@@ -3,8 +3,8 @@ import os
 import json
 from ...typing import sha256, Dict, get_type_hints
 
-url = 'https://free.easychat.work'
-model = ['gpt-3.5-turbo-16k', 'gpt-3.5-turbo-16k-0613', 'gpt-3.5-turbo-0613']
+url = 'https://www.jayshen.xyz'
+model = ['gpt-3.5-turbo']
 supports_stream = True
 needs_auth = False
 
@@ -14,12 +14,12 @@ def _create_completion(model: str, messages: list, stream: bool, temperature: fl
     }
     data = {
         'model': model,
-        'temperature': 0.7,
+        'temperature': 0.5,
         'presence_penalty': 0,
         'messages': messages,
     }
     response = requests.post(url + '/api/openai/v1/chat/completions',
-                             json=data, stream=stream)
+                             json=data, stream=True)
     
     yield response.json()['choices'][0]['message']['content']
 

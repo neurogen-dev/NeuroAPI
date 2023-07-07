@@ -1,10 +1,9 @@
-import requests
-import os
-import json
+import os, requests
 from ...typing import sha256, Dict, get_type_hints
+import json
 
-url = 'https://free.easychat.work'
-model = ['gpt-3.5-turbo-16k', 'gpt-3.5-turbo-16k-0613', 'gpt-3.5-turbo-0613']
+url = "https://chat.dfehub.com"
+model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4']
 supports_stream = True
 needs_auth = False
 
@@ -19,7 +18,7 @@ def _create_completion(model: str, messages: list, stream: bool, temperature: fl
         'messages': messages,
     }
     response = requests.post(url + '/api/openai/v1/chat/completions',
-                             json=data, stream=stream)
+                             json=data, stream=True)
     
     yield response.json()['choices'][0]['message']['content']
 

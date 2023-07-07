@@ -13,7 +13,17 @@ from g4f import ChatCompletion, Provider
 app = Flask(__name__)
 CORS(app)
 
-
+@app.route("/v1/models", methods=['GET'])
+def models():
+    data = [
+        {
+            "id": "gpt-3.5-turbo",
+            "object": "model",
+            "owned_by": "organization-owner",
+            "permission": []
+        }
+    ]
+    return {'data': data, 'object': 'list'}
 @app.route("/chat/completions", methods=['POST'])
 @app.route("/v1/chat/completions", methods=['POST'])
 @app.route("/", methods=['POST'])
