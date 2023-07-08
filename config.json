@@ -47,5 +47,5 @@
      "server_name": "0.0.0.0",
     // "server_port": 7860,
     // 如果要share到gradio，设置为true
-    // "share": false,
+     "share": true,
 }
