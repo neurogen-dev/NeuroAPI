@@ -7,7 +7,10 @@
     --message-user-background-color-dark: #26B561;
     --message-bot-background-color-light: #FFFFFF;
     --message-bot-background-color-dark: #2C2C2C;
+    --switch-checkbox-color-light: #e5e7eb;
+    --switch-checkbox-color-dark: #515151;
 }
+
 
 #app_title {
     font-weight: var(--prose-header-text-weight);
@@ -20,6 +23,19 @@
 #description {
     text-align: center;
     margin: 32px 0 4px 0;
+}
+
+/* 解决container=False时的错误填充 */
+div.form {
+    background: none !important;
+}
+
+/* 高级页面 */
+#advanced_warning {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-content: center;
 }
 
 /* gradio的页脚信息 */
@@ -64,7 +80,7 @@ footer {
     border-radius: var(--container-radius);
     background: var(--background-fill-primary);
     padding: var(--size-4) var(--size-6);
-    min-width: 400px;
+    min-width: 360px;
     max-width: 480px;
     overflow: hidden;
     pointer-events: auto;
@@ -97,20 +113,20 @@ footer {
     display: none;
 }
 /* user_info */
-#user_info {
+#user_info.block {
     white-space: nowrap;
-    position: absolute; left: 8em; top: .2em;
+    position: absolute; left: 8em; top: .8em;
     z-index: var(--layer-2);
     box-shadow: var(--block-shadow);
-    border: none; border-radius: var(--block-label-radius);
+    border: none!important; border-radius: var(--block-label-radius);
     background: var(--color-accent);
     padding: var(--block-label-padding);
     font-size: var(--block-label-text-size); line-height: var(--line-sm);
-    width: auto; min-height: 30px!important;
+    width: auto; max-height: 30px!important;
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
 }
-#user_info .wrap {
+#user_info.block .wrap {
     opacity: 0;
 }
 #user_info p {
@@ -147,7 +163,7 @@ footer {
 .insert_block {
     position: relative;
     margin: 0;
-    padding: .5em 1em;
+    padding: 8px 12px;
     box-shadow: var(--block-shadow);
     border-width: var(--block-border-width);
     border-color: var(--block-border-color);
@@ -185,13 +201,42 @@ footer {
     line-height: 20px;
 }
 
-.apSwitch {
+/* 亮暗色模式切换 */
+#apSwitch input[type="checkbox"] {
+    margin: 0 !important;
+}
+#apSwitch label.apSwitch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--body-text-color);
+    font-weight: var(--checkbox-label-text-weight);
+    font-size: var(--checkbox-label-text-size);
+    line-height: var(--line-md);
+    margin: 2px 0 !important;
+}
+input[type="checkbox"]#apSwitch_checkbox::before {
+    background: none !important;
+    content: '🌞';
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 22px;
+    top: -4.4px;
+    left: -1px;
+}
+input:checked[type="checkbox"]#apSwitch_checkbox::before {
+    content: '🌚';
+    left: 16px;
+}
+
+/* .apSwitch {
     top: 2px;
     display: inline-block;
-    height: 24px;
+    height: 22px;
     position: relative;
-    width: 48px;
-    border-radius: 12px;
+    width: 40px;
+    border-radius: 11px;
+    box-shadow: inset 0 0 1px 0 rgba(0,0,0,0.05), inset 0 0 2px 0 rgba(0,0,0,0.08) !important;
 }
 .apSwitch input {
     display: none !important;
@@ -205,12 +250,11 @@ footer {
     right: 0;
     top: 0;
     transition: .4s;
-    font-size: 18px;
-    border-radius: 12px;
+    font-size: 22px;
+    border-radius: 11px;
 }
 .apSlider::before {
-    bottom: -1.5px;
-    left: 1px;
+    transform: scale(0.9);
     position: absolute;
     transition: .4s;
     content: "🌞";
@@ -219,8 +263,63 @@ input:checked + .apSlider {
     background-color: var(--primary-600);
 }
 input:checked + .apSlider::before {
-    transform: translateX(23px);
+    transform: translateX(18px);
     content:"🌚";
+} */
+
+.switch_checkbox label {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+}
+.switch_checkbox input[type="checkbox"] + span {
+    margin-left: 0 !important;
+}
+
+.switch_checkbox input[type="checkbox"] {
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+}
+
+.switch_checkbox input[type="checkbox"] {
+    display: inline-block !important;
+    position: relative !important;
+    border: none !important;
+    outline: none;
+    width: 40px !important;
+    height: 22px !important;
+    border-radius: 11px !important;
+    background-image: none !important;
+    box-shadow: inset 0 0 1px 0 rgba(0,0,0,0.05), inset 0 0 2px 0 rgba(0,0,0,0.08) !important;
+    background-image: none !important;
+    background-color: var(--switch-checkbox-color-light) !important;
+    transition: .2s ease background-color;
+}
+.dark .switch_checkbox input[type="checkbox"] {
+    background-color: var(--switch-checkbox-color-dark) !important;
+}
+.switch_checkbox input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    top: 0;
+    left: 0;
+    background: #FFFFFF;
+    border: 0.5px solid rgba(0,0,0,0.02);
+    box-shadow: 0 0 0 0 rgba(0,0,0,0.15), 0 1px 0 0 rgba(0,0,0,0.05);
+    transform: scale(0.9);
+    border-radius: 11px !important;
+    transition: .4s ease all;
+    box-shadow: var(--input-shadow);
+}
+.switch_checkbox input:checked[type="checkbox"] {
+    background-color: var(--primary-600) !important;
+}
+.switch_checkbox input:checked[type="checkbox"]::before {
+    background-color: #fff;
+    left: 18px;
 }
 
 /* Override Slider Styles (for webkit browsers like Safari and Chrome)
@@ -341,7 +440,7 @@ ol:not(.options), ul:not(.options) {
     #chuanhu_chatbot {
         height: calc(100vh - 200px);
     }
-    #chuanhu_chatbot .wrap {
+    #chuanhu_chatbot>.wrapper>.wrap {
         max-height: calc(100vh - 200px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
     }
 }
@@ -350,7 +449,7 @@ ol:not(.options), ul:not(.options) {
     #chuanhu_chatbot {
         height: calc(100vh - 140px);
     }
-    #chuanhu_chatbot .wrap {
+    #chuanhu_chatbot>.wrapper>.wrap {
         max-height: calc(100vh - 140px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
     }
     [data-testid = "bot"] {
@@ -360,7 +459,7 @@ ol:not(.options), ul:not(.options) {
         letter-spacing: -1px; font-size: 22px;
     }
 }
-#chuanhu_chatbot .wrap {
+#chuanhu_chatbot>.wrapper>.wrap {
     overflow-x: hidden;
 }
 /* 对话气泡 */
@@ -456,7 +555,7 @@ ol:not(.options), ul:not(.options) {
 }
 
 /* history message */
-.wrap>.history-message {
+.wrapper>.wrap>.history-message {
     padding: 10px !important;
 }
 .history-message {
@@ -475,7 +574,7 @@ ol:not(.options), ul:not(.options) {
 .history-message>.message {
     margin-bottom: 16px;
 }
-.wrap>.history-message::after {
+.wrapper>.wrap>.history-message::after {
     content: "";
     display: block;
     height: 2px;
@@ -484,7 +583,7 @@ ol:not(.options), ul:not(.options) {
     margin-top: -10px;
     clear: both;
 }
-.wrap>.history-message>:last-child::after {
+.wrapper>.wrap>.history-message>:last-child::after {
     content: "仅供查看";
     display: block;
     text-align: center;

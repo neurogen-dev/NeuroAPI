@@ -348,10 +348,11 @@ class BaseLLMModel:
                 reference_results.append([result['body'], result['href']])
                 display_append.append(
                     # f"{idx+1}. [{domain_name}]({result['href']})\n"
-                    f"<li><a href=\"{result['href']}\" target=\"_blank\">{result['title']}</a></li>\n"
+                    f"<a href=\"{result['href']}\" target=\"_blank\">{idx+1}.&nbsp;{result['title']}</a>"
                 )
             reference_results = add_source_numbers(reference_results)
-            display_append = "<ol>\n\n" + "".join(display_append) + "</ol>"
+            # display_append = "<ol>\n\n" + "".join(display_append) + "</ol>"
+            display_append = '<div class = "source-a">' + "".join(display_append) + '</div>'
             real_inputs = (
                 replace_today(WEBSEARCH_PTOMPT_TEMPLATE)
                 .replace("{query}", real_inputs)
@@ -362,7 +363,6 @@ class BaseLLMModel:
             display_append = ""
         return limited_context, fake_inputs, display_append, real_inputs, chatbot
 
-
     def predict(
         self,
         inputs,
@@ -370,18 +370,18 @@ class BaseLLMModel:
         stream=False,
         use_websearch=False,
         files=None,
-        reply_language="Русский",
+        reply_language="中文",
         should_check_token_count=True,
     ):  # repetition_penalty, top_k
 
-        status_text = "Начинаем создание ответа..."
+        status_text = "开始生成回答……"
         logging.info(
-             "user" + f"{self.user_identifier}" + "Входные данные:" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
+             "用户" + f"{self.user_identifier}" + "的输入为：" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
         )
         if should_check_token_count:
             yield chatbot + [(inputs, "")], status_text
         if reply_language == "跟随问题语言（不稳定）":
-            reply_language = "the same language as the question, such as English, 中文, 日本語, Español, Français, Русский or Deutsch."
+            reply_language = "the same language as the question, such as English, 中文, 日本語, Español, Français, or Deutsch."
 
         limited_context, fake_inputs, display_append, inputs, chatbot = self.prepare_inputs(real_inputs=inputs, use_websearch=use_websearch, files=files, reply_language=reply_language, chatbot=chatbot)
         yield chatbot + [(fake_inputs, "")], status_text
@@ -415,7 +415,7 @@ class BaseLLMModel:
 
         try:
             if stream:
-                logging.debug("Используйтcя потоковая передача.")
+                logging.debug("使用流式传输")
                 iter = self.stream_next_chatbot(
                     inputs,
                     chatbot,
@@ -425,7 +425,7 @@ class BaseLLMModel:
                 for chatbot, status_text in iter:
                     yield chatbot, status_text
             else:
-                logging.debug("Нет стриминга")
+                logging.debug("不使用流式传输")
                 chatbot, status_text = self.next_chatbot_at_once(
                     inputs,
                     chatbot,
@@ -440,7 +440,7 @@ class BaseLLMModel:
 
         if len(self.history) > 1 and self.history[-1]["content"] != inputs:
             logging.info(
-                "Ответ："
+                "回答为："
                 + colorama.Fore.BLUE
                 + f"{self.history[-1]['content']}"
                 + colorama.Style.RESET_ALL
@@ -465,7 +465,7 @@ class BaseLLMModel:
                 del self.all_token_counts[0]
                 del self.history[:2]
             logging.info(status_text)
-            status_text = f"Чтобы предотварить перерасход токенов, ChatGPT забывает о {count} элементе беседы"
+            status_text = f"为了防止token超限，模型忘记了早期的 {count} 轮对话"
             yield chatbot, status_text
 
         self.auto_save(chatbot)
@@ -476,9 +476,9 @@ class BaseLLMModel:
         stream=False,
         use_websearch=False,
         files=None,
-        reply_language="Русский",
+        reply_language="中文",
     ):
-        logging.debug("Выполняется повторная попытка……")
+        logging.debug("重试中……")
         if len(self.history) > 0:
             inputs = self.history[-2]["content"]
             del self.history[-2:]
@@ -487,7 +487,7 @@ class BaseLLMModel:
         elif len(chatbot) > 0:
             inputs = chatbot[-1][0]
         else:
-            yield chatbot, f"{STANDARD_ERROR_MSG}Контекст пуст"
+            yield chatbot, f"{STANDARD_ERROR_MSG}上下文是空的"
             return
 
         iter = self.predict(
@@ -500,7 +500,7 @@ class BaseLLMModel:
         )
         for x in iter:
             yield x
-        logging.debug("Повторная попытка завершена")
+        logging.debug("重试完毕")
 
     # def reduce_token_size(self, chatbot):
     #     logging.info("开始减少token数量……")
@@ -527,7 +527,7 @@ class BaseLLMModel:
 
     def set_token_upper_limit(self, new_upper_limit):
         self.token_upper_limit = new_upper_limit
-        print(f"Лимит токенов установлен на {new_upper_limit}")
+        print(f"token上限设置为{new_upper_limit}")
 
     def set_temperature(self, new_temperature):
         self.temperature = new_temperature
@@ -592,19 +592,19 @@ class BaseLLMModel:
 
     def delete_last_conversation(self, chatbot):
         if len(chatbot) > 0 and STANDARD_ERROR_MSG in chatbot[-1][1]:
-            msg = "Удаляйте записи чатбота только в том случае, если они содержат сообщения об ошибках"
+            msg = "由于包含报错信息，只删除chatbot记录"
             chatbot.pop()
             return chatbot, self.history
         if len(self.history) > 0:
             self.history.pop()
             self.history.pop()
         if len(chatbot) > 0:
-            msg = "Удален набор разговоров чатбота"
+            msg = "删除了一组chatbot对话"
             chatbot.pop()
         if len(self.all_token_counts) > 0:
-            msg = "Удалена запись о подсчёте токенов для группы диалогов."
+            msg = "删除了一组对话的token计数记录"
             self.all_token_counts.pop()
-        msg = "Удален набор диалогов"
+        msg = "删除了一组对话"
         return chatbot, msg
 
     def token_message(self, token_lst=None):
@@ -663,14 +663,14 @@ class BaseLLMModel:
             return os.path.basename(filename), json_s["system"], json_s["chatbot"]
         except:
             # 没有对话历史或者对话历史解析失败
-            logging.info(f"Удален набор диалогов {filename}")
+            logging.info(f"没有找到对话历史记录 {filename}")
             return gr.update(), self.system_prompt, gr.update()
 
     def delete_chat_history(self, filename, user_name):
         if filename == "CANCELED":
             return gr.update(), gr.update(), gr.update()
         if filename == "":
-            return i18n("Вы не выбрали никакой истории переписки."), gr.update(), gr.update()
+            return i18n("你没有选择任何对话历史"), gr.update(), gr.update()
         if not filename.endswith(".json"):
             filename += ".json"
         if "/" not in filename:
@@ -681,7 +681,7 @@ class BaseLLMModel:
             os.remove(history_file_path)
             return i18n("删除对话历史成功"), get_history_names(False, user_name), []
         except:
-            logging.info(f"Не удалось удалить историю переписки. {history_file_path}")
+            logging.info(f"删除对话历史失败 {history_file_path}")
             return i18n("对话历史")+filename+i18n("已经被删除啦"), gr.update(), gr.update()
 
     def auto_load(self):

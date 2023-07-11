@@ -6,7 +6,7 @@ import re
 pattern = r'i18n\((\"{3}.*?\"{3}|\".*?\")\)'
 
 # Load the .py file
-with open('webui.py', 'r', encoding='utf-8') as f:
+with open('ChuanhuChatbot.py', 'r', encoding='utf-8') as f:
     contents = f.read()
 
 # Load the .py files in the modules folder

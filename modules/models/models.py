@@ -87,8 +87,7 @@ class OpenAIClient(BaseLLMModel):
             try:
                 usage_data = self._get_billing_data(usage_url)
             except Exception as e:
-                #logging.error(f"获取API使用情况失败:" + str(e))
-                return i18n(" ")
+                None
             # rounded_usage = "{:.5f}".format(usage_data["total_usage"] / 100)
             rounded_usage = round(usage_data["total_usage"] / 100, 5)
             usage_percent = round(usage_data["total_usage"] / usage_limit, 2)
@@ -100,18 +99,11 @@ class OpenAIClient(BaseLLMModel):
                     usage_limit = usage_limit
                 )
         except requests.exceptions.ConnectTimeout:
-            status_text = (
-                STANDARD_ERROR_MSG + CONNECTION_TIMEOUT_MSG + ERROR_RETRIEVE_MSG
-            )
-            return status_text
+            None
         except requests.exceptions.ReadTimeout:
-            status_text = STANDARD_ERROR_MSG + READ_TIMEOUT_MSG + ERROR_RETRIEVE_MSG
-            return status_text
+            None
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            logging.error(i18n("获取API使用情况失败:") + str(e))
-            return STANDARD_ERROR_MSG + ERROR_RETRIEVE_MSG
+            None
 
     def set_token_upper_limit(self, new_upper_limit):
         pass
@@ -556,7 +548,7 @@ def get_model(
     chatbot = gr.Chatbot.update(label=model_name)
     try:
         if model_type == ModelType.OpenAI:
-            logging.info(f"Загружается OpenAI: {model_name}")
+            logging.info(f"正在加载OpenAI模型: {model_name}")
             model = OpenAIClient(
                 model_name=model_name,
                 api_key=access_key,
@@ -611,7 +603,8 @@ def get_model(
             raise ValueError(f"未知模型: {model_name}")
         logging.info(msg)
     except Exception as e:
-        logging.error(e)
+        import traceback
+        traceback.print_exc()
         msg = f"{STANDARD_ERROR_MSG}: {e}"
     if dont_change_lora_selector:
         return model, msg, chatbot

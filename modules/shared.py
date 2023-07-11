@@ -1,7 +1,7 @@
 from modules.presets import COMPLETION_URL, BALANCE_API_URL, USAGE_API_URL, API_HOST
 import os
 import queue
-import g4f as openai
+import openai
 
 class State:
     interrupted = False

@@ -12,8 +12,8 @@ LLAMA_MODEL = None
 LLAMA_INFERENCER = None
 
 # ChatGPT 设置
-INITIAL_SYSTEM_PROMPT = "You are a virtual ChatGPT assistant. Your task is to help the user, listen to all the user's instructions and follow them. Answer the user in the following language: {reply_language}."
-API_HOST = "127.0.0.1:1337"
+INITIAL_SYSTEM_PROMPT = "You are a helpful assistant."
+API_HOST = "http://127.0.0.1:1337"
 COMPLETION_URL = "http://127.0.0.1:1337/v1/chat/completions"
 BALANCE_API_URL="https://api.openai.com/dashboard/billing/credit_grants"
 USAGE_API_URL="https://api.openai.com/dashboard/billing/usage"
@@ -36,29 +36,31 @@ BILLING_NOT_APPLICABLE_MSG = i18n("账单信息不适用") # 本地运行的模�
 TIMEOUT_STREAMING = 60  # 流式对话时的超时时间
 TIMEOUT_ALL = 200  # 非流式对话时的超时时间
 ENABLE_STREAMING_OPTION = True  # 是否启用选择选择是否实时显示回答的勾选框
-HIDE_MY_KEY = True  # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
+HIDE_MY_KEY = False  # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
 CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
 
 SIM_K = 5
-INDEX_QUERY_TEMPRATURE = 0.5
+INDEX_QUERY_TEMPRATURE = 1.0
 
-CHUANHU_TITLE = i18n("NeurogenGPT🚀")
+CHUANHU_TITLE = i18n("川虎Chat 🚀")
 
-CHUANHU_DESCRIPTION = i18n("[Telegram канал проекта Neurogen](https://t.me/neurogen_news)")
+CHUANHU_DESCRIPTION = i18n("由Bilibili [土川虎虎虎](https://space.bilibili.com/29125536)、[明昭MZhao](https://space.bilibili.com/24807452) 和 [Keldos](https://github.com/Keldos-Li) 开发<br />访问川虎Chat的 [GitHub项目](https://github.com/GaiZhenbiao/ChuanhuChatGPT) 下载最新版脚本")
 
 
 ONLINE_MODELS = [
     "gpt-3.5-turbo",
-    "gpt-3.5-turbo-0613",
     "gpt-3.5-turbo-16k",
-    "gpt-3.5-turbo-16k-0613",
+    "gpt-3.5-turbo-0613",
+    "gpt-4",
     "gpt-4-0613",
 ]
 
 LOCAL_MODELS = [
     "chatglm-6b",
     "chatglm-6b-int4",
-    "chatglm-6b-int4-qe",
+    "chatglm-6b-int4-ge",
+    "chatglm2-6b",
+    "chatglm2-6b-int4",
     "StableLM",
     "MOSS",
     "llama-7b-hf",
@@ -101,8 +103,7 @@ REDUCE_TOKEN_FACTOR = 0.5 # 与模型token上限想乘，得到目标token数。
 
 REPLY_LANGUAGES = [
     "Русский",
-    "English",
-
+    "English"
 ]
 
 
@@ -148,7 +149,7 @@ SUMMARIZE_PROMPT = """Write a concise summary of the following:
 
 {text}
 
-CONCISE SUMMARY IN {reply_language}:"""
+CONCISE SUMMARY IN РУССКИЙ:"""
 
 ALREADY_CONVERTED_MARK = "<!-- ALREADY CONVERTED BY PARSER. -->"
 
