@@ -40,7 +40,7 @@ HIDE_MY_KEY = True  # 如果你想在UI中隐藏你的 API 密钥，将此值设
 CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
 
 SIM_K = 5
-INDEX_QUERY_TEMPRATURE = 1.0
+INDEX_QUERY_TEMPRATURE = 0.5
 
 CHUANHU_TITLE = i18n("NeurogenGPT🚀")
 

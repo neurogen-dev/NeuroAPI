@@ -1,11 +1,10 @@
 from . import Provider
 from .Providers import (
-    Ezcht,
+    Aitianhu,
     You,
     Bing,
     Yqcloud,
     Theb,
-    Aichat,
     Bard,
     Vercel,
     Forefront,
@@ -15,19 +14,21 @@ from .Providers import (
     ChatgptLogin,
     DeepAi,
     GetGpt,
-    Mishalsgpt,
+    Pierangelo,
     Gravityengine,
     ChatgptAi,
     ChatgptLogin,
     Phind,
     Easychat,
-    hteyun,
-    Weuseing,
     Fakeopen,
     Better,
     Alpha,
     Nino,
-    Lsdev
+    Lsdev,
+    Jayshen,
+    Aws,
+    DFEHub,
+    Acytoo
 )
 
 Palm = Bard

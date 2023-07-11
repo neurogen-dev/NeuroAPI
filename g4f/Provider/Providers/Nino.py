@@ -2,7 +2,7 @@ import os, uuid, requests
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://chimeragpt.ninomae.top'
-model = ['gpt-4-0613', 'claude-instant-100k', 'gpt-4-poe']
+model = ['gpt-3.5-turbo', 'gpt-4-0613', 'claude-instant-100k', 'gpt-4-poe']
 supports_stream = True
 needs_auth = True
 
