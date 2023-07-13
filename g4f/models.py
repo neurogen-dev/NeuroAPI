@@ -12,7 +12,7 @@ class Model:
         name: str = 'gpt-3.5-turbo'
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.Aitianhu, Provider.GetGpt])
+        best_provider: Provider.Provider = random.choice([Provider.GetGpt, Provider.AiService, Provider.Wewordle, Provider.Aitianhu,])
         best_providers: list = [Provider.Easychat, Provider.Gravityengine, Provider.GetGpt]
 
     class gpt_35_turbo_0613:
@@ -33,7 +33,27 @@ class Model:
         name: str = 'gpt-3.5-turbo-16k'
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.Easychat])
+        best_provider: Provider.Provider = random.choice([Provider.Kiask, Provider.Zeabur])
+
+    #POE
+
+    class beaver:
+        name: str = 'beaver'
+        base_provider: str = 'poe'
+        #best_provider: Provider.Provider = Provider.Easychat
+        best_provider: Provider.Provider = random.choice([Provider.V50])
+
+    class a2_100k:
+        name: str = 'a2_100k'
+        base_provider: str = 'poe'
+        #best_provider: Provider.Provider = Provider.Easychat
+        best_provider: Provider.Provider = random.choice([Provider.V50])
+
+    class a2_2:
+        name: str = 'a2_2'
+        base_provider: str = 'poe'
+        #best_provider: Provider.Provider = Provider.Easychat
+        best_provider: Provider.Provider = random.choice([Provider.V50])
 
 
     class gpt_dev:
@@ -44,7 +64,7 @@ class Model:
     class gpt_4:
         name: str = 'gpt-4'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Bing
+        best_provider: Provider.Provider = Provider.Zeabur
         best_providers: list = [Provider.Bing, Provider.Lockchat]
     
     class gpt_4_0613:
@@ -197,6 +217,12 @@ class ModelUtils:
         'gpt-for-dev': Model.gpt_dev,
         'gpt-3.5-turbo-16k': Model.gpt_35_turbo_16k,
         'gpt-3.5-turbo-16k-0613': Model.gpt_35_turbo_16k_0613,
+
+        #POE
+
+        'beaver': Model.beaver,
+        'a2_100k': Model.a2_100k,
+        'a2_2': Model.a2_2,
         
         'claude-instant-v1-100k': Model.claude_instant_v1_100k,
         'claude-v1-100k': Model.claude_v1_100k,
