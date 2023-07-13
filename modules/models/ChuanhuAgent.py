@@ -109,7 +109,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
         """if the model accepts multi modal input, implement this function"""
         status = gr.Markdown.update()
         if files:
-            index = construct_index(self.api_key, file_src=files)
+            index = construct_index(file_src=files)
             assert index is not None, "获取索引失败"
             self.index = index
             status = i18n("索引构建完成")
