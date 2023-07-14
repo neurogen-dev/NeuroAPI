@@ -12,14 +12,15 @@ class Model:
         name: str = 'gpt-3.5-turbo'
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.GetGpt, Provider.AiService, Provider.Wewordle, Provider.Aitianhu,])
-        best_providers: list = [Provider.Easychat, Provider.Gravityengine, Provider.GetGpt]
+        best_provider: Provider.Provider = random.choice([Provider.GetGpt, Provider.AiService, Provider.Easychat, Provider.Aitianhu,])
+        best_providers: list = [Provider.GetGpt, Provider.AiService, Provider.Easychat, Provider.Aitianhu]
 
     class gpt_35_turbo_0613:
         name: str = 'gpt-3.5-turbo-0613'
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
         best_provider: Provider.Provider = random.choice([Provider.Fakeopen])
+        best_providers: list = [Provider.Fakeopen]
         
 
     class gpt_35_turbo_16k_0613:
@@ -34,6 +35,7 @@ class Model:
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
         best_provider: Provider.Provider = random.choice([Provider.Kiask, Provider.Zeabur])
+        best_providers: list = [Provider.Kiask, Provider.Zeabur]
 
     #POE
 
@@ -65,7 +67,7 @@ class Model:
         name: str = 'gpt-4'
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.Zeabur
-        best_providers: list = [Provider.Bing, Provider.Lockchat]
+        best_providers: list = [Provider.Bing, Provider.Lockchat, Provider.Zeabur]
     
     class gpt_4_0613:
         name: str = 'gpt-4-0613'
@@ -91,61 +93,6 @@ class Model:
     class claude_v1:
         name: str = 'claude-v1'
         base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class alpaca_7b:
-        name: str = 'alpaca-7b'
-        base_provider: str = 'replicate'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class stablelm_tuned_alpha_7b:
-        name: str = 'stablelm-tuned-alpha-7b'
-        base_provider: str = 'replicate'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class bloom:
-        name: str = 'bloom'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class bloomz:
-        name: str = 'bloomz'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class flan_t5_xxl:
-        name: str = 'flan-t5-xxl'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class flan_ul2:
-        name: str = 'flan-ul2'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class gpt_neox_20b:
-        name: str = 'gpt-neox-20b'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class oasst_sft_4_pythia_12b_epoch_35:
-        name: str = 'oasst-sft-4-pythia-12b-epoch-3.5'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class santacoder:
-        name: str = 'santacoder'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class command_medium_nightly:
-        name: str = 'command-medium-nightly'
-        base_provider: str = 'cohere'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class command_xlarge_nightly:
-        name: str = 'command-xlarge-nightly'
-        base_provider: str = 'cohere'
         best_provider: Provider.Provider = Provider.Vercel
 
     class code_cushman_001:
@@ -188,21 +135,6 @@ class Model:
         base_provider: str = 'google'
         best_provider: Provider.Provider = Provider.Bard
         
-            
-    """    'falcon-40b': Model.falcon_40b,
-    'falcon-7b': Model.falcon_7b,
-    'llama-13b': Model.llama_13b,"""
-    
-    class falcon_40b:
-        name: str = 'falcon-40b'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.H2o
-    
-    class falcon_7b:
-        name: str = 'falcon-7b'
-        base_provider: str = 'huggingface'
-        best_provider: Provider.Provider = Provider.H2o
-        
     class llama_13b:
         name: str = 'llama-13b'
         base_provider: str = 'huggingface'
@@ -229,22 +161,6 @@ class ModelUtils:
         'claude-instant-v1': Model.claude_instant_v1,
         'claude-v1': Model.claude_v1,
         
-        'alpaca-7b': Model.alpaca_7b,
-        'stablelm-tuned-alpha-7b': Model.stablelm_tuned_alpha_7b,
-        
-        'bloom': Model.bloom,
-        'bloomz': Model.bloomz,
-        
-        'flan-t5-xxl': Model.flan_t5_xxl,
-        'flan-ul2': Model.flan_ul2,
-        
-        'gpt-neox-20b': Model.gpt_neox_20b,
-        'oasst-sft-4-pythia-12b-epoch-3.5': Model.oasst_sft_4_pythia_12b_epoch_35,
-        'santacoder': Model.santacoder,
-        
-        'command-medium-nightly': Model.command_medium_nightly,
-        'command-xlarge-nightly': Model.command_xlarge_nightly,
-        
         'code-cushman-001': Model.code_cushman_001,
         'code-davinci-002': Model.code_davinci_002,
         
@@ -261,7 +177,5 @@ class ModelUtils:
         'google-palm': Model.palm,
         'bard': Model.palm,
         
-        'falcon-40b': Model.falcon_40b,
-        'falcon-7b': Model.falcon_7b,
         'llama-13b': Model.llama_13b,
     }
