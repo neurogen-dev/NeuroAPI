@@ -7,22 +7,11 @@ import socket
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 
-from g4f import ChatCompletion, Provider
+from g4f import Model, ChatCompletion, Provider
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/v1/models", methods=['GET'])
-def models():
-    data = [
-        {
-            "id": "gpt-3.5-turbo",
-            "object": "model",
-            "owned_by": "organization-owner",
-            "permission": []
-        }
-    ]
-    return {'data': data, 'object': 'list'}
 @app.route("/chat/completions", methods=['POST'])
 @app.route("/v1/chat/completions", methods=['POST'])
 @app.route("/", methods=['POST'])
@@ -103,31 +92,84 @@ def chat_completions():
     return app.response_class(stream(), mimetype='text/event-stream')
 
 @app.route("/v1/dashboard/billing/subscription")
+@app.route("/dashboard/billing/subscription")
 def billing_subscription():
-    return jsonify({
-  "id": "sub_0947613321",
-  "plan": "Enterprise",
-  "status": "active",
-  "start_date": "2023-01-01",
-  "end_date": "null",
-  "current_period_start": "2023-01-01",
-  "current_period_end": "null",
-  "trial_start": "null",
-  "trial_end": "null",
-  "cancel_at_period_end": False,
-  "canceled_at": "null",
-  "created_at": "2023-01-01",
-  "updated_at": "2023-01-01"
-})
+  return jsonify({
+    "id": "sub_0947613321",
+    "plan": "Enterprise",
+    "status": "active",
+    "start_date": "2023-01-01",
+    "end_date": None,
+    "current_period_start": "2023-01-01",
+    "current_period_end": None,
+    "trial_start": None,
+    "trial_end": None,
+    "cancel_at_period_end": False,
+    "canceled_at": None,
+    "created_at": "2023-01-01",
+    "updated_at": "2023-01-01",
+    "hard_limit_usd": 99999.99
+  })
 
-@app.after_request
-def after_request(response):
-    origin = request.headers.get('Origin')
-    response.headers.add('Access-Control-Allow-Origin', origin)
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-    response.headers.add('Access-Control-Allow-Headers', '*')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
+
+@app.route("/v1/dashboard/billing/usage")
+@app.route("/dashboard/billing/usage")
+def billing_usage():
+  return jsonify({"total": 99999.99, "total_usage": 1.01})
+
+@app.route("/v1/models")
+@app.route("/models")
+def models():
+  import g4f.models
+  model = {"data":[]}
+  for i in g4f.models.ModelUtils.convert:
+    print(i)
+    model['data'].append({
+            "id": i,
+            "object": "model",
+            "owned_by": g4f.models.ModelUtils.convert[i].base_provider,
+            "tokens": 99999,
+            "fallbacks": None,
+            "endpoints": [
+                "/v1/chat/completions"
+            ],
+            "limits": None,
+            "permission": []
+        })
+  return jsonify(model)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify({
+        "error": {
+            "message": f"Invalid URL ({request.method} /)",
+            "type": "invalid_request_error",
+            "param": None,
+            "code": None
+        }
+    }), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return jsonify({
+        "error": {
+            "message": "Something went wrong on our end",
+            "type": "internal_server_error",
+            "param": None,
+            "code": None
+        }
+    }), 500
+
+@app.errorhandler(415)
+def unsupported_media_type(e):
+    return jsonify({
+        "error": {
+            "message": "Unsupported media type",
+            "type": "unsupported_media_type",
+            "param": None,
+            "code": None
+        }
+    }), 415
 
 if __name__ == '__main__':
     site_config = {

@@ -1,36 +1,64 @@
-import os
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 import json
-import time
-import subprocess
 
-from ...typing import sha256, Dict, get_type_hints
+options = webdriver.ChromeOptions()
+options.add_argument('--headless=new')
+options.add_argument("--enable-javascript")
+options.add_experimental_option("detach", True)
 
-url = 'https://phind.com'
-model = ['gpt-4']
-supports_stream = True
+needs_auth = False
+supports_stream = False
+model = ["gpt-3.5-turbo"]
+
+url = 'https://www.phind.com/'
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
+    conversation = ''
+    for message in messages:
+        conversation += '%s: %s; ' % (message['role'], message['content'])
+    
+    conversation += 'assistant: '
+    driver = webdriver.Chrome(options=options)
+    driver.get(url)
+    script = """
+        return fetch("https://www.phind.com/api/agent", {
+            credentials: "include",
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+                "Accept": "*/*",
+                "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+                "Content-Type": "application/json",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin"
+            },\n"""
+    
+    script += f'referrer: "{url}agent?q={conversation}&source=searchbox",\n'
+    script += 'body: JSON.stringify({userInput: "'+conversation+'", messages: [], shouldRunGPT4: false}),\n'        
+    script += """
+            method: "POST",
+            mode: "cors"
+        })
+        .then(response => response.text())
+        .then(data => data)
+        .catch(error => console.error(error));
+    """
+    
+    result = driver.execute_script(script)
+    result = result.replace("\n", "").split("data:")
+    stroke = []
 
-    path = os.path.dirname(os.path.realpath(__file__))
-    config = json.dumps({
-        'model': model,
-        'messages': messages}, separators=(',', ':'))
+    driver.quit()
 
-    cmd = ['python', f'{path}/helpers/phind.py', config]
-
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-    for line in iter(p.stdout.readline, b''):
-        if b'<title>Just a moment...</title>' in line:
-            os.system('clear' if os.name == 'posix' else 'cls')
-            yield 'Clouflare error, please try again...'
-            os._exit(0)
-        
-        else:
-            if b'ping - 2023-' in line:
-                continue
-            
-            yield line.decode('cp1251') #[:-1]
-            
-params = f'g4f.Providers.{os.path.basename(__file__)[:-3]} supports: ' + \
-    '(%s)' % ', '.join([f"{name}: {get_type_hints(_create_completion)[name].__name__}" for name in _create_completion.__code__.co_varnames[:_create_completion.__code__.co_argcount]])
+    if "<!DOCTYPE html>" in result[0]:
+        return "ERROR"
+    
+    for i in range(len(result)):
+        try:
+            x = json.loads(result[i])["choices"][0]["delta"]["content"]
+            if type(x) == str:
+                stroke.append(x)
+        except:
+            pass
+    return ''.join(stroke)
