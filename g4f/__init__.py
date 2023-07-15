@@ -8,35 +8,32 @@ class ChatCompletion:
     def create(model: Model.model or str, messages: list, provider: Provider.Provider = None, stream: bool = False, auth: str = False, **kwargs):
         kwargs['auth'] = auth
 
-        if isinstance(model, str):
-            try:
-                model = ModelUtils.convert[model]
-            except KeyError:
-                raise Exception(f'The model: {model} does not exist')
+        if provider and provider.needs_auth and not auth:
+            print(
+                f'ValueError: {provider.__name__} requires authentication (use auth="cookie or token or jwt ..." param)', file=sys.stderr)
+            sys.exit(1)
 
-        engines = model.best_providers if not provider else [provider]
+        try:
+            if isinstance(model, str):
+                try:
+                    model = ModelUtils.convert[model]
+                except KeyError:
+                    raise Exception(f'The model: {model} does not exist')
 
-        for engine in engines:
-            if engine.needs_auth and not auth:
-                print(
-                    f'ValueError: {engine.__name__} requires authentication (use auth="cookie or token or jwt ..." param)', file=sys.stderr)
-                continue
+            engine = model.best_provider if not provider else provider
 
             if not engine.supports_stream and stream == True:
                 print(
                     f"ValueError: {engine.__name__} does not support 'stream' argument", file=sys.stderr)
-                continue
+                sys.exit(1)
 
             print(f'Using {engine.__name__} provider')
 
-            # Try to interact with the chosen engine. If an error occurs, a new engine is selected
-            try:
-                response = engine._create_completion(model.name, messages, stream, **kwargs)
-                return (response if stream else ''.join(response))
-            except (ValueError, KeyError, Exception) as e:  # Handle both ValueError, KeyError and Exception
-                print("Error with engine: ", e)
-
-        print("All provider attempts have failed. Exiting...")
-        sys.exit(1)
-
-
+            return (engine._create_completion(model.name, messages, stream, **kwargs)
+                    if stream else ''.join(engine._create_completion(model.name, messages, stream, **kwargs)))
+        except TypeError as e:
+            print(e)
+            arg: str = str(e).split("'")[1]
+            print(
+                f"ValueError: {engine.__name__} does not support '{arg}' argument", file=sys.stderr)
+            sys.exit(1)

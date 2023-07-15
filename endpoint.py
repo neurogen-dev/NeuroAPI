@@ -12,6 +12,7 @@ from g4f import Model, ChatCompletion, Provider
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route("/chat/completions", methods=['POST'])
 @app.route("/v1/chat/completions", methods=['POST'])
 @app.route("/", methods=['POST'])
