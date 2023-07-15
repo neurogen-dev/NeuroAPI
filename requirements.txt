@@ -32,7 +32,6 @@ tls-client
 pypasser
 names
 curl_cffi
-streamlit
 selenium
 fake-useragent
 twocaptcha
@@ -54,3 +53,14 @@ flask-cors
 gevent
 pytz
 gunicorn
+transformers
+huggingface_hub
+torch
+icetk
+protobuf==3.19.5
+git+https://github.com/OptimalScale/LMFlow.git
+cpm-kernels
+sentence_transformers
+accelerate
+sentencepiece
+datasets
