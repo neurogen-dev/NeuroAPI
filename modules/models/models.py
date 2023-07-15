@@ -134,6 +134,102 @@ class OpenAIClient(BaseLLMModel):
             "frequency_penalty": self.frequency_penalty,
         }
 
+        if self.model_name == "gpt-3.5-turbo-16k-openai (Chimera API)":
+            model = "gpt-3.5-turbo-16k-openai"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4 (Chimera API)":
+            model = "gpt-4"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4-0613 (Chimera API)":
+            model = "gpt-4-0613"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "claude_instant (Chimera API)":
+            model = "claude_instant"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "claude-instant-100k (Chimera API)":
+            model = "claude-instant-100k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "claude-2-100k (Chimera API)":
+            model = "claude-2-100k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "sage (Chimera API)":
+            model = "sage"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        else:
+            payload = {
+            "model": self.model_name,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+
         if self.max_generation_token is not None:
             payload["max_tokens"] = self.max_generation_token
         if self.stop_sequence is not None:
@@ -600,7 +696,15 @@ def get_model(
             from .ChuanhuAgent import ChuanhuAgent_Client
             model = ChuanhuAgent_Client(model_name, access_key, user_name=user_name)
         elif model_type == ModelType.Unknown:
-            raise ValueError(f"未知模型: {model_name}")
+            logging.info(f"正在加载OpenAI模型: {model_name}")
+            model = OpenAIClient(
+                model_name=model_name,
+                api_key=access_key,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                user_name=user_name,
+            )
         logging.info(msg)
     except Exception as e:
         import traceback

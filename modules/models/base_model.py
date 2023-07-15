@@ -136,6 +136,10 @@ class ModelType(Enum):
         model_name_lower = model_name.lower()
         if "gpt" in model_name_lower:
             model_type = ModelType.OpenAI
+        if "claude" in model_name_lower:
+            model_type = ModelType.OpenAI
+        if "sage" in model_name_lower:
+            model_type = ModelType.OpenAI
         elif "chatglm" in model_name_lower:
             model_type = ModelType.ChatGLM
         elif "llama" in model_name_lower or "alpaca" in model_name_lower:

@@ -4,7 +4,7 @@ import random
 import time
 from gevent import pywsgi
 import socket
-from flask import Flask, request
+from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 
 from g4f import ChatCompletion, Provider
@@ -101,6 +101,33 @@ def chat_completions():
         yield 'data: [DONE]\n\n'
 
     return app.response_class(stream(), mimetype='text/event-stream')
+
+@app.route("/v1/dashboard/billing/subscription")
+def billing_subscription():
+    return jsonify({
+  "id": "sub_0947613321",
+  "plan": "Enterprise",
+  "status": "active",
+  "start_date": "2023-01-01",
+  "end_date": "null",
+  "current_period_start": "2023-01-01",
+  "current_period_end": "null",
+  "trial_start": "null",
+  "trial_end": "null",
+  "cancel_at_period_end": False,
+  "canceled_at": "null",
+  "created_at": "2023-01-01",
+  "updated_at": "2023-01-01"
+})
+
+@app.after_request
+def after_request(response):
+    origin = request.headers.get('Origin')
+    response.headers.add('Access-Control-Allow-Origin', origin)
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    response.headers.add('Access-Control-Allow-Headers', '*')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 if __name__ == '__main__':
     site_config = {

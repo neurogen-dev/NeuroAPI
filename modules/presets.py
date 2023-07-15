@@ -51,8 +51,13 @@ ONLINE_MODELS = [
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-16k",
     "gpt-3.5-turbo-0613",
-    "gpt-4",
-    "gpt-4-0613",
+    'gpt-3.5-turbo-16k-openai (Chimera API)',
+    'gpt-4 (Chimera API)',
+    'gpt-4-0613 (Chimera API)',
+    'claude_instant (Chimera API)',
+    'claude-instant-100k (Chimera API)',
+    'claude-2-100k (Chimera API)',
+    'sage (Chimera API)'
 ]
 
 LOCAL_MODELS = [
@@ -72,7 +77,7 @@ LOCAL_MODELS = [
 if os.environ.get('HIDE_LOCAL_MODELS', 'false') == 'true':
     MODELS = ONLINE_MODELS
 else:
-    MODELS = ONLINE_MODELS + LOCAL_MODELS
+    MODELS = ONLINE_MODELS
 
 DEFAULT_MODEL = 0
 
@@ -92,9 +97,11 @@ MODEL_TOKEN_LIMIT = {
     "gpt-4": 8192,
     "gpt-4-0314": 8192,
     "gpt-4-0613": 8192,
-    "gpt-4-32k": 32768,
-    "gpt-4-32k-0314": 32768,
-    "gpt-4-32k-0613": 32768
+    "gpt-3.5-turbo-16k-openai": 16384,
+    "gpt-3.5-turbo-16k-poe": 16384,
+    "gpt-4": 8192,
+    "gpt-4-0613": 8192,
+    "gpt-4-poe": 8192,
 }
 
 TOKEN_OFFSET = 1000 # 模型的token上限减去这个值，得到软上限。到达软上限之后，自动尝试减少token占用。

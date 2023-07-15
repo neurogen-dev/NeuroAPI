@@ -35,7 +35,8 @@ from .Providers import (
     B88,
     Kiask,
     Zeabur,
-    V50
+    V50,
+    Chimera,
 
 )
 

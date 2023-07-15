@@ -57,6 +57,72 @@ class Model:
         #best_provider: Provider.Provider = Provider.Easychat
         best_provider: Provider.Provider = random.choice([Provider.V50])
 
+    class gpt_35_turbo_poe:
+        name: str = 'gpt-3.5-turbo-poe'
+        base_provider: str = 'poe'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class gpt_35_turbo_openai:
+        name: str = 'gpt-3.5-turbo-openai'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class gpt_35_turbo_16k_openai:
+        name: str = 'gpt-3.5-turbo-16k-openai'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class gpt_35_turbo_16k_poe:
+        name: str = 'gpt-3.5-turbo-16k-poe'
+        base_provider: str = 'poe'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class gpt_4_poe:
+        name: str = 'gpt-4-poe'
+        base_provider: str = 'poe'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class gpt_4_32k:
+        name: str = 'gpt-4-32k'
+        base_provider: str = 'reversed'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class gpt_4_32k_poe:
+        name: str = 'gpt-4-32k-poe'
+        base_provider: str = 'poe'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class claude_instant_100k:
+        name: str = 'claude-instant-100k'
+        base_provider: str = 'anthropic'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class claude_instant:
+        name: str = 'claude-instant'
+        base_provider: str = 'anthropic'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class claude_2_100k:
+        name: str = 'claude-2-100k'
+        base_provider: str = 'anthropic'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
+    class sage:
+        name: str = 'sage'
+        base_provider: str = 'poe'
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
+
 
     class gpt_dev:
         name: str = 'gpt-for-dev'
@@ -66,14 +132,14 @@ class Model:
     class gpt_4:
         name: str = 'gpt-4'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Zeabur
-        best_providers: list = [Provider.Bing, Provider.Lockchat, Provider.Zeabur]
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
     
     class gpt_4_0613:
         name: str = 'gpt-4-0613'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Lsdev
-        best_providers: list = [Provider.Lsdev, Provider.Nino]
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
 
     class claude_instant_v1_100k:
         name: str = 'claude-instant-v1-100k'
@@ -151,15 +217,28 @@ class ModelUtils:
         'gpt-3.5-turbo-16k-0613': Model.gpt_35_turbo_16k_0613,
 
         #POE
+        'gpt-3.5-turbo-poe': Model.gpt_35_turbo_poe,
+        'gpt-3.5-turbo-openai': Model.gpt_35_turbo_openai,
+        'gpt-3.5-turbo-16k-openai': Model.gpt_35_turbo_16k_openai,
+        'gpt-3.5-turbo-16k-poe': Model.gpt_35_turbo_16k_poe,
+        'gpt-4-poe': Model.gpt_4_poe,
+        'gpt-4-32k': Model.gpt_4_32k,
+        'gpt-4-32k-poe': Model.gpt_4_32k_poe,
 
         'beaver': Model.beaver,
         'a2_100k': Model.a2_100k,
         'a2_2': Model.a2_2,
+
+        'claude-instant-100k': Model.claude_instant_100k,
+        'claude-instant': Model.claude_instant,
+        'claude-2-100k': Model.claude_2_100k,
         
         'claude-instant-v1-100k': Model.claude_instant_v1_100k,
         'claude-v1-100k': Model.claude_v1_100k,
         'claude-instant-v1': Model.claude_instant_v1,
         'claude-v1': Model.claude_v1,
+
+        'sage': Model.sage,
         
         'code-cushman-001': Model.code_cushman_001,
         'code-davinci-002': Model.code_davinci_002,
