@@ -27,7 +27,7 @@ class Model:
         name: str = 'gpt-3.5-turbo-16k-0613'
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.EasyZeaburchat])
+        best_provider: Provider.Provider = random.choice([Provider.Zeabur])
         best_providers: list = [Provider.Easychat]
 
     class gpt_35_turbo_16k:
