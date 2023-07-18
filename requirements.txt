@@ -49,7 +49,6 @@ PyExecJS
 browser_cookie3
 aiohttp
 flask
-flask-core
 flask-cors
 gevent
 pytz

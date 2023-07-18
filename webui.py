@@ -229,7 +229,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         max_context_length_slider = gr.Slider(
                             minimum=1,
                             maximum=100000,
-                            value=2000,
+                            value=4000,
                             step=1,
                             interactive=True,
                             label="max context",
@@ -237,7 +237,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         max_generation_slider = gr.Slider(
                             minimum=1,
                             maximum=100000,
-                            value=1000,
+                            value=4000,
                             step=1,
                             interactive=True,
                             label="max generations",
