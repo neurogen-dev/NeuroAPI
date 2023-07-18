@@ -111,6 +111,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+python/
+git/
+history/
+
 
 # Spyder project settings
 .spyderproject
