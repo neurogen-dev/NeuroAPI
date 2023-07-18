@@ -7,7 +7,7 @@ tqdm
 colorama
 googlesearch-python
 Pygments
-langchain==0.0.173
+langchain
 markdown
 PyPDF2
 pdfplumber
@@ -16,7 +16,7 @@ commentjson
 openpyxl
 pandoc
 wolframalpha
-faiss-cpu==1.7.4
+faiss-cpu
 git+https://github.com/deedy5/duckduckgo_search
 arxiv
 wikipedia
@@ -42,7 +42,7 @@ retrying
 mailgw_temporary_email
 pycryptodome
 random-password-generator
-numpy>=1.22.2
+numpy==1.24.4
 tornado>=6.3.2
 PyExecJS
 browser_cookie3
@@ -55,12 +55,4 @@ pytz
 gunicorn
 transformers
 huggingface_hub
-torch
-icetk
 protobuf==3.19.5
-git+https://github.com/OptimalScale/LMFlow.git
-cpm-kernels
-sentence_transformers
-accelerate
-sentencepiece
-datasets

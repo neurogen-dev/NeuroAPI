@@ -1,4 +1,6 @@
 @echo off
+call update.bat
+REM строка выше производит обновление каждый раз, при каждом запуске
 echo Opening NeurogenGPT...
 
 REM Open powershell via bat

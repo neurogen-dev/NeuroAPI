@@ -4,7 +4,7 @@ call update.bat
 REM строка выше производит обновление каждый раз, при каждом запуске
 
 call venv\Scripts\activate.bat
-python endpoint.py --enable_proxy
+python endpoint.py
 pause
 
 :: Упаковано и собрано телеграм каналом Neutogen News: https://t.me/neurogen_news
