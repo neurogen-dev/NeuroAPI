@@ -1,5 +1,6 @@
 gradio==3.36.1
 gradio_client==0.2.7
+psycopg2-binary
 pypinyin
 tiktoken
 socksio
