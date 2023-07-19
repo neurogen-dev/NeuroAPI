@@ -236,19 +236,20 @@ class BaseLLMModel:
     def stream_next_chatbot(self, inputs, chatbot, fake_input=None, display_append=""):
         def get_return_value():
             return chatbot, status_text
-
-        status_text = i18n("开始实时传输回答……")
+    
+        partial_text = ""  # Добавить это определение
+    
         if fake_input:
             chatbot.append((fake_input, ""))
         else:
             chatbot.append((inputs, ""))
-
+    
         user_token_count = self.count_token(inputs)
         self.all_token_counts.append(user_token_count)
-        logging.debug(f"输入token计数: {user_token_count}")
-
+        logging.debug(f"Входной токен счет: {user_token_count}")
+    
         stream_iter = self.get_answer_stream_iter()
-
+    
         if display_append:
             display_append = '\n\n<hr class="append-display no-in-raw" />' + display_append
         for partial_text in stream_iter:

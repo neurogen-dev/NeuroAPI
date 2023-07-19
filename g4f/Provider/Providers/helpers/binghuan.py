@@ -81,12 +81,12 @@ class AsyncCompletion:
         create = None
         for _ in range(5):
             try:
-                create = requests.get('https://b.ai-huan.xyz/turing/conversation/create', 
+                create = requests.get('https://bing.lemonsoftware.eu.org/turing/conversation/create', 
                     headers = {
-                        'host': 'b.ai-huan.xyz',
+                        'host': 'bing.lemonsoftware.eu.org',
                         'accept-encoding': 'gzip, deflate, br',
                         'connection': 'keep-alive',
-                        'authority': 'b.ai-huan.xyz',
+                        'authority': 'bing.lemonsoftware.eu.org',
                         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                         'accept-language': 'en-US,en;q=0.9',
                         'cache-control': 'max-age=0',
@@ -141,7 +141,7 @@ class AsyncCompletion:
                 'sec-fetch-site': 'same-origin',
                 'x-ms-client-request-id': str(uuid.uuid4()),
                 'x-ms-useragent': 'azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32',
-                'Referer': 'https://b.ai-huan.xyz/search?q=Bing+AI&showconv=1&FORM=hpcodx',
+                'Referer': 'https://bing.lemonsoftware.eu.org/search?q=Bing+AI&showconv=1&FORM=hpcodx',
                 'Referrer-Policy': 'origin-when-cross-origin',
                 'x-forwarded-for': f'13.{random.randint(104, 107)}.{random.randint(0, 255)}.{random.randint(0, 255)}'
             }

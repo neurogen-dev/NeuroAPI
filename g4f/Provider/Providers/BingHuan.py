@@ -3,7 +3,7 @@ import json
 import subprocess
 from ...typing import sha256, Dict, get_type_hints
 
-url = 'https://b.ai-huan.xyz'
+url = 'https://bing.lemonsoftware.eu.org'
 model = ['gpt-3.5-turbo', 'gpt-4']
 supports_stream = True
 needs_auth = False

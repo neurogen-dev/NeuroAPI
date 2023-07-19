@@ -117,6 +117,11 @@ class Model:
         best_provider: Provider.Provider = Provider.Chimera
         best_providers: list = [Provider.Chimera]
 
+    class claude_2:
+        name: str = 'claude-2'
+        base_provider: str = 'anthropic'
+        best_provider: Provider.Provider = Provider.ClaudeAI
+
     class sage:
         name: str = 'sage'
         base_provider: str = 'poe'
@@ -233,6 +238,8 @@ class ModelUtils:
         'claude-instant': Model.claude_instant,
         'claude-2-100k': Model.claude_2_100k,
         
+        'claude-2': Model.claude_2,
+
         'claude-instant-v1-100k': Model.claude_instant_v1_100k,
         'claude-v1-100k': Model.claude_v1_100k,
         'claude-instant-v1': Model.claude_instant_v1,

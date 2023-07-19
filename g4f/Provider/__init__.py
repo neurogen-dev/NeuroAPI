@@ -37,6 +37,7 @@ from .Providers import (
     Zeabur,
     V50,
     Chimera,
+    ClaudeAI,
 
 )
 

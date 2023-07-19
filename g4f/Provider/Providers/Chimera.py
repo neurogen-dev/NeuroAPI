@@ -38,7 +38,7 @@ if os.path.exists("config.json"):
 else:
     config = {}
 
-my_api_key = config.get("openai_api_key", "")
+my_api_key = config.get("openai_api_key", "_hvFFPS4VPZGn2PKFAO7D663hO74W_IQyZ0FekFdlsY")
 my_api_key = os.environ.get("OPENAI_API_KEY", my_api_key)
 
 openai.api_key = my_api_key

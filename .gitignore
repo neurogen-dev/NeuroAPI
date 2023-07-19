@@ -148,3 +148,5 @@ auth.json
 lora/
 .idea
 templates/*
+code_improver.yaml
+.history

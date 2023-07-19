@@ -8,9 +8,10 @@ import threading
 from curl_cffi import requests
 from ...typing import sha256, Dict, get_type_hints
 
-url = 'https://play.vercel.ai'
+url = 'https://sdk.vercel.ai'
 supports_stream = True
 needs_auth = False
+working = True
 
 models = {
     'claude-instant-v1': 'anthropic:claude-instant-v1',
@@ -47,11 +48,9 @@ class Client:
         self.session = requests.Session()
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'en-US,en;q=0.5',
-            'Te': 'trailers',
-            'Upgrade-Insecure-Requests': '1'
         }
         self.session.headers.update(self.headers)
 
@@ -86,7 +85,7 @@ class Client:
             'Custom-Encoding': self.get_token(),
             'Host': 'sdk.vercel.ai',
             'Origin': 'https://sdk.vercel.ai',
-            'Referrer': 'https://sdk.vercel.ai',
+            'Referrer': 'https://sdk.vercel.ai/prompt',
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
@@ -103,7 +102,7 @@ class Client:
             nonlocal response, error
             for _ in range(3):
                 try:
-                    response = self.session.post('https://sdk.vercel.ai/api/generate',
+                    response = self.session.post('https://sdk.vercel.ai/api/prompt',
                                                  json=payload, headers=headers, content_callback=callback)
                     response.raise_for_status()
 
@@ -143,10 +142,8 @@ class Client:
                 index = len(lines) - 1
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
-    yield 'Vercel is currently not working.'
-    return
     
-    conversation = 'This is a conversation between a human and a language model, respond to the last message accordingly, referring to the past history of messages if needed.\n'
+    conversation = 'This is a conversation between a human and a language model. The language model should always respond as the assistant, referring to the past history of messages if needed.\n'
     
     for message in messages:
         conversation += '%s: %s\n' % (message['role'], message['content'])
@@ -154,7 +151,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     conversation += 'assistant: '
     
     completion = Client().generate(model, conversation)
-
+    
     for token in completion:
         yield token
 

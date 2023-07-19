@@ -6,9 +6,10 @@ import subprocess
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://you.com'
-model = 'gpt-3.5-turbo'
+model = ['gpt-3.5-turbo']
 supports_stream = True
 needs_auth = False
+working = False
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
 
