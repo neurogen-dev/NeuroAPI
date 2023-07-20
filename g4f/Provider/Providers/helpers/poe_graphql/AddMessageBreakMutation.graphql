@@ -1,0 +1,32 @@
+mutation chatHelpers_addMessageBreakEdgeMutation_Mutation(
+  $chatId: BigInt!
+) {
+  messageBreakEdgeCreate(chatId: $chatId) {
+    message {
+      cursor
+      node {
+        id
+        messageId
+        text
+        author
+        suggestedReplies
+        creationTime
+        state
+      }
+      id
+    }
+    introductionMessage {
+      cursor
+      node {
+        id
+        messageId
+        text
+        author
+        suggestedReplies
+        creationTime
+        state
+      }
+      id
+    }
+  }
+}

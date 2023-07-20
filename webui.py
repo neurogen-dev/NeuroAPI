@@ -606,10 +606,679 @@ def billing_subscription():
   })
 
 
+@app.route("/v1/dashboard/billing/subscription")
+@app.route("/dashboard/billing/subscription")
+def billing_subscription():
+  return jsonify({
+  "object": "billing_subscription",
+  "has_payment_method": True,
+  "canceled": False,
+  "canceled_at": None,
+  "delinquent": None,
+  "access_until": 1690848000,
+  "soft_limit": 6944500,
+  "hard_limit": 166666666,
+  "system_hard_limit": 166666666,
+  "soft_limit_usd": 416.67,
+  "hard_limit_usd": 9999.99996,
+  "system_hard_limit_usd": 9999.99996,
+  "plan": {
+    "title": "Pay-as-you-go",
+    "id": "payg"
+  },
+  "primary": True,
+  "account_name": "Lemon SMith",
+  "po_number": None,
+  "billing_email": None,
+  "tax_ids": None,
+  "billing_address": {
+    "city": "Hastings",
+    "line1": " 2 Amherst Road",
+    "country": "GB",
+    "postal_code": "TN34 1TT"
+  },
+  "business_address": None
+}
+)
+
+
 @app.route("/v1/dashboard/billing/usage")
 @app.route("/dashboard/billing/usage")
 def billing_usage():
-  return jsonify({"total": 99999.99, "total_usage": 1.01})
+  return jsonify({
+  "object": "list",
+  "daily_costs": [
+    {
+      "timestamp": 1688169600.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 16.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688256000.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688342400.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688428800.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688515200.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688601600.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688688000.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688774400.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688860800.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1688947200.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689033600.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689120000.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689206400.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689292800.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 2.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689379200.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689465600.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689552000.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689638400.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 8.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    },
+    {
+      "timestamp": 1689724800.0,
+      "line_items": [
+        {
+          "name": "GPT-4",
+          "cost": 0.0
+        },
+        {
+          "name": "Chat models",
+          "cost": 1.01
+        },
+        {
+          "name": "InstructGPT",
+          "cost": 0.0
+        },
+        {
+          "name": "Fine-tuning models",
+          "cost": 0.0
+        },
+        {
+          "name": "Embedding models",
+          "cost": 0.0
+        },
+        {
+          "name": "Image models",
+          "cost": 0.0
+        },
+        {
+          "name": "Audio models",
+          "cost": 0.0
+        }
+      ]
+    }
+  ],
+  "total_usage": 1.01
+}
+)
 
 @app.route("/v1/models")
 @app.route("/models")
@@ -617,7 +1286,6 @@ def models():
   import g4f.models
   model = {"data":[]}
   for i in g4f.models.ModelUtils.convert:
-    print(i)
     model['data'].append({
             "id": i,
             "object": "model",
@@ -631,6 +1299,29 @@ def models():
             "permission": []
         })
   return jsonify(model)
+
+@app.route("/v1/providers")
+@app.route("/providers")
+def providers():
+  files = os.listdir("g4f/Provider/Providers")
+  files = [f for f in files if os.path.isfile(os.path.join("g4f/Provider/Providers", f))]
+  files.sort(key=str.lower)
+  providers_data = {"data":[]}
+  for file in files:
+      if file.endswith(".py"):
+          name = file[:-3]
+          try:
+              p = getattr(g4f.Provider,name)
+              providers_data["data"].append({
+              "provider": str(name),
+              "model": list(p.model),
+              "url": str(p.url),
+              "working": bool(p.working),
+              "supports_stream": bool(p.supports_stream)
+              })
+          except:
+                pass
+  return jsonify(providers_data)
 
 @app.errorhandler(404)
 def page_not_found(e):

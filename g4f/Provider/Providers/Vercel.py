@@ -14,7 +14,7 @@ needs_auth = False
 working = True
 
 models = {
-    'claude-instant-v1': 'anthropic:claude-instant-v1',
+    'claude-instant': 'anthropic:claude-instant-v1',
     'claude-v1': 'anthropic:claude-v1',
     'alpaca-7b': 'replicate:replicate/alpaca-7b',
     'stablelm-tuned-alpha-7b': 'replicate:stability-ai/stablelm-tuned-alpha-7b',
