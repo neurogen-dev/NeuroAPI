@@ -47,5 +47,5 @@
      "server_name": "0.0.0.0",
     // "server_port": 7860,
     // Если хотите поделиться через gradio, установите значение true
-     "share": false,
+     "share": false
 }
