@@ -10,9 +10,11 @@ from ...typing import sha256, Dict, get_type_hints
 from datetime import datetime
 
 url: str = 'https://ai.ls'
-model: str = ['gpt-3.5-turbo']
+model = ['gpt-3.5-turbo']
 supports_stream = True
 needs_auth = False
+working =  True
+
 
 class Utils:
     def hash(json_data: Dict[str, str]) -> sha256:
@@ -45,7 +47,7 @@ def _create_completion(model: str, messages: list, temperature: float = 0.6, str
         'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
         'authorization': 'Bearer free',
         'client-id': str(uuid.uuid4()),
-        'client-v': '0.1.248',
+        'client-v': '0.1.255',
         'content-type': 'application/json',
         'origin': 'https://ai.ls',
         'referer': 'https://ai.ls/',

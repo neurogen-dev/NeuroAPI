@@ -56,3 +56,4 @@ gunicorn
 transformers
 huggingface_hub
 protobuf==3.19.5
+free-proxy

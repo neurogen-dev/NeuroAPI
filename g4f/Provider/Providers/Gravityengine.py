@@ -21,7 +21,7 @@ def _create_completion(model: str, messages: list, stream: bool, temperature: fl
     }
     response = requests.post(url + '/api/openai/v1/chat/completions',
                              json=data, stream=True)
-
+    
     yield response.json()['choices'][0]['message']['content']
 
 params = f'g4f.Providers.{os.path.basename(__file__)[:-3]} supports: ' + \

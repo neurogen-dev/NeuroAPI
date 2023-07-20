@@ -2,35 +2,11 @@ import re
 import os
 import openai
 import openai.error
-import json
-import os
 import logging
 import sys
-import commentjson as json
 from dotenv import load_dotenv
+import commentjson as json
 from ...typing import sha256, Dict, get_type_hints
-
-load_dotenv()
-
-__all__ = [
-    "my_api_key",
-    "authflag",
-    "auth_list",
-    "dockerflag",
-    "retrieve_proxy",
-    "log_level",
-    "advance_docs",
-    "update_doc_config",
-    "usage_limit",
-    "multi_api_key",
-    "server_name",
-    "server_port",
-    "share",
-    "check_update",
-    "latex_delimiters_set",
-    "hide_history_when_not_logged_in",
-    "default_chuanhu_assistant_model"
-]
 
 if os.path.exists("config.json"):
     with open("config.json", "r", encoding='utf-8') as f:
@@ -38,19 +14,18 @@ if os.path.exists("config.json"):
 else:
     config = {}
 
+load_dotenv()
+
 my_api_key = config.get("openai_api_key", "_hvFFPS4VPZGn2PKFAO7D663hO74W_IQyZ0FekFdlsY")
 my_api_key = os.environ.get("OPENAI_API_KEY", my_api_key)
 
 openai.api_key = my_api_key
 openai.api_base = "https://chimeragpt.adventblocks.cc/v1"
 
-
 url = 'https://chimeragpt.adventblocks.cc/'
 model = [
-    'gpt-3.5-turbo',
     'gpt-3.5-turbo-poe',
     'gpt-3.5-turbo-openai',
-    'gpt-3.5-turbo-16k',
     'gpt-3.5-turbo-16k-openai',
     'gpt-3.5-turbo-16k-poe',
     'gpt-4',
@@ -58,7 +33,7 @@ model = [
     'gpt-4-poe',
     'gpt-4-32k',
     'gpt-4-32k-poe',
-    'claude_instant',
+    'claude-instant',
     'claude-instant-100k',
     'claude-2-100k',
     'sage'
@@ -66,7 +41,7 @@ model = [
 
 supports_stream = True
 needs_auth = False
-
+working = True
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     try:

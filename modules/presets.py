@@ -142,7 +142,7 @@ Make sure to cite results using [number] notation after the reference.
 If the provided context information refer to multiple subjects with the same name, write separate answers for each subject.
 Use prior knowledge only if the given context didn't provide enough information.
 Answer the question: {query_str}
-Reply in {reply_language}
+Reply in {reply_language}. Respond using Markdown.
 """
 
 REFINE_TEMPLATE = """\

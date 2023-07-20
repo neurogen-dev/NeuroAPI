@@ -7,6 +7,8 @@ url = 'https://bing.lemonsoftware.eu.org'
 model = ['gpt-3.5-turbo', 'gpt-4']
 supports_stream = True
 needs_auth = False
+working = False
+
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     path = os.path.dirname(os.path.realpath(__file__))
@@ -16,10 +18,9 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     cmd = ['python', f'{path}/helpers/binghuan.py', config]
 
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
+    
     for line in iter(p.stdout.readline, b''):
         yield line.decode('cp1252')
-
 
 
 params = f'g4f.Providers.{os.path.basename(__file__)[:-3]} supports: ' + \

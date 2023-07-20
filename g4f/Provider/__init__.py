@@ -1,6 +1,6 @@
 from . import Provider
 from .Providers import (
-    Aitianhu,
+    AItianhu,
     You,
     Bing,
     Yqcloud,
@@ -27,7 +27,7 @@ from .Providers import (
     Lsdev,
     Jayshen,
     Aws,
-    DFEHub,
+    DfeHub,
     Acytoo,
     AiService,
     BingHuan,
