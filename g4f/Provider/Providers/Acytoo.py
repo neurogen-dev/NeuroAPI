@@ -4,7 +4,7 @@ import json
 
 url = "https://chat.acytoo.com/api/completions"
 model = ['gpt-3.5-turbo']
-supports_stream = False
+supports_stream = True
 needs_auth = False
 working = True
 

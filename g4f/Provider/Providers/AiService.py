@@ -4,7 +4,7 @@ from ...typing import get_type_hints
 
 url = "https://aiservice.vercel.app/api/chat/answer"
 model = ['gpt-3.5-turbo']
-supports_stream = False
+supports_stream = True
 needs_auth = False
 working = True
 

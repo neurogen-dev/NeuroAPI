@@ -6,7 +6,7 @@ import base64
 
 url = 'https://chatgptlogin.ac'
 model = ['gpt-3.5-turbo']
-supports_stream = False
+supports_stream = True
 needs_auth = False
 working = False
 

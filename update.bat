@@ -1,3 +1,2 @@
-git pull
-call venv\Scripts\activate.bat
+call git pull
 call install.bat

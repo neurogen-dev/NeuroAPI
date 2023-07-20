@@ -5,7 +5,7 @@ from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://4aiu6ctrknfxkoaigkigzh5lwm0cciuc.lambda-url.ap-east-1.on.aws/chat/completions'
 model = ['gpt-3.5-turbo', 'gpt-4']
-supports_stream = False
+supports_stream = True
 needs_auth = False
 
 class Auth(requests.auth.AuthBase):

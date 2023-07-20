@@ -1,5 +1,5 @@
-gradio==3.36.1
-gradio_client==0.2.7
+gradio
+gradio_client
 psycopg2-binary
 pypinyin
 tiktoken
