@@ -137,8 +137,8 @@ class Model:
     class gpt_4:
         name: str = 'gpt-4'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Yl
-        best_providers: list = [Provider.Yl]
+        best_provider: Provider.Provider = Provider.Chimera
+        best_providers: list = [Provider.Chimera]
     
     class gpt_4_0613:
         name: str = 'gpt-4-0613'
