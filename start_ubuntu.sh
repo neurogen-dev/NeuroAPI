@@ -1,7 +1,4 @@
 #!/bin/bash
-git checkout main
-git fetch --all
-git reset --hard origin/main
 git pull
 
 python3 -m venv venv
