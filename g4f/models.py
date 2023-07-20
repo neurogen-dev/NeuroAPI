@@ -28,7 +28,7 @@ class Model:
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
         best_provider: Provider.Provider = random.choice([Provider.Zeabur])
-        best_providers: list = [Provider.Easychat]
+        best_providers: list = [Provider.EasyChat]
 
     class gpt_35_turbo_16k:
         name: str = 'gpt-3.5-turbo-16k'
@@ -137,8 +137,8 @@ class Model:
     class gpt_4:
         name: str = 'gpt-4'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
+        best_provider: Provider.Provider = Provider.Yl
+        best_providers: list = [Provider.Yl]
     
     class gpt_4_0613:
         name: str = 'gpt-4-0613'

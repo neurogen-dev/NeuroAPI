@@ -585,26 +585,6 @@ def chat_completions():
 
     return app.response_class(stream(), mimetype='text/event-stream')
 
-@app.route("/v1/dashboard/billing/subscription")
-@app.route("/dashboard/billing/subscription")
-def billing_subscription():
-  return jsonify({
-    "id": "sub_0947613321",
-    "plan": "Enterprise",
-    "status": "active",
-    "start_date": "2023-01-01",
-    "end_date": None,
-    "current_period_start": "2023-01-01",
-    "current_period_end": None,
-    "trial_start": None,
-    "trial_end": None,
-    "cancel_at_period_end": False,
-    "canceled_at": None,
-    "created_at": "2023-01-01",
-    "updated_at": "2023-01-01",
-    "hard_limit_usd": 99999.99
-  })
-
 
 @app.route("/v1/dashboard/billing/subscription")
 @app.route("/dashboard/billing/subscription")
