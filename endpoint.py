@@ -7,11 +7,15 @@ import g4f
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 
+from gevent import pywsgi
+import socket
+
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/chat/completions", methods=['POST'])
 @app.route("/v1/chat/completions", methods=['POST'])
-@app.route("/v1/completions", methods=['POST'])
+@app.route("/", methods=['POST'])
 def chat_completions():
     streaming = request.json.get('stream', False)
     model = request.json.get('model', 'gpt-3.5-turbo')
@@ -101,7 +105,8 @@ def chat_completions():
             time.sleep(0.1)
 
     return app.response_class(stream(), mimetype='text/event-stream')
-    
+
+
 @app.route("/v1/dashboard/billing/subscription")
 @app.route("/dashboard/billing/subscription")
 def billing_subscription():
