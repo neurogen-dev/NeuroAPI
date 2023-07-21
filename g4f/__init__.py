@@ -9,7 +9,7 @@ class ChatCompletion:
     def create(model: Model.model or str, messages: list, provider: Provider.Provider = None, stream: bool = False, auth: str = False, **kwargs):
         kwargs['auth'] = auth
         if provider and provider.working == False:
-            return f'{provider.__name__} is not working'
+            return f'{provider.__name__} не работает. Пожалуйста, отправьте ваш запрос заново, чтобы он переадресовался новому провайдеру.'
 
         if provider and provider.needs_auth and not auth:
             print(

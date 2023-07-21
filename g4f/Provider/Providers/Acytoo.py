@@ -6,7 +6,7 @@ url = "https://chat.acytoo.com/api/completions"
 model = ['gpt-3.5-turbo']
 supports_stream = True
 needs_auth = False
-working = True
+working = False
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     base = ''

@@ -1,6 +1,7 @@
 from . import Provider
 from .Providers import (
     AItianhu,
+    Ails,
     You,
     Bing,
     Yqcloud,
