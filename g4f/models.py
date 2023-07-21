@@ -39,24 +39,6 @@ class Model:
 
     #POE
 
-    class beaver:
-        name: str = 'beaver'
-        base_provider: str = 'poe'
-        #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.V50])
-
-    class a2_100k:
-        name: str = 'a2_100k'
-        base_provider: str = 'poe'
-        #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.V50])
-
-    class a2_2:
-        name: str = 'a2_2'
-        base_provider: str = 'poe'
-        #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.V50])
-
     class gpt_35_turbo_poe:
         name: str = 'gpt-3.5-turbo-poe'
         base_provider: str = 'poe'
@@ -217,10 +199,6 @@ class ModelUtils:
         'gpt-4-poe': Model.gpt_4_poe,
         'gpt-4-32k': Model.gpt_4_32k,
         'gpt-4-32k-poe': Model.gpt_4_32k_poe,
-
-        'beaver': Model.beaver,
-        'a2_100k': Model.a2_100k,
-        'a2_2': Model.a2_2,
 
         'claude-instant-100k': Model.claude_instant_100k,
         'claude-instant': Model.claude_instant,
