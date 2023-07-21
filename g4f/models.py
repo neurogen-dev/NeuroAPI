@@ -27,7 +27,7 @@ class Model:
         name: str = 'gpt-3.5-turbo-16k-0613'
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
-        best_provider: Provider.Provider = random.choice([Provider.Zeabur])
+        best_provider: Provider.Provider = Provider.Zeabur
         best_providers: list = [Provider.EasyChat]
 
     class gpt_35_turbo_16k:
@@ -140,17 +140,6 @@ class Model:
         best_provider: Provider.Provider = Provider.Chimera
         best_providers: list = [Provider.Chimera]
 
-
-    class gpt_dev:
-        name: str = 'gpt-for-dev'
-        base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Phind
-
-    class claude_instant_v1_100k:
-        name: str = 'claude-instant-v1-100k'
-        base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Nino
-
     class claude_instant_v1:
         name: str = 'claude-instant-v1'
         base_provider: str = 'anthropic'
@@ -217,7 +206,6 @@ class ModelUtils:
         'gpt-3.5-turbo-0613': Model.gpt_35_turbo_0613,
         'gpt-4': Model.gpt_4,
         'gpt-4-0613': Model.gpt_4_0613,
-        'gpt-for-dev': Model.gpt_dev,
         'gpt-3.5-turbo-16k': Model.gpt_35_turbo_16k,
         'gpt-3.5-turbo-16k-0613': Model.gpt_35_turbo_16k_0613,
 
@@ -240,7 +228,6 @@ class ModelUtils:
         
         'claude-2': Model.claude_2,
 
-        'claude-instant-v1-100k': Model.claude_instant_v1_100k,
         'claude-v1-100k': Model.claude_v1_100k,
         'claude-instant-v1': Model.claude_instant_v1,
         'claude-v1': Model.claude_v1,
