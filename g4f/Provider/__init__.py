@@ -10,7 +10,6 @@ from .Providers import (
     Liaobots,
     H2o,
     DeepAi,
-    GetGpt,
     Pierangelo,
     Gravityengine,
     EasyChat,
