@@ -10,7 +10,7 @@ class ChatCompletion:
         kwargs['auth'] = auth
         if provider and provider.working == False:
             return f'{provider.__name__} не работает. Пожалуйста, отправьте ваш запрос заново, чтобы он переадресовался новому провайдеру.'
-
+        
         if provider and provider.needs_auth and not auth:
             print(
                 f'ValueError: {provider.__name__} requires authentication (use auth="cookie or token or jwt ..." param)', file=sys.stderr)
@@ -40,3 +40,7 @@ class ChatCompletion:
             print(
                 f"ValueError: {engine.__name__} does not support '{arg}' argument", file=sys.stderr)
             sys.exit(1)
+        except Exception as e:
+            if 'Internal Server Error' in str(e):
+                return f'Провайдер {provider.__name__} недоступен'
+            raise e

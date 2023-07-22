@@ -25,8 +25,6 @@ openai.api_base = "https://chimeragpt.adventblocks.cc/v1"
 url = 'https://chimeragpt.adventblocks.cc/'
 model = [
     'gpt-3.5-turbo-poe',
-    'gpt-3.5-turbo-openai',
-    'gpt-3.5-turbo-16k-openai',
     'gpt-3.5-turbo-16k-poe',
     'gpt-4',
     'gpt-4-0613',
@@ -40,7 +38,7 @@ model = [
 ]
 
 supports_stream = True
-needs_auth = False
+needs_auth = True
 working = True
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
