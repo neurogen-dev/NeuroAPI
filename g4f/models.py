@@ -11,7 +11,7 @@ class Model:
     class gpt_35_turbo:
         name: str = 'gpt-3.5-turbo'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.DfeHub
+        best_provider: Provider.Provider = Provider.Wewordle
         #best_provider: Provider.Provider = random.choice([Provider.Gravityengine, Provider.Yqcloud, Provider.AItianhu])
         best_providers: list = [Provider.Gravityengine, Provider.Yqcloud, Provider.AItianhu]
 

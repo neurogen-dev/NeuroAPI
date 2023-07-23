@@ -1,7 +1,5 @@
 {
-    // Ваш OpenAI API Key, обычно обязателен,
-    // Если пропущен, то "openai_api_key": "" требуется ввести в графическом интерфейсе
-    "openai_api_key": " ",
+    "openai_api_key": " ", // Введите тут ваш ключ Chimera API
     "google_palm_api_key": "",
     "xmchat_api_key": "",
     "usage_limit": 999, // Месячный лимит API Key, в долларах США
