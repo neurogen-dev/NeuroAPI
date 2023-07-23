@@ -511,21 +511,43 @@ CORS(app)
 @app.route("/chat/completions", methods=['POST'])
 @app.route("/v1/chat/completions", methods=['POST'])
 @app.route("/", methods=['POST'])
-@app.route("/chat/completions", methods=['POST'])
-@app.route("/v1/chat/completions", methods=['POST'])
-@app.route("/", methods=['POST'])
 def chat_completions():
     streaming = request.json.get('stream', False)
     model = request.json.get('model', 'gpt-3.5-turbo')
     messages = request.json.get('messages')
-
-    response = ChatCompletion.create(model=model, stream=streaming,
+    provider = request.json.get('provider', False)
+    if not provider:
+        r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
+        r_j = r.json()['data']
+        random.shuffle(r_j)
+        for p in r_j:
+            for m in p['model']:
+                if model in m and m[model]['status'] == 'Active':
+                    response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,p['provider']),stream=streaming,
                                      messages=messages)
-
+                    break
+            else:
+                continue
+            break
+    else:
+        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
+                                     messages=messages)
+    
     if not streaming:
         while 'curl_cffi.requests.errors.RequestsError' in response:
-            response = ChatCompletion.create(model=model, stream=streaming,
-                                             messages=messages)
+            random.shuffle(r_j)
+            for p in r_j:
+                for m in p['model']:
+                    if model in m and p[model]['status'] == 'Active':
+                        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,p['provider']),stream=streaming,
+                                         messages=messages)
+                        break
+                else:
+                    continue
+                break
+            else:
+                response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
+                                     messages=messages)
 
         completion_timestamp = int(time.time())
         completion_id = ''.join(random.choices(
@@ -537,9 +559,9 @@ def chat_completions():
             'created': completion_timestamp,
             'model': model,
             'usage': {
-                'prompt_tokens': 0,
-                'completion_tokens': 0,
-                'total_tokens': 0
+                'prompt_tokens': len(messages),
+                'completion_tokens': len(response),
+                'total_tokens': len(messages)+len(response)
             },
             'choices': [{
                 'message': {
@@ -552,41 +574,30 @@ def chat_completions():
         }
 
     def stream():
-        completion_data = {
-            'id': '',
-            'object': 'chat.completion.chunk',
-            'created': 0,
-            'model': 'gpt-3.5-turbo-0301',
-            'choices': [
-                {
-                    'delta': {
-                        'content': ""
-                    },
-                    'index': 0,
-                    'finish_reason': None
-                }
-            ]
-        }
-
+        nonlocal response
         for token in response:
-            completion_id = ''.join(
-                random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
             completion_timestamp = int(time.time())
-            completion_data['id'] = f'chatcmpl-{completion_id}'
-            completion_data['created'] = completion_timestamp
-            completion_data['choices'][0]['delta']['content'] = token
-            if token.startswith("an error occured"):
-                completion_data['choices'][0]['delta']['content'] = "Server Response Error, please try again.\n"
-                completion_data['choices'][0]['delta']['stop'] = "error"
-                yield 'data: %s\n\ndata: [DONE]\n\n' % json.dumps(completion_data, separators=(',' ':'))
-                return
+            completion_id = ''.join(random.choices(
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
+
+            completion_data = {
+                'id': f'chatcmpl-{completion_id}',
+                'object': 'chat.completion.chunk',
+                'created': completion_timestamp,
+                'model': model,
+                'choices': [
+                    {
+                        'delta': {
+                            'content': token
+                        },
+                        'index': 0,
+                        'finish_reason': None
+                    }
+                ]
+            }
+
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
             time.sleep(0.1)
-
-        completion_data['choices'][0]['finish_reason'] = "stop"
-        completion_data['choices'][0]['delta']['content'] = ""
-        yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-        yield 'data: [DONE]\n\n'
 
     return app.response_class(stream(), mimetype='text/event-stream')
 
