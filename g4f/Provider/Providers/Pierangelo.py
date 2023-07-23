@@ -6,6 +6,7 @@ url = 'https://chat.pierangelo.info'
 model = ['gpt-4', 'gpt-3.5-turbo']
 supports_stream = True
 needs_auth = False
+working =  False
 
 models = {
     'gpt-4': {

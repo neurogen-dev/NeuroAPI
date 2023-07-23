@@ -6,6 +6,7 @@ url = "https://gptleg.zeabur.app"
 model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-0613']
 supports_stream = True
 needs_auth = False
+working =  True
 
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
