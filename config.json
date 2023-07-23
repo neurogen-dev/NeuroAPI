@@ -1,5 +1,6 @@
 {
     "openai_api_key": " ", // Введите тут ваш ключ Chimera API
+    "pawan_api_key": " ", // Введите тут ваш ключ Pawan.krd
     "google_palm_api_key": "",
     "xmchat_api_key": "",
     "usage_limit": 999, // Месячный лимит API Key, в долларах США
