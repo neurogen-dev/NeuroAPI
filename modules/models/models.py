@@ -135,7 +135,7 @@ class OpenAIClient(BaseLLMModel):
         }
 
         if self.model_name == "gpt-3.5-turbo-16k-openai (Chimera API)":
-            model = "gpt-3.5-turbo-16k-openai"
+            model = "gpt-3.5-turbo-16k-poe"
             payload = {
             "model": model,
             "messages": history,
@@ -158,8 +158,8 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
-        elif self.model_name == "gpt-4-0613 (Chimera API)":
-            model = "gpt-4-0613"
+        elif self.model_name == "gpt-4-0314 (Chimera API)":
+            model = "gpt-4-0314"
             payload = {
             "model": model,
             "messages": history,
