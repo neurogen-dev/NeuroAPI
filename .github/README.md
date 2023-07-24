@@ -79,4 +79,39 @@
 
 ### Обновление
 # MacOS
-* wip
+## Ручная установка:
+
+ 1. Установите Python 3.10 и git, если они у вас еще не установлены.
+
+* Для начала, установим [Homebrew](https://brew.sh/index_ru), менеджер пакетов для MacOS:
+
+* Откройте Терминал и выполните команду:
+
+ `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+
+ Потребуется ввести ваш пароль в процессе установки.
+
+* Затем, когда программа установится, выполните команды:
+
+`brew install git`
+
+`brew install python@3.10`
+
+* 2. Затем загрузим freegpt-webui-ru с Github, для этого выполните команду:
+
+`git clone https://github.com/Em1tSan/freegpt-webui-ru`
+и затем перейдем в скачанную папку
+`cd freegpt-webui-ru`
+
+* 3. Теперь установим все необходимые пакеты:
+
+`python3 -m pip install -U pip`
+
+`pip3 install -U setuptools`
+
+`pip3 install -r requirements_linux.txt`
+
+* 4. После установки пакетов, можно запускать сам NeuroGPT:
+
+`python3 webui.py`
+
