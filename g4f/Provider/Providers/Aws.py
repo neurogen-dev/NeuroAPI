@@ -7,6 +7,7 @@ url = 'https://4aiu6ctrknfxkoaigkigzh5lwm0cciuc.lambda-url.ap-east-1.on.aws/chat
 model = ['gpt-3.5-turbo', 'gpt-4']
 supports_stream = True
 needs_auth = False
+working = True
 
 class Auth(requests.auth.AuthBase):
     def __init__(self):

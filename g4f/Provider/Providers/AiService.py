@@ -31,7 +31,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         _json = response.json()
         yield _json['data']
     else:
-        print(f"Error Occurred::{response.status_code}")
+        print(f"Error Occurred::{response.status_code}", stream=True)
         return None
     
 

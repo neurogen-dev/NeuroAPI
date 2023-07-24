@@ -5,7 +5,7 @@ url = 'https://bard.google.com'
 model = ['Palm2']
 supports_stream = True
 needs_auth = True
-working = False
+working = True
 
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):

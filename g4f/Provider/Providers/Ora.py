@@ -43,7 +43,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     }
 
     response = requests.post('https://ora.ai/api/conversation', 
-                            headers=headers, json=json_data)
+                            headers=headers, json=json_data, stream=True)
     
     yield response.json()['response']
 

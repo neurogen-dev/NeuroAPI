@@ -59,7 +59,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
             "activeSubscriptions": []
         }
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
+    response = requests.post(url, headers=headers, data=json.dumps(data), stream=True)
     if response.status_code == 200:
         _json = response.json()
         if 'message' in _json:
