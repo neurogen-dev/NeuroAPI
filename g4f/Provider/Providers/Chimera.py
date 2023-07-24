@@ -16,7 +16,7 @@ else:
 
 load_dotenv()
 
-my_api_key = config.get("openai_api_key", "_hvFFPS4VPZGn2PKFAO7D663hO74W_IQyZ0FekFdlsY")
+my_api_key = config.get("openai_api_key", "")
 my_api_key = os.environ.get("OPENAI_API_KEY", my_api_key)
 
 openai.api_key = my_api_key
@@ -27,7 +27,7 @@ model = [
     'gpt-3.5-turbo-poe',
     'gpt-3.5-turbo-16k-poe',
     'gpt-4',
-    'gpt-4-0613',
+    'gpt-4-0314',
     'gpt-4-poe',
     'gpt-4-32k',
     'gpt-4-32k-poe',
