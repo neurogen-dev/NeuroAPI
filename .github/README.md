@@ -67,7 +67,7 @@
 ### Установка
 * Скачайте NeuroGPT: `git clone https://github.com/Em1tSan/NeuroGPT.git`.
 * Откройте папку freegpt-webui-ru: `cd NeuroGPT`
-* Выполните установку необходимых пакетов: `pip install -r requirements-linux.txt`
+* Выполните установку необходимых пакетов: `pip install -r requirements_linux.txt`
 ### Запуск Чата
 * Откройте папку `NeuroGPT`. 
 * Выполните `python3 webui.py`
