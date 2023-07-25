@@ -513,42 +513,57 @@ CORS(app)
 @app.route("/", methods=['POST'])
 def chat_completions():
     streaming = request.json.get('stream', False)
+    streaming_ = request.json.get('stream', False)
     model = request.json.get('model', 'gpt-3.5-turbo')
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
     if not provider:
         r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
-        r_j = r.json()['data']
-        random.shuffle(r_j)
-        for p in r_j:
-            for m in p['model']:
-                if model in m and m[model]['status'] == 'Active':
-                    response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,p['provider']),stream=streaming,
+        data = r.json()['data']
+        random.shuffle(data)
+        for provider_info in data:
+            for model_info in provider_info['model']:
+                if model in model_info and model_info[model]['status'] == 'Active':
+                    if getattr(g4f.Provider,provider_info['provider']).supports_stream != streaming_:
+                      streaming = False
+                    else:
+                      streaming = True
+                    response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider_info['provider']),stream=streaming,
                                      messages=messages)
+                    provider_name = provider_info['provider']
+                    print(provider_name)
                     break
             else:
                 continue
             break
     else:
+        provider_name = provider
+        if getattr(g4f.Provider,provider).supports_stream != streaming_:
+          streaming = False
+        else:
+          streaming = True
         response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
                                      messages=messages)
-    
-    if not streaming:
-        while 'curl_cffi.requests.errors.RequestsError' in response:
-            random.shuffle(r_j)
-            for p in r_j:
-                for m in p['model']:
-                    if model in m and p[model]['status'] == 'Active':
-                        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,p['provider']),stream=streaming,
-                                         messages=messages)
-                        break
-                else:
-                    continue
-                break
-            else:
-                response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
-                                     messages=messages)
-
+    if not provider:
+      while 'curl_cffi.requests.errors.RequestsError' in response:
+          random.shuffle(data)
+          for provider_info in data:
+              for model_info in provider_info['model']:
+                  if model in model_info and model_info[model]['status'] == 'Active':
+                      if getattr(g4f.Provider,provider_info['provider']).supports_stream != streaming_:
+                        streaming = False
+                      else:
+                        streaming = True
+                      response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider_info['provider']),stream=streaming,
+                                      messages=messages)
+                      provider_name = provider_info['provider']
+                      print(provider_name)
+                      break
+              else:
+                  continue
+              break
+                
+    if not streaming_:
         completion_timestamp = int(time.time())
         completion_id = ''.join(random.choices(
             'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
@@ -558,6 +573,8 @@ def chat_completions():
             'object': 'chat.completion',
             'created': completion_timestamp,
             'model': model,
+            'provider':provider_name,
+            'supports_stream':getattr(g4f.Provider,provider_name).supports_stream,
             'usage': {
                 'prompt_tokens': len(messages),
                 'completion_tokens': len(response),
@@ -572,7 +589,7 @@ def chat_completions():
                 'index': 0
             }]
         }
-
+    print(response)
     def stream():
         nonlocal response
         for token in response:
@@ -584,7 +601,6 @@ def chat_completions():
                 'id': f'chatcmpl-{completion_id}',
                 'object': 'chat.completion.chunk',
                 'created': completion_timestamp,
-                'model': model,
                 'choices': [
                     {
                         'delta': {
@@ -595,12 +611,13 @@ def chat_completions():
                     }
                 ]
             }
-
+            print(token)
+            print(completion_data)
+            print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
             time.sleep(0.1)
-
+    print('===Start Streaming===')
     return app.response_class(stream(), mimetype='text/event-stream')
-
 
 @app.route("/v1/dashboard/billing/subscription")
 @app.route("/dashboard/billing/subscription")
