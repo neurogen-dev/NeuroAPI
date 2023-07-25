@@ -93,77 +93,12 @@ GPT-3.5-TURBO 16K - 20/2000
   * Если хотите его отключить - откройте `start_endpoint.bat` и удалите строку с `update`.
 * Endpoint будет доступен по адресу: `http://127.0.0.1:1337/`
 
-## VirtualMachine
-### Hyper-V
-#### Прежде чем начать
-#### Установка и обновления
-* Перейдите в раздел Linux
-### VirtualBox
-#### Прежде чем начать
-#### Установка и обновления
-* Перейдите в раздел Linux
-
 
 # Linux
-* В данной инструкции рассматриваются только х64 битные версии Linux семейства Debian. Такие как Debian, Ubuntu, Mint и прочие.
-* Так же следует учесть, в примерах рассматривается локальный запуск на линуксе. Но если у вас удаленная машина (или сервер), например, виртуальная - то ip-адрес будет отличаться от `127.0.0.1` в случае попытки доступа с соседнего (или внешнего) устройства.
-
-
-## Ручная установка
-**Внимание!** Наличие совместимой версии Python для установки из репозитория очень сильно зависит от вашего дистрибутива! Например, в `Debian 12` поставляется с `Python 3.11`. Стабильная работа обеспечена только на Python 3.10
-### Прежде чем начать
-Надо установить зависимости, если они не установлены. Выполняем в терминале:
-* `sudo apt update`
-* `sudo apt install python3-full python-is-python3 git`
-* `sudo apt install build-essential libffi-dev cmake libcurl4-openssl-dev`
-### Установка
-* Скачайте NeuroGPT: `git clone https://github.com/Em1tSan/NeuroGPT.git`.
-* Откройте папку freegpt-webui-ru: `cd NeuroGPT`
-* Выполните установку необходимых пакетов: `pip install -r requirements_linux.txt`
-### Запуск Чата
-* Откройте папку `NeuroGPT`. 
-* Выполните `python3 webui.py`
-* Если все в порядке, то после запуска, можете открыть в браузере адрес: `http://127.0.0.1:7680/` (но скорее всего он откроется автоматически)
-### Запуск Endpoint'а
-* Откройте папку `NeuroGPT`. 
-* Выполните `python3 endpoint.py`
-* Endpoint будет доступен по адресу: `http://127.0.0.1:1337/`
+wip
 
 ### Обновление
-# MacOS
+# MacOS [нестабильно]
 ## Ручная установка:
 
- 1. Установите Python 3.10 и git, если они у вас еще не установлены.
-
-* Для начала, установим [Homebrew](https://brew.sh/index_ru), менеджер пакетов для MacOS:
-
-* Откройте Терминал и выполните команду:
-
- `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-
- Потребуется ввести ваш пароль в процессе установки.
-
-* Затем, когда программа установится, выполните команды:
-
-`brew install git`
-
-`brew install python@3.10`
-
-* 2. Затем загрузим freegpt-webui-ru с Github, для этого выполните команду:
-
-`git clone https://github.com/Em1tSan/freegpt-webui-ru`
-и затем перейдем в скачанную папку
-`cd freegpt-webui-ru`
-
-* 3. Теперь установим все необходимые пакеты:
-
-`python3 -m pip install -U pip`
-
-`pip3 install -U setuptools`
-
-`pip3 install -r requirements_linux.txt`
-
-* 4. После установки пакетов, можно запускать сам NeuroGPT:
-
-`python3 webui.py`
-
+`wip
