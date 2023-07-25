@@ -146,6 +146,18 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
+        if self.model_name == "gpt-3.5-turbo (Chimera API)":
+            model = "gpt-3.5-turbo-poe"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
         elif self.model_name == "gpt-4 (Chimera API)":
             model = "gpt-4"
             payload = {
@@ -172,6 +184,18 @@ class OpenAIClient(BaseLLMModel):
         }
         elif self.model_name == "gpt-4-32k (Chimera API)":
             model = "gpt-4-32k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4-32k":
+            model = "gpt-4-32k-poe"
             payload = {
             "model": model,
             "messages": history,
@@ -668,7 +692,7 @@ def get_model(
     chatbot = gr.Chatbot.update(label=model_name)
     try:
         if model_type == ModelType.OpenAI:
-            logging.info(f"正在加载OpenAI模型: {model_name}")
+            logging.info(f"Загрузка модели OpenAI: {model_name}")
             model = OpenAIClient(
                 model_name=model_name,
                 api_key=access_key,

@@ -8,13 +8,17 @@ from dotenv import load_dotenv
 import commentjson as json
 from ...typing import sha256, Dict, get_type_hints
 
+__all__ = [
+    "my_api_key",
+]
+
+load_dotenv()
+
 if os.path.exists("config.json"):
     with open("config.json", "r", encoding='utf-8') as f:
         config = json.load(f)
 else:
     config = {}
-
-load_dotenv()
 
 my_api_key = config.get("openai_api_key", "")
 my_api_key = os.environ.get("OPENAI_API_KEY", my_api_key)
