@@ -109,9 +109,9 @@ MODEL_TOKEN_LIMIT = {
     "claude-2-100k": 100000,
 }
 
-TOKEN_OFFSET = 1000 # Вычитайте это значение из лимита токенов модели, чтобы получить мягкий предел. После достижения мягкого предела попробуйте снизить использование токенов. 
-DEFAULT_TOKEN_LIMIT = 4096 # Предел токенов по умолчанию 
-REDUCE_TOKEN_FACTOR = 0.5 # Умножьте на лимит токенов модели, чтобы получить целевое количество токенов. При снижении использования токенов уменьшите его до значения ниже целевого количества токенов.
+TOKEN_OFFSET = 1000 
+DEFAULT_TOKEN_LIMIT = 4096 
+REDUCE_TOKEN_FACTOR = 0.5
 
 REPLY_LANGUAGES = [
     "Русский",
@@ -161,7 +161,7 @@ SUMMARIZE_PROMPT = """Write a concise summary of the following:
 
 {text}
 
-CONCISE SUMMARY IN РУССКИЙ:"""
+CONCISE SUMMARY IN RUSSIAN:"""
 
 ALREADY_CONVERTED_MARK = "<!-- ALREADY CONVERTED BY PARSER. -->"
 

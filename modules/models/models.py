@@ -134,7 +134,7 @@ class OpenAIClient(BaseLLMModel):
             "frequency_penalty": self.frequency_penalty,
         }
 
-        if self.model_name == "gpt-3.5-turbo-16k-openai (Chimera API)":
+        if self.model_name == "gpt-3.5-turbo-16k (Chimera API)":
             model = "gpt-3.5-turbo-16k-poe"
             payload = {
             "model": model,
