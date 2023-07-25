@@ -170,6 +170,18 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
+        elif self.model_name == "gpt-4":
+            model = "gpt-4-standart"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
         elif self.model_name == "gpt-4-0314 (Chimera API)":
             model = "gpt-4-0314"
             payload = {

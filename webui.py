@@ -725,39 +725,6 @@ def providers():
                 pass
   return jsonify(providers_data)
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return jsonify({
-        "error": {
-            "message": f"Invalid URL ({request.method} /)",
-            "type": "invalid_request_error",
-            "param": None,
-            "code": None
-        }
-    }), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return jsonify({
-        "error": {
-            "message": "Something went wrong on our end",
-            "type": "internal_server_error",
-            "param": None,
-            "code": None
-        }
-    }), 500
-
-@app.errorhandler(415)
-def unsupported_media_type(e):
-    return jsonify({
-        "error": {
-            "message": "Unsupported media type",
-            "type": "unsupported_media_type",
-            "param": None,
-            "code": None
-        }
-    }), 415
-
 
 def run_flask_server():
     site_config = {

@@ -68,6 +68,12 @@ class Model:
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.Chimera
         best_providers: list = [Provider.Chimera]
+        
+    class gpt_4_standart:
+        name: str = 'gpt-4-standart'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.DfeHub
+        best_providers: list = [Provider.DfeHub]
     
     class gpt_4_0613:
         name: str = 'gpt-4-0613'
@@ -187,6 +193,7 @@ class ModelUtils:
         'gpt-3.5-turbo': Model.gpt_35_turbo,
         'gpt-3.5-turbo-0613': Model.gpt_35_turbo_0613,
         'gpt-4': Model.gpt_4,
+        'gpt-4-standart': Model.gpt_4_standart,
         'gpt-4-0613': Model.gpt_4_0613,
         'gpt-3.5-turbo-16k': Model.gpt_35_turbo_16k,
         'gpt-3.5-turbo-16k-0613': Model.gpt_35_turbo_16k_0613,

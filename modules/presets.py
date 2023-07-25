@@ -50,6 +50,7 @@ CHUANHU_DESCRIPTION = i18n("由Bilibili [土川虎虎虎](https://space.bilibili
 ONLINE_MODELS = [
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-16k",
+    'gpt-4',
     #"claude-2",
     "gpt-3.5-turbo (Chimera API)",
     'gpt-3.5-turbo-16k (Chimera API)',
