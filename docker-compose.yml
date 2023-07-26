@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  neurogengpt:
+    build: .
+    ports:
+      - "7860:7860"
+      - "1337:1337"

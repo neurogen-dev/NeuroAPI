@@ -27,6 +27,34 @@
 
 Портативную версию, не требующую установку зависимостей и запускающуюся в 1 клик можно [скачать тут](https://github.com/Em1tSan/NeuroGPT/releases/download/v1.0.0/NeuroGPT-Portable.v1.0.7z). 
 
+## Docker
+
+Склонировать репозиторий:
+
+```bash
+git clone https://github.com/Em1tSan/NeuroGPT.git
+```
+
+Собрать образ:
+
+```bash
+docker-compose build
+```
+
+Запустить контейнер:
+
+```bash
+docker-compose up -d
+```
+
+Остановить контейнер:
+
+```bash
+docker-compose down
+```
+
+Приложение будет доступно по адресу <http://localhost:7860> ↗
+
 ## Поддержка и вопросы
 
 Если у вас возникли какие то вопросы или вы в принципе хотите обсудить проект, то это можно сделать в моем телеграм канале: https://t.me/neurogen_news
