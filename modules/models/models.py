@@ -353,7 +353,7 @@ class OpenAIClient(BaseLLMModel):
                 try:
                     chunk = json.loads(chunk[6:])
                 except json.JSONDecodeError:
-                    print("Ошибка разбора JSON, полученный контент: " + f"{chunk}")
+                    logging.error("Ошибка разбора JSON, полученный контент: " + f"{chunk}")
                     error_msg += chunk
                     continue
                 if chunk_length > 6 and "delta" in chunk["choices"][0]:
