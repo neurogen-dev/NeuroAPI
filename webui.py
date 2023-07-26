@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
 import os
 import logging
 import sys
@@ -34,17 +34,17 @@ with open("assets/custom.css", "r", encoding="utf-8") as f:
     customCSS = f.read()
 
 def create_new_model():
-    return get_model(model_name = MODELS[DEFAULT_MODEL], access_key = my_api_key)[0]
+    return get_model(model_name=MODELS[DEFAULT_MODEL], access_key=my_api_key)[0]
 
 with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     user_name = gr.State("")
     promptTemplates = gr.State(load_template(get_template_names(plain=True)[0], mode=2))
     user_question = gr.State("")
-    assert type(my_api_key)==str
+    assert type(my_api_key) == str
     user_api_key = gr.State(my_api_key)
     current_model = gr.State(create_new_model)
 
-    topic = gr.State(i18n("未命名对话历史记录"))
+    topic = gr.State("История неименованного диалога")
 
     with gr.Row():
         gr.HTML(CHUANHU_TITLE, elem_id="app_title")
@@ -54,11 +54,11 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         update_info = gr.HTML(get_html("update.html").format(
             current_version=repo_html(),
             version_time=version_time(),
-            cancel_btn=i18n("取消"),
-            update_btn=i18n("更新"),
-            seenew_btn=i18n("详情"),
-            ok_btn=i18n("好"),
-            ), visible=check_update)
+            cancel_btn="Отмена",
+            update_btn="Обновить",
+            seenew_btn="Подробности",
+            ok_btn="OK",
+        ), visible=check_update)
 
     with gr.Row(equal_height=True):
         with gr.Column(scale=5):
@@ -68,7 +68,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Column(min_width=225, scale=12):
                     user_input = gr.Textbox(
                         elem_id="user_input_tb",
-                        show_label=False, placeholder=i18n("在这里输入"),
+                        show_label=False, placeholder="Введите ваш запроос здесь",
                         container=False
                     )
                 with gr.Column(min_width=42, scale=1):
@@ -76,79 +76,79 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     cancelBtn = gr.Button(value="", variant="secondary", visible=False, elem_id="cancel_btn")
             with gr.Row():
                 emptyBtn = gr.Button(
-                    i18n("🧹 新的对话"), elem_id="empty_btn"
+                    "🧹 Новый диалог", elem_id="empty_btn"
                 )
-                retryBtn = gr.Button(i18n("🔄 重新生成"))
-                delFirstBtn = gr.Button(i18n("🗑️ 删除最旧对话"))
-                delLastBtn = gr.Button(i18n("🗑️ 删除最新对话"))
+                retryBtn = gr.Button("🔄 Перегенерировать")
+                delFirstBtn = gr.Button("🗑️ Удалить самый старый диалог")
+                delLastBtn = gr.Button("🗑️ Удалить последний диалог")
                 with gr.Row(visible=False) as like_dislike_area:
                     with gr.Column(min_width=20, scale=1):
-                        likeBtn = gr.Button(i18n("👍"))
+                        likeBtn = gr.Button("👍")
                     with gr.Column(min_width=20, scale=1):
-                        dislikeBtn = gr.Button(i18n("👎"))
+                        dislikeBtn = gr.Button("👎")
 
         with gr.Column():
             with gr.Column(min_width=50, scale=1):
-                with gr.Tab(label=i18n("模型")):
+                with gr.Tab(label="Модель"):
                     keyTxt = gr.Textbox(
                         show_label=True,
-                        placeholder=f"Your API-key...",
+                        placeholder="Your API-key...",
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
                         visible=not HIDE_MY_KEY,
                         label="API-Key",
                     )
                     if multi_api_key:
-                        usageTxt = gr.Markdown(i18n("多账号模式已开启，无需输入key，可直接开始对话"), elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("Многопользовательский режим включен, не нужно вводить ключ, можно сразу начать диалог", elem_id="usage_display", elem_classes="insert_block")
                     else:
-                        usageTxt = gr.Markdown(i18n("**发送消息** 或 **提交key** 以显示额度"), elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("**Отправьте сообщение** или **Отправьте ключ** для отображения кредита", elem_id="usage_display", elem_classes="insert_block")
                     model_select_dropdown = gr.Dropdown(
-                        label=i18n("选择模型"), choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
+                        label="Выберите модель", choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
                     )
                     lora_select_dropdown = gr.Dropdown(
-                        label=i18n("选择LoRA模型"), choices=[], multiselect=False, interactive=True, visible=False
+                        label="Выберите модель LoRA", choices=[], multiselect=False, interactive=True, visible=False
                     )
                     with gr.Row():
-                        single_turn_checkbox = gr.Checkbox(label=i18n("单轮对话"), value=False, elem_classes="switch_checkbox")
-                        use_websearch_checkbox = gr.Checkbox(label=i18n("使用在线搜索"), value=False, elem_classes="switch_checkbox")
-                        
+                        single_turn_checkbox = gr.Checkbox(label="Single-turn режим диалога", value=False, elem_classes="switch_checkbox")
+                        use_websearch_checkbox = gr.Checkbox(label="Использовать онлайн-поиск", value=False, elem_classes="switch_checkbox")
+
                     language_select_dropdown = gr.Dropdown(
-                        label=i18n("选择回复语言（针对搜索&索引功能）"),
+                        label="Выберите язык ответа (для функций поиска и индексации)",
                         choices=REPLY_LANGUAGES,
                         multiselect=False,
                         value=REPLY_LANGUAGES[0],
                     )
-                    index_files = gr.Files(label=i18n("上传"), type="file")
-                    two_column = gr.Checkbox(label=i18n("双栏pdf"), value=advance_docs["pdf"].get("two_column", False))
-                    summarize_btn = gr.Button(i18n("总结"))
-                    # TODO: 公式ocr
-                    # formula_ocr = gr.Checkbox(label=i18n("识别公式"), value=advance_docs["pdf"].get("formula_ocr", False))
+                    index_files = gr.Files(label="Загрузить", type="file")
+                    two_column = gr.Checkbox(label="Двухстолбчатый pdf", value=advance_docs["pdf"].get("two_column", False))
+                    summarize_btn = gr.Button("Резюмировать")
+                    # TODO: OCR формулы
+                    # formula_ocr = gr.Checkbox(label="OCR формулы", value=advance_docs["pdf"].get("formula_ocr", False))
 
                 with gr.Tab(label="Prompt"):
                     systemPromptTxt = gr.Textbox(
                         show_label=True,
-                        placeholder=i18n("在这里输入System Prompt..."),
+                        placeholder="Введите здесь System Prompt...",
                         label="System prompt",
                         value=INITIAL_SYSTEM_PROMPT,
                         lines=10
                     )
-                    with gr.Accordion(label=i18n("加载Prompt模板"), open=True):
+                    with gr.Accordion(label="Загрузить шаблон Prompt", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     templateFileSelectDropdown = gr.Dropdown(
-                                        label=i18n("选择Prompt模板集合文件"),
+                                        label="Выберите файл с коллекцией шаблонов Prompt",
                                         choices=get_template_names(plain=True),
                                         multiselect=False,
                                         value=get_template_names(plain=True)[0],
                                         container=False,
                                     )
                                 with gr.Column(scale=1):
-                                    templateRefreshBtn = gr.Button(i18n("🔄 刷新"))
+                                    templateRefreshBtn = gr.Button("🔄 Обновить")
                             with gr.Row():
                                 with gr.Column():
                                     templateSelectDropdown = gr.Dropdown(
-                                        label=i18n("从Prompt模板中加载"),
+                                        label="Загрузить из шаблона Prompt",
                                         choices=load_template(
                                             get_template_names(plain=True)[0], mode=1
                                         ),
@@ -156,47 +156,47 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                         container=False,
                                     )
 
-                with gr.Tab(label=i18n("保存/加载")):
-                    with gr.Accordion(label=i18n("保存/加载对话历史记录"), open=True):
+                with gr.Tab(label="Сохранить/Загрузить"):
+                    with gr.Accordion(label="Сохранить/Загрузить историю диалога", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     historyFileSelectDropdown = gr.Dropdown(
-                                        label=i18n("从列表中加载对话"),
+                                        label="Загрузить диалог из списка",
                                         choices=get_history_names(plain=True),
                                         multiselect=False,
                                         container=False,
                                     )
                                 with gr.Row():
                                     with gr.Column(min_width=42, scale=1):
-                                        historyRefreshBtn = gr.Button(i18n("🔄 刷新"))
+                                        historyRefreshBtn = gr.Button("🔄 Обновить")
                                     with gr.Column(min_width=42, scale=1):
-                                        historyDeleteBtn = gr.Button(i18n("🗑️ 删除"))
+                                        historyDeleteBtn = gr.Button("🗑️ Удалить")
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     saveFileName = gr.Textbox(
                                         show_label=True,
-                                        placeholder=i18n("设置文件名: 默认为.json，可选为.md"),
-                                        label=i18n("设置保存文件名"),
-                                        value=i18n("对话历史记录"),
+                                        placeholder="Установить имя файла: по умолчанию .json, можно выбрать .md",
+                                        label="Выберите имя файла для сохранения",
+                                        value="История диалога",
                                         container=False,
                                     )
                                 with gr.Column(scale=1):
-                                    saveHistoryBtn = gr.Button(i18n("💾 保存对话"))
-                                    exportMarkdownBtn = gr.Button(i18n("📝 导出为Markdown"))
-                                    gr.Markdown(i18n("默认保存于history文件夹"))
+                                    saveHistoryBtn = gr.Button("💾 Сохранить диалог")
+                                    exportMarkdownBtn = gr.Button("📝 Экспортировать в Markdown")
+                                    gr.Markdown("По умолчанию сохраняется в папке истории")
                             with gr.Row():
                                 with gr.Column():
                                     downloadFile = gr.File(interactive=True)
 
-                with gr.Tab(label=i18n("高级")):
-                    gr.HTML(get_html("appearance_switcher.html").format(label=i18n("切换亮暗色主题")), elem_classes="insert_block")
+                with gr.Tab(label="Расширенный"):
+                    gr.HTML(get_html("appearance_switcher.html").format(label="Переключить светлую/темную тему"), elem_classes="insert_block")
                     use_streaming_checkbox = gr.Checkbox(
-                            label=i18n("实时传输回答"), value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
+                            label="Стриминг текста", value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
                         )
-                    checkUpdateBtn = gr.Button(i18n("🔄 检查更新..."), visible=check_update)
-                    gr.Markdown(i18n("# ⚠️ 务必谨慎更改 ⚠️"), elem_id="advanced_warning")
-                    with gr.Accordion(i18n("参数"), open=False):
+                    checkUpdateBtn = gr.Button("🔄 Проверить обновления...", visible=check_update)
+                    gr.Markdown("# ⚠️ ОСТОРОЖНО ⚠️", elem_id="advanced_warning")
+                    with gr.Accordion("Параметры", open=False):
                         temperature_slider = gr.Slider(
                             minimum=-0,
                             maximum=2.0,
@@ -223,7 +223,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         stop_sequence_txt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("停止符，用英文逗号隔开..."),
+                            placeholder="Введите здесь стоп-слова, разделенные запятой...",
                             label="stop",
                             value="",
                             lines=1,
@@ -262,40 +262,40 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         logit_bias_txt = gr.Textbox(
                             show_label=True,
-                            placeholder=f"word:likelihood",
+                            placeholder="word:likelihood",
                             label="logit bias",
                             value="",
                             lines=1,
                         )
                         user_identifier_txt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("用于定位滥用行为"),
-                            label=i18n("用户名"),
+                            placeholder="Используется для локализации злоупотреблений",
+                            label="Имя пользователя",
                             value=user_name.value,
                             lines=1,
                         )
 
-                    with gr.Accordion(i18n("网络设置"), open=False):
+                    with gr.Accordion("Сетевые настройки", open=False):
                         # 优先展示自定义的api_host
                         apihostTxt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("在这里输入API-Host..."),
+                            placeholder="Введите здесь API-Host...",
                             label="API-Host",
                             value=config.api_host or shared.API_HOST,
                             lines=1,
                             container=False,
                         )
-                        changeAPIURLBtn = gr.Button(i18n("🔄 切换API地址"))
+                        changeAPIURLBtn = gr.Button("🔄 Переключить API-адрес")
                         proxyTxt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("在这里输入代理地址..."),
-                            label=i18n("代理地址（示例：http://127.0.0.1:10809）"),
+                            placeholder="Введите здесь адрес прокси...",
+                            label="Адрес прокси (например: http://127.0.0.1:10809）",
                             value="",
                             lines=2,
                             container=False,
                         )
-                        changeProxyBtn = gr.Button(i18n("🔄 设置代理地址"))
-                        default_btn = gr.Button(i18n("🔙 恢复默认设置"))
+                        changeProxyBtn = gr.Button("🔄 Установить адрес прокси")
+                        default_btn = gr.Button("🔙 Восстановить настройки по умолчанию")
 
     gr.Markdown(CHUANHU_DESCRIPTION, elem_id="description")
     gr.HTML(get_html("footer.html").format(versions=versions_html()), elem_id="footer")
@@ -307,7 +307,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
             user_info, user_name = gr.Markdown.update(value=f"User: {request.username}"), request.username
         else:
             user_info, user_name = gr.Markdown.update(value=f"", visible=False), ""
-        current_model = get_model(model_name = MODELS[DEFAULT_MODEL], access_key = my_api_key)[0]
+        current_model = get_model(model_name=MODELS[DEFAULT_MODEL], access_key=my_api_key)[0]
         current_model.set_user_identifier(user_name)
         chatbot = gr.Chatbot.update(label=MODELS[DEFAULT_MODEL])
         return user_info, user_name, current_model, toggle_like_btn_visibility(DEFAULT_MODEL), *current_model.auto_load(), get_history_names(False, user_name), chatbot
@@ -503,7 +503,7 @@ logging.info(
     + colorama.Style.RESET_ALL
 )
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
-demo.title = i18n("川虎Chat 🚀")
+demo.title = "川虎Chat 🚀"
 
 app = Flask(__name__)
 CORS(app)
@@ -516,38 +516,41 @@ def chat_completions():
     model = request.json.get('model', 'gpt-3.5-turbo')
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
-    if not provider:
+    if provider == 'Chimera':
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.Chimera, stream=streaming,
+                                             messages=messages)
+    else:
         r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
         r_j = r.json()['data']
         random.shuffle(r_j)
         for p in r_j:
             for m in p['model']:
                 if model in m and m[model]['status'] == 'Active':
-                    response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,p['provider']),stream=streaming,
-                                     messages=messages)
+                    response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider, p['provider']),
+                                                         stream=streaming,
+                                                         messages=messages)
                     break
             else:
                 continue
             break
-    else:
-        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
-                                     messages=messages)
-    
+
     if not streaming:
         while 'curl_cffi.requests.errors.RequestsError' in response:
             random.shuffle(r_j)
             for p in r_j:
                 for m in p['model']:
                     if model in m and p[model]['status'] == 'Active':
-                        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,p['provider']),stream=streaming,
-                                         messages=messages)
+                        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider, p['provider']),
+                                                             stream=streaming,
+                                                             messages=messages)
                         break
                 else:
                     continue
                 break
             else:
-                response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
-                                     messages=messages)
+                response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider, provider),
+                                                     stream=streaming,
+                                                     messages=messages)
 
         completion_timestamp = int(time.time())
         completion_id = ''.join(random.choices(
@@ -561,7 +564,7 @@ def chat_completions():
             'usage': {
                 'prompt_tokens': len(messages),
                 'completion_tokens': len(response),
-                'total_tokens': len(messages)+len(response)
+                'total_tokens': len(messages) + len(response)
             },
             'choices': [{
                 'message': {
