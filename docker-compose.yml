@@ -6,3 +6,5 @@ services:
     ports:
       - "7860:7860"
       - "1337:1337"
+    env_file:
+      - .env
