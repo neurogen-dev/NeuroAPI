@@ -4,6 +4,7 @@ import logging
 import sys
 
 import gradio as gr
+import asyncio
 
 from modules import config
 from modules.config import *
@@ -11,6 +12,7 @@ from modules.utils import *
 from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
+
 
 import threading
 import time
@@ -743,15 +745,18 @@ def run_flask_server():
     server.serve_forever()
 
 def run_gradio_server():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop) 
+   
     reload_javascript()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        blocked_paths=["config.json"],
-        server_name=server_name,
-        server_port=server_port,
-        share=share,
-        auth=auth_list if authflag else None,
-        favicon_path="./assets/favicon.ico",
-        inbrowser=not dockerflag, # 禁止 в docker 下 открывать inbrowser
+      blocked_paths=["config.json"],
+      server_name=server_name,
+      server_port=server_port,
+      share=share,
+      auth=auth_list if authflag else None,
+      favicon_path="./assets/favicon.ico",
+      inbrowser=not dockerflag, # 禁止 в docker 下 открывать inbrowser
     )
 
 if __name__ == '__main__':
