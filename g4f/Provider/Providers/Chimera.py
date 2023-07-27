@@ -54,9 +54,9 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         )
         if stream:
             for chunk in response:
-                yield chunk.choices[0].delta.get("content", ""), end="", flush=True
+                yield chunk.choices[0].delta.get("content", "")
         else:
-            yield response.choices[0]['message'].get("content", ""), end="", flush=True
+            yield response.choices[0]['message'].get("content", "")
             
     except openai.error.APIError as e:
         if e.http_status == 429:
