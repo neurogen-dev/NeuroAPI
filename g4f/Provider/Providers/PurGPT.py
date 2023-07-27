@@ -20,7 +20,7 @@ if os.path.exists("config.json"):
 else:
     config = {}
 
-purgpt_api_key = config.get("purgpt_api_key", "")
+purgpt_api_key = config.get("purgpt_api_key", "purgpt-qhu7co84r41q2rpyw4m2v")
 purgpt_api_key = os.environ.get("PURGPT_API_KEY", purgpt_api_key)
 
 openai.api_key = purgpt_api_key

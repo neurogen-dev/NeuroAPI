@@ -9,11 +9,11 @@ LLAMA_MODEL = None
 LLAMA_INFERENCER = None
 
 # ChatGPT 设置
-INITIAL_SYSTEM_PROMPT = "You are a helpful assistant."
+INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. "
 API_HOST = "http://127.0.0.1:1337"
 COMPLETION_URL = "http://127.0.0.1:1337/v1/chat/completions"
-BALANCE_API_URL="https://api.openai.com/dashboard/billing/credit_grants"
-USAGE_API_URL="https://api.openai.com/dashboard/billing/usage"
+BALANCE_API_URL="http://127.0.0.1:1337/v1/dashboard/billing/credit_grants"
+USAGE_API_URL="http://127.0.0.1:1337/v1/dashboard/billing/usage"
 HISTORY_DIR = Path("history")
 HISTORY_DIR = "history"
 TEMPLATES_DIR = "templates"
@@ -39,7 +39,7 @@ CONCURRENT_COUNT = 100 # Количество пользователей, кот
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-CHUANHU_TITLE = "FreeGPT - Бесплатный ChatGPT"
+CHUANHU_TITLE = "FreeGPT"
 
 CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.0.0"
 
