@@ -232,7 +232,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         max_context_length_slider = gr.Slider(
                             minimum=1,
-                            maximum=100000,
+                            maximum=32768,
                             value=4000,
                             step=1,
                             interactive=True,
@@ -240,8 +240,8 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         max_generation_slider = gr.Slider(
                             minimum=1,
-                            maximum=100000,
-                            value=4000,
+                            maximum=32768,
+                            value=2000,
                             step=1,
                             interactive=True,
                             label="max generations",
@@ -628,9 +628,9 @@ def chat_completions():
             }
             #print(token)
             #print(completion_data)
-            print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
+            #print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-            time.sleep(0.03)
+            time.sleep(0.01)
     print('===Start Streaming===')
     return app.response_class(stream(), mimetype='text/event-stream')
 
