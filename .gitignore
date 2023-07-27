@@ -149,3 +149,4 @@ lora/
 templates/*
 code_improver.yaml
 .history
+config.json
