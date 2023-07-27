@@ -134,45 +134,9 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
-
-        if self.model_name == "gpt-3.5-turbo-16k (Chimera API)":
-            model = "gpt-3.5-turbo-16k-poe"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-3.5-turbo (Chimera API)":
-            model = "gpt-3.5-turbo-poe"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4 (Chimera API)":
+        
+        if self.model_name == "gpt-4 (Chimera API)":
             model = "gpt-4"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4":
-            model = "gpt-4-standart"
             payload = {
             "model": model,
             "messages": history,
@@ -185,90 +149,6 @@ class OpenAIClient(BaseLLMModel):
         }
         elif self.model_name == "gpt-4-0314 (Chimera API)":
             model = "gpt-4-0314"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4-32k (Chimera API)":
-            model = "gpt-4-32k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4-32k":
-            model = "gpt-4-32k-poe"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "claude_instant (Chimera API)":
-            model = "claude_instant"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "claude-instant-100k (Chimera API)":
-            model = "claude-instant-100k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "claude-2-100k (Chimera API)":
-            model = "claude-2-100k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "sage (Chimera API)":
-            model = "sage"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4-32k-poe (Chimera API)":
-            model = "gpt-4-32k-poe"
             payload = {
             "model": model,
             "messages": history,
