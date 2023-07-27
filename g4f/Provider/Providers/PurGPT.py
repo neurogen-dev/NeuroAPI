@@ -20,17 +20,28 @@ if os.path.exists("config.json"):
 else:
     config = {}
 
-my_api_key = config.get("openai_api_key", "")
-my_api_key = os.environ.get("OPENAI_API_KEY", my_api_key)
+purgpt_api_key = config.get("purgpt_api_key", "")
+purgpt_api_key = os.environ.get("PURGPT_API_KEY", purgpt_api_key)
 
-openai.api_key = my_api_key
-openai.api_base = "https://chimeragpt.adventblocks.cc/api/v1"
+openai.api_key = purgpt_api_key
+openai.api_base = "https://beta.purgpt.xyz/v1"
 
-url = 'https://chimeragpt.adventblocks.cc/'
+url = 'https://beta.purgpt.xyz'
 model = [
-    'gpt-4',
-    'gpt-4-0314',
-    'gpt-4-32k',
+    'babbage',
+    'davinci',
+    'text-davinci-001',
+    'ada',
+    'text-curie-001',
+    'text-ada-001',
+    'curie-instruct-beta',
+    'davinci-instruct-beta',
+    'text-davinci-003',
+    'text-babbage-001',
+    'curie',
+    'text-davinci-002',
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
 ]
 
 supports_stream = True

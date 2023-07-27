@@ -20,16 +20,17 @@ if os.path.exists("config.json"):
 else:
     config = {}
 
-my_api_key = config.get("openai_api_key", "")
-my_api_key = os.environ.get("OPENAI_API_KEY", my_api_key)
+chatty_api_key = config.get("chatty_api_key", "sk-CNXqqHnq1Nv541Ec94A2E5170eAe4c9692F4Cd06E4B28489")
+chatty_api_key = os.environ.get("CHATTY_API_KEY", chatty_api_key)
 
-openai.api_key = my_api_key
-openai.api_base = "https://chimeragpt.adventblocks.cc/api/v1"
+openai.api_key = chatty_api_key
+openai.api_base = "https://chattyapi.tech/v1"
 
-url = 'https://chimeragpt.adventblocks.cc/'
+url = 'https://chattyapi.tech'
 model = [
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
     'gpt-4',
-    'gpt-4-0314',
     'gpt-4-32k',
 ]
 

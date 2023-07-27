@@ -45,18 +45,11 @@ CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https
 
 
 ONLINE_MODELS = [
-    "gpt-3.5-turbo",
-    "gpt-3.5-turbo-16k",
-    'gpt-4',
-    #"claude-2",
-    "gpt-3.5-turbo (Chimera API)",
-    'gpt-3.5-turbo-16k (Chimera API)',
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
+    'gpt-4 (Нестабильно)',
+    'gpt-4-32 (Нестабильно)',
     'gpt-4 (Chimera API)',
-    'gpt-4-32k-poe (Chimera API)',
-    'claude_instant (Chimera API)',
-    'claude-instant-100k (Chimera API)',
-    'claude-2-100k (Chimera API)',
-    'sage (Chimera API)'
 ]
 
 LOCAL_MODELS = [

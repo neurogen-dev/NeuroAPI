@@ -34,6 +34,9 @@ from .Providers import (
     Ora,
     Phind,
     Poe,
+    Chatty,
+    PurGPT,
+
 )
 
 Palm = Bard
