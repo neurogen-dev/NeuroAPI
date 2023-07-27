@@ -135,9 +135,9 @@ class ModelType(Enum):
         elif "sage" in model_name_lower:
             model_type = ModelType.OpenAI
         elif "llama" in model_name_lower or "alpaca" in model_name_lower:
-            model_type = ModelType.LLaMA
+            model_type = ModelType.OpenAI
         else:
-            model_type = ModelType.Unknown
+            model_type = ModelType.OpenAI
         return model_type
 
 

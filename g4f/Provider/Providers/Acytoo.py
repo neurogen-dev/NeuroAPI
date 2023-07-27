@@ -4,9 +4,9 @@ import json
 
 url = "https://chat.acytoo.com/api/completions"
 model = ['gpt-3.5-turbo']
-supports_stream = True
+supports_stream = False
 needs_auth = False
-working = True
+working = False
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     base = ''
@@ -31,7 +31,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         "password": ""
     }
 
-    response = requests.post(url, headers=headers, data=json.dumps(data), stream=True)
+    response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
         yield response.text
     else:

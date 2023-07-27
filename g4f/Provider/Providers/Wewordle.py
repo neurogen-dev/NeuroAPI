@@ -8,7 +8,7 @@ from ...typing import sha256, Dict, get_type_hints
 
 url = "https://wewordle.org/gptapi/v1/android/turbo"
 model = ['gpt-3.5-turbo']
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 
@@ -59,7 +59,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
             "activeSubscriptions": []
         }
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data), stream=True)
+    response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
         _json = response.json()
         if 'message' in _json:

@@ -1,8 +1,8 @@
 import g4f
 
 # Set with provider
-stream = False
-response = g4f.ChatCompletion.create(model='gpt-3.5-turbo', provider=g4f.Provider.PurGPT, messages=[
+stream = True
+response = g4f.ChatCompletion.create(model='bing', provider=g4f.Provider.BingHuan, messages=[
                                      {"role": "user", "content": "hello"}], stream=stream)
 
 if stream:

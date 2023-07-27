@@ -9,7 +9,7 @@ LLAMA_MODEL = None
 LLAMA_INFERENCER = None
 
 # ChatGPT 设置
-INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. "
+INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. Respond using markdown."
 API_HOST = "http://127.0.0.1:1337"
 COMPLETION_URL = "http://127.0.0.1:1337/v1/chat/completions"
 BALANCE_API_URL="http://127.0.0.1:1337/v1/dashboard/billing/credit_grants"
@@ -30,7 +30,7 @@ NO_APIKEY_MSG = "API key пуст, пожалуйста, проверьте, п�
 NO_INPUT_MSG = "Пожалуйста, введите содержание диалога."# Не введено содержание диалога 
 BILLING_NOT_APPLICABLE_MSG = "Информация о биллинге не применима"# Информация о биллинге, возвращаемая локально запущенной моделью
 
-TIMEOUT_STREAMING = 120 # Время ожидания для потокового диалога 
+TIMEOUT_STREAMING = 60 # Время ожидания для потокового диалога 
 TIMEOUT_ALL = 400 # Время ожидания для непотокового диалога 
 ENABLE_STREAMING_OPTION = True # Включить ли флажок для выбора отображения ответа в режиме реального времени 
 HIDE_MY_KEY = True # Если вы хотите скрыть свой API ключ в UI, установите это значение в True 
@@ -41,15 +41,17 @@ INDEX_QUERY_TEMPRATURE = 1.0
 
 CHUANHU_TITLE = "FreeGPT"
 
-CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.0.0"
+CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.1.0"
 
 
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
-    'gpt-3.5-turbo-16k',
-    'gpt-4 (Нестабильно)',
-    'gpt-4-32 (Нестабильно)',
-    'gpt-4 (Chimera API)',
+    'gpt-3.5-turbo-16k-chimera-api',
+    'gpt-4-chimera-api',
+    #'gpt-4 (Нестабильно)',
+    #'gpt-4-32 (Нестабильно)',
+    #'llama-2-70b-chat-chimera-api',
+    #'bing',
 ]
 
 LOCAL_MODELS = [

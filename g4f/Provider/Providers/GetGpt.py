@@ -7,9 +7,9 @@ from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://chat.getgpt.world/'
 model = ['gpt-3.5-turbo']
-supports_stream = True
+supports_stream = False
 needs_auth = False
-working = True
+working = False
 
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
@@ -46,7 +46,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     })
 
     res = requests.post('https://chat.getgpt.world/api/chat/stream', 
-                        headers=headers, json={'signature': encrypt(data)}, stream=True)
+                        headers=headers, json={'signature': encrypt(data)})
 
     for line in res.iter_lines():
         if b'content' in line:

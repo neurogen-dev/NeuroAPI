@@ -28,9 +28,11 @@ openai.api_base = "https://chimeragpt.adventblocks.cc/api/v1"
 
 url = 'https://chimeragpt.adventblocks.cc/'
 model = [
+    'gpt-3.5-turbo-16k',
     'gpt-4',
     'gpt-4-0314',
-    'gpt-4-32k',
+    'llama-2-70b-chat',
+
 ]
 
 supports_stream = True
@@ -44,9 +46,8 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
             messages=messages,
             stream=stream
         )
-        if stream:
-            for chunk in response:
-                yield chunk.choices[0].delta.get("content", "")
+        for chunk in response:
+            yield chunk.choices[0].delta.get("content", "")
         else:
             yield response.choices[0]['message'].get("content", "")
             

@@ -4,7 +4,7 @@ import json
 
 url = "https://www.aitianhu.com/api/chat-process"
 model = ['gpt-3.5-turbo']
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 
@@ -25,7 +25,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         "temperature": 0.8,
         "top_p": 1
     }
-    response = requests.post(url, headers=headers, json=data, stream=True)
+    response = requests.post(url, headers=headers, json=data)
     if response.status_code == 200:
         lines = response.text.strip().split('\n')
         res = json.loads(lines[-1])
