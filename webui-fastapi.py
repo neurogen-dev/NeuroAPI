@@ -779,5 +779,5 @@ def setup_logging():
 
 
 if __name__ == "__main__":
-    uvicorn.run("webui:app", host="0.0.0.0", port=5000, log_level="info", lifespan='on')
+    uvicorn.run("webui-fastapi:app", host="0.0.0.0", port=5000, log_level="info", lifespan='on')
     setup_logging()
