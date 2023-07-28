@@ -14,19 +14,15 @@ __all__ = [
 
 load_dotenv()
 
-if os.path.exists("config.json"):
-    with open("config.json", "r", encoding='utf-8') as f:
-        config = json.load(f)
-else:
-    config = {}
+with open("config.json", "r", encoding="utf-8") as f:
+    purgpt_api_key = json.load(f)["purgpt_api_key"]
 
-purgpt_api_key = config.get("purgpt_api_key", "purgpt-qhu7co84r41q2rpyw4m2v")
 purgpt_api_key = os.environ.get("PURGPT_API_KEY", purgpt_api_key)
 
 openai.api_key = purgpt_api_key
-openai.api_base = "https://beta.purgpt.xyz/v1"
+openai.api_base = "https://beta.purgpt.xyz/v1/chat/completions"
 
-url = 'https://beta.purgpt.xyz'
+url = 'https://beta.purgpt.xyz/v1/chat/completions'
 model = [
     'babbage',
     'davinci',

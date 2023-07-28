@@ -122,19 +122,12 @@ class ChuanhuCallbackHandler(BaseCallbackHandler):
 class ModelType(Enum):
     Unknown = -1
     OpenAI = 0
-    LLaMA = 1
 
     @classmethod
     def get_type(cls, model_name: str):
         model_type = None
         model_name_lower = model_name.lower()
         if "gpt" in model_name_lower:
-            model_type = ModelType.OpenAI
-        elif "claude" in model_name_lower:
-            model_type = ModelType.OpenAI
-        elif "sage" in model_name_lower:
-            model_type = ModelType.OpenAI
-        elif "llama" in model_name_lower or "alpaca" in model_name_lower:
             model_type = ModelType.OpenAI
         else:
             model_type = ModelType.OpenAI

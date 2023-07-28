@@ -14,6 +14,8 @@ import base64
 from io import BytesIO
 from PIL import Image
 
+import openai
+
 from tqdm import tqdm
 import colorama
 import asyncio
@@ -116,10 +118,26 @@ class OpenAIClient(BaseLLMModel):
         history = self.history
         logging.debug(colorama.Fore.YELLOW +
                       f"{history}" + colorama.Fore.RESET)
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {openai_api_key}",
-        }
+        if self.model_name == "bing":
+            with open("config.json", "r", encoding="utf-8") as f:
+                purgpt_api_key = cjson.load(f)["purgpt_api_key"]
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {purgpt_api_key}",
+            }
+        elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+            with open("config.json", "r", encoding="utf-8") as f:
+                chatty_api_key = cjson.load(f)["chatty_api_key"]
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {chatty_api_key}",
+            }
+            #print(f"Bearer {chatty_api_key}")
+        else:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {openai_api_key}",
+            }
 
         if system_prompt is not None:
             history = [construct_system(system_prompt), *history]
@@ -183,6 +201,42 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
+        elif self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+            model = "gpt-3.5-turbo-16k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4-chatty-api":
+            model = "gpt-4"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4-32k-chatty-api":
+            model = "gpt-4-32k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
         else:
             payload = {
             "model": self.model_name,
@@ -209,12 +263,29 @@ class OpenAIClient(BaseLLMModel):
         else:
             timeout = TIMEOUT_ALL
 
-        # 如果有自定义的api-host，使用自定义host发送请求，否则使用默认设置发送请求
-        if shared.state.completion_url != COMPLETION_URL:
-            logging.info(f"使用自定义API URL: {shared.state.completion_url}")
-
+        # Если модель gpt-4, изменяем хост API
+        if self.model_name == "gpt-3.5-turbo-16k-chimera-api" or self.model_name == "gpt-4-chimera-api" or self.model_name == "llama-2-70b-chat-chimera-api":
+            shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
+        elif self.model_name == "bing":
+            shared.state.completion_url = "https://purgpt.xyz/v1/bing"
+        elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+            shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
+        else:
+            shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
+            logging.info(f"Используется API URL: {shared.state.completion_url}")
+    
+        logging.info(f"Используется API URL: {shared.state.completion_url}")
+    
         with retrieve_proxy():
             try:
+                if self.model_name == "gpt-3.5-turbo-16k-chimera-api" or self.model_name == "gpt-4-chimera-api" or self.model_name == "llama-2-70b-chat-chimera-api":
+                    shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
+                elif self.model_name == "bing":
+                    shared.state.completion_url = "https://purgpt.xyz/v1/bing"
+                elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+                    shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
+                else:
+                    shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
                 response = requests.post(
                     shared.state.completion_url,
                     headers=headers,

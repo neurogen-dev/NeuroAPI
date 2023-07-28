@@ -519,17 +519,8 @@ def chat_completions():
     model = request.json['model']
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
-    if model == 'gpt-4-chimera-api':
+    if provider == 'Chimera':
         response = g4f.ChatCompletion.create(model='gpt-4', provider=g4f.Provider.Chimera, stream=streaming,
-                                             messages=messages)
-    elif model == 'gpt-3.5-turbo-16k-chimera-api':
-        response = g4f.ChatCompletion.create(model='gpt-3.5-turbo-16k-0613', provider=g4f.Provider.Chimera, stream=streaming,
-                                             messages=messages)
-    elif model == 'gpt-3.5-turbo-16k-chimera-api':
-        response = g4f.ChatCompletion.create(model='gpt-3.5-turbo-16k-0613', provider=g4f.Provider.Chimera, stream=streaming,
-                                             messages=messages)
-    elif model == 'gpt-3.5-turbo-16k':
-        response = g4f.ChatCompletion.create(model='gpt-3.5-turbo-16k', provider=g4f.Provider.Chimera, stream=streaming,
                                              messages=messages)
     else:
         if not provider:

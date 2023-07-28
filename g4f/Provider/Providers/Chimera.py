@@ -46,11 +46,14 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
             messages=messages,
             stream=stream
         )
-        for chunk in response:
-            yield chunk.choices[0].delta.get("content", "")
+        if isinstance(response, str):
+            yield response
         else:
-            yield response.choices[0]['message'].get("content", "")
-            
+            for chunk in response:
+                if hasattr(chunk.choices[0].message, 'get'):
+                    yield chunk.choices[0].message.get("content", "")
+                else:
+                    yield ""
     except openai.error.APIError as e:
         if e.http_status == 429:
             detail_pattern = re.compile(r'{"detail":"(.*?)"}')

@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 import commentjson as json
 from ...typing import sha256, Dict, get_type_hints
 
+__all__ = [
+    "my_api_key",
+]
+
 load_dotenv()
 
 if os.path.exists("config.json"):
@@ -22,9 +26,8 @@ chatty_api_key = os.environ.get("CHATTY_API_KEY", chatty_api_key)
 openai.api_key = chatty_api_key
 openai.api_base = "https://chattyapi.tech/v1"
 
-url = 'https://chattyapi.tech/v1'
+url = 'https://chattyapi.tech'
 model = [
-    'gpt-3.5-turbo',
     'gpt-3.5-turbo-16k',
     'gpt-4',
     'gpt-4-32k',
