@@ -36,7 +36,8 @@ from .Providers import (
     Poe,
     Chatty,
     PurGPT,
-    PurGPTBing
+    PurGPTBing,
+    CharFree
 
 )
 

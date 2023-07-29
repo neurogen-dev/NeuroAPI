@@ -2,8 +2,8 @@ import os, requests
 from ...typing import sha256, Dict, get_type_hints
 import json
 
-url = "https://chat.dfehub.com/api/chat"
-model = ['gpt-4-standart']
+url = "https://v.chatfree.cc"
+model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k']
 supports_stream = False
 needs_auth = False
 working = True
@@ -15,8 +15,8 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         'accept': '*/*',
         'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
         'content-type': 'application/json',
-        'origin': 'https://chat.dfehub.com',
-        'referer': 'https://chat.dfehub.com/',
+        'origin': 'https://v.chatfree.cc',
+        'referer': 'https://v.chatfree.cc/',
         'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"macOS"',
@@ -29,14 +29,15 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
 
     json_data = {
         'messages': messages,
-        'model': 'gpt-4',
+        'stream': True,
+        'model': model,
         'temperature': 0.5,
         'presence_penalty': 0,
         'frequency_penalty': 0,
         'top_p': 1,
     }
 
-    response = requests.post('https://chat.dfehub.com/api/openai/v1/chat/completions',
+    response = requests.post('https://v.chatfree.cc/api/openai/v1/chat/completions',
         headers=headers, json=json_data)
     
     for chunk in response.iter_lines():
