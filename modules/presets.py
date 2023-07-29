@@ -39,7 +39,7 @@ CONCURRENT_COUNT = 100 # Количество пользователей, кот
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-CHUANHU_TITLE = "NeuroGPT (v 1.1.0)"
+CHUANHU_TITLE = "NeuroGPT (v 1.1.1)"
 
 CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.1.1"
 
