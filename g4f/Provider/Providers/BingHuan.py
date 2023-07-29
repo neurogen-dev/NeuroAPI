@@ -4,8 +4,8 @@ import subprocess
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://bing.lemonsoftware.eu.org'
-model = ['bing']
-supports_stream = True
+model = ['gpt-4']
+supports_stream = False
 needs_auth = False
 working = True
 

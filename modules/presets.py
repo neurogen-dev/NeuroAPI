@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 import os
 from pathlib import Path
 import gradio as gr
@@ -30,7 +29,7 @@ NO_APIKEY_MSG = "API key пуст, пожалуйста, проверьте, п�
 NO_INPUT_MSG = "Пожалуйста, введите содержание диалога."# Не введено содержание диалога 
 BILLING_NOT_APPLICABLE_MSG = "Информация о биллинге не применима"# Информация о биллинге, возвращаемая локально запущенной моделью
 
-TIMEOUT_STREAMING = 60 # Время ожидания для потокового диалога 
+TIMEOUT_STREAMING = 240 # Время ожидания для потокового диалога 
 TIMEOUT_ALL = 400 # Время ожидания для непотокового диалога 
 ENABLE_STREAMING_OPTION = True # Включить ли флажок для выбора отображения ответа в режиме реального времени 
 HIDE_MY_KEY = False # Если вы хотите скрыть свой API ключ в UI, установите это значение в True 
@@ -45,17 +44,30 @@ CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https
 
 
 ONLINE_MODELS = [
-    'gpt-3.5-turbo',
-    #'gpt-3.5-turbo-16k',
+    'gpt-3.5-turbo-openai',
+    'gpt-3.5-turbo-16k-openai',
+    'gpt-4-openai',
     'gpt-3.5-turbo-16k-chimera-api',
     'gpt-3.5-turbo-16k-chatty-api',
     'gpt-4-chimera-api',
     'gpt-4-chatty-api',
-    #'gpt-4 (Нестабильно)',
     'gpt-4-32k-chatty-api',
     'llama-2-70b-chat-chimera-api',
     'claude-2'
     #'bing',
+]
+
+CHIMERA_MODELS = [
+
+    'gpt-3.5-turbo-16k-chimera-api',
+    'gpt-4-chimera-api',
+    'llama-2-70b-chat-chimera-api',
+]
+
+CHATTY_MODELS = [
+    'gpt-3.5-turbo-16k-chatty-api',
+    'gpt-4-chatty-api',
+    'gpt-4-32k-chatty-api',
 ]
 
 LOCAL_MODELS = [

@@ -1,27 +1,13 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
-from typing import TYPE_CHECKING, List
 
 import logging
 import json
 import commentjson as cjson
-import os
-import sys
 import requests
-import urllib3
-import platform
-import base64
-from io import BytesIO
-from PIL import Image
 
-import openai
 
-from tqdm import tqdm
 import colorama
-import asyncio
-import aiohttp
-from enum import Enum
-import uuid
+from g4f import ChatCompletion, Provider
 
 from ..presets import *
 from ..index_func import *
@@ -237,6 +223,54 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
+        elif self.model_name == "gpt-3.5-turbo-openai":
+            model = "gpt-3.5-turbo"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-3.5-turbo-16k-openai":
+            model = "gpt-3.5-turbo-16k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-3.5-turbo-16k-openai":
+            model = "gpt-3.5-turbo-16k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4-openai":
+            model = "gpt-4"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
         else:
             payload = {
             "model": self.model_name,
@@ -286,6 +320,7 @@ class OpenAIClient(BaseLLMModel):
                     shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
                 else:
                     shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
+                
                 response = requests.post(
                     shared.state.completion_url,
                     headers=headers,
@@ -338,7 +373,7 @@ class OpenAIClient(BaseLLMModel):
                     except Exception as e:
                         continue
         if error_msg:
-            yield "Ошибка разбора JSON, полученный контент: " + error_msg
+            yield "Провайдер API ответил ошибкой: " + error_msg
 
     def set_key(self, new_access_key):
         ret = super().set_key(new_access_key)

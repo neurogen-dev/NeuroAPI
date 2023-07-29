@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from modules.presets import COMPLETION_URL, BALANCE_API_URL, USAGE_API_URL, API_HOST
 import os
 import queue

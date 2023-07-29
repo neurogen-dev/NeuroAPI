@@ -1,34 +1,23 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
-from typing import TYPE_CHECKING, List
 
 import logging
 import json
-import commentjson as cjson
 import os
-import sys
-import requests
 import urllib3
 import traceback
 import pathlib
 
-from tqdm import tqdm
 import colorama
 from duckduckgo_search import DDGS
 from itertools import islice
-import asyncio
-import aiohttp
 from enum import Enum
 
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.callbacks.manager import BaseCallbackManager
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain.input import print_text
-from langchain.schema import AgentAction, AgentFinish, LLMResult
-from threading import Thread, Condition
+from langchain.schema import AgentAction, AgentFinish
+from threading import Condition
 from collections import deque
 
 from ..presets import *

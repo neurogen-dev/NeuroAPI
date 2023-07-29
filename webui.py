@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 import os
 import logging
-import sys
 
 import gradio as gr
 import asyncio
@@ -21,13 +19,12 @@ import random
 import time
 from gevent import pywsgi
 import socket
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 import g4f
-from g4f import Model, ChatCompletion, Provider
 
-logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.INFO)
 
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
@@ -94,11 +91,11 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Tab(label="Модель"):
                     keyTxt = gr.Textbox(
                         show_label=True,
-                        placeholder="Your API-key...",
+                        placeholder="Ваш API-ключ...",
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
                         visible=not HIDE_MY_KEY,
-                        label="API-Key",
+                        label="Ключ ChimeraAPI",
                     )
                     if multi_api_key:
                         usageTxt = gr.Markdown("Многопользовательский режим включен, не нужно вводить ключ, можно сразу начать диалог", elem_id="usage_display", elem_classes="insert_block")
@@ -522,7 +519,7 @@ def chat_completions():
     if provider == 'ClaudeAI':
         from fp.fp import FreeProxy
         proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
-        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.Chimera, stream=streaming,
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.ClaudeAI, stream=streaming,
                                              messages=messages, proxy=proxy)
     else:
         if not provider:
@@ -597,7 +594,7 @@ def chat_completions():
                 'index': 0
             }]
         }
-    #print(response)
+    print(response)
     def stream():
         nonlocal response
         for token in response:
@@ -619,9 +616,9 @@ def chat_completions():
                     }
                 ]
             }
-            #print(token)
-            #print(completion_data)
-            #print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
+            print(token)
+            print(completion_data)
+            print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
             time.sleep(0.01)
     print('===Start Streaming===')
