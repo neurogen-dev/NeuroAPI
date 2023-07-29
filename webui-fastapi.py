@@ -129,7 +129,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         multiselect=False,
                         value=REPLY_LANGUAGES[0],
                     )
-                    index_files = gr.Files(label="Загрузить", type="file")
+                    index_files = gr.Files(label="Загрузить (ChimeraAPI)", type="file")
                     two_column = gr.Checkbox(label="Двухстолбчатый pdf", value=advance_docs["pdf"].get("two_column", False))
                     summarize_btn = gr.Button("Резюмировать")
                     # TODO: OCR формулы
