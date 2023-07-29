@@ -28,7 +28,6 @@ class ChatCompletion:
             if not engine.supports_stream and stream == True:
                 print(
                     f"ValueError: {engine.__name__} does not support 'stream' argument", file=sys.stderr)
-                sys.exit(1)
 
             if logging: print(f'Using {engine.__name__} provider')
 

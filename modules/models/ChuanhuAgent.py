@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from langchain.chains.summarize import load_summarize_chain
 from langchain import PromptTemplate, LLMChain
 from langchain.chat_models import ChatOpenAI

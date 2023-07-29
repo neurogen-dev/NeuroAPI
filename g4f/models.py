@@ -13,7 +13,7 @@ class Model:
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.Yqcloud
         #best_provider: Provider.Provider = random.choice([Provider.Gravityengine, Provider.Yqcloud, Provider.AItianhu])
-        best_providers: list = [Provider.Gravityengine, Provider.Yqcloud, Provider.AItianhu]
+        best_providers: list = [Provider.Chatty, Provider.Wewordle, Provider.AItianhu]
 
     class gpt_35_turbo_0613:
         name: str = 'gpt-3.5-turbo-0613'
@@ -28,14 +28,14 @@ class Model:
         base_provider: str = 'openai'
         #best_provider: Provider.Provider = Provider.Easychat
         best_provider: Provider.Provider = Provider.Zeabur
-        best_providers: list = [Provider.EasyChat]
+        best_providers: list = [Provider.Zeabur]
 
     class gpt_35_turbo_16k:
         name: str = 'gpt-3.5-turbo-16k'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Zeabur
+        best_provider: Provider.Provider = Provider.CharFree
         #best_provider: Provider.Provider = random.choice([Provider.Zeabur, Provider.Gravityengine])
-        best_providers: list = [Provider.Zeabur, Provider.Gravityengine]
+        best_providers: list = [Provider.EasyChat, Provider.CharFree]
 
     #POE
 
@@ -68,6 +68,12 @@ class Model:
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.Chimera
         best_providers: list = [Provider.Chimera]
+        
+    class gpt_4_standart:
+        name: str = 'gpt-4-standart'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.DfeHub
+        best_providers: list = [Provider.DfeHub]
     
     class gpt_4_0613:
         name: str = 'gpt-4-0613'
@@ -181,12 +187,22 @@ class Model:
         name: str = 'llama-13b'
         base_provider: str = 'huggingface'
         best_provider: Provider.Provider = Provider.H2o
+
+    class llama_2_70b_chat:
+        name: str = 'llama-2-70b-chat'
+        base_provider: str = 'huggingface'
+        best_provider: Provider.Provider = Provider.Chimera
+    class bing:
+        name: str = 'bing'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.BingHuan
     
 class ModelUtils:
     convert: dict = {
         'gpt-3.5-turbo': Model.gpt_35_turbo,
         'gpt-3.5-turbo-0613': Model.gpt_35_turbo_0613,
         'gpt-4': Model.gpt_4,
+        'gpt-4-standart': Model.gpt_4_standart,
         'gpt-4-0613': Model.gpt_4_0613,
         'gpt-3.5-turbo-16k': Model.gpt_35_turbo_16k,
         'gpt-3.5-turbo-16k-0613': Model.gpt_35_turbo_16k_0613,
@@ -229,4 +245,6 @@ class ModelUtils:
         'bard': Model.palm,
         
         'llama-13b': Model.llama_13b,
+        'llama-2-70b-chat': Model.llama_2_70b_chat,
+        'bing': Model.bing,
     }

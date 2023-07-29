@@ -5,7 +5,7 @@ import os
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://claude.ai/chats'
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 model = ['claude-2']

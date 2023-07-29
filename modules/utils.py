@@ -309,9 +309,8 @@ def construct_system(text):
 def construct_assistant(text):
     return construct_text("assistant", text)
 
-
 def save_file(filename, system, history, chatbot, user_name):
-    logging.debug(f"{user_name} 保存对话历史中……")
+    logging.debug(f"{user_name} Сохранение истории диалога...")
     os.makedirs(os.path.join(HISTORY_DIR, user_name), exist_ok=True)
     if filename.endswith(".json"):
         json_s = {"system": system, "history": history, "chatbot": chatbot}
@@ -327,7 +326,7 @@ def save_file(filename, system, history, chatbot, user_name):
             md_s += f"\n{data['role']}: \n- {data['content']} \n"
         with open(os.path.join(HISTORY_DIR, user_name, filename), "w", encoding="utf8") as f:
             f.write(md_s)
-    logging.debug(f"{user_name} 保存对话历史完毕")
+    logging.debug(f"{user_name} История диалога сохранена")
     return os.path.join(HISTORY_DIR, user_name, filename)
 
 
@@ -336,7 +335,7 @@ def sorted_by_pinyin(list):
 
 
 def get_file_names(dir, plain=False, filetypes=[".json"]):
-    logging.debug(f"获取文件名列表，目录为{dir}，文件类型为{filetypes}，是否为纯文本列表{plain}")
+    logging.debug(f"Получение списка имен файлов, директория: {dir}, типы файлов: {filetypes}, простой список: {plain}")
     files = []
     try:
         for type in filetypes:
@@ -346,7 +345,7 @@ def get_file_names(dir, plain=False, filetypes=[".json"]):
     files = sorted_by_pinyin(files)
     if files == []:
         files = [""]
-    logging.debug(f"files are:{files}")
+    logging.debug(f"Файлы: {files}")
     if plain:
         return files
     else:
@@ -354,7 +353,7 @@ def get_file_names(dir, plain=False, filetypes=[".json"]):
 
 
 def get_history_names(plain=False, user_name=""):
-    logging.debug(f"从用户 {user_name} 中获取历史记录文件名列表")
+    logging.debug(f"Получение списка имен файлов истории из пользователя {user_name}")
     if user_name == "" and hide_history_when_not_logged_in:
         return ""
     else:
@@ -362,7 +361,7 @@ def get_history_names(plain=False, user_name=""):
 
 
 def load_template(filename, mode=0):
-    logging.debug(f"加载模板文件{filename}，模式为{mode}（0为返回字典和下拉菜单，1为返回下拉菜单，2为返回字典）")
+    logging.debug(f"Загрузка шаблонного файла {filename}, режим: {mode} (0 - возвращение словаря и выпадающего списка, 1 - возвращение выпадающего списка, 2 - возвращение словаря)")
     lines = []
     if filename.endswith(".json"):
         with open(os.path.join(TEMPLATES_DIR, filename), "r", encoding="utf8") as f:
@@ -387,12 +386,12 @@ def load_template(filename, mode=0):
 
 
 def get_template_names(plain=False):
-    logging.debug("获取模板文件名列表")
+    logging.debug("Получение списка имен файлов шаблонов")
     return get_file_names(TEMPLATES_DIR, plain, filetypes=[".csv", "json"])
 
 
 def get_template_content(templates, selection, original_system_prompt):
-    logging.debug(f"应用模板中，选择为{selection}，原始系统提示为{original_system_prompt}")
+    logging.debug(f"Применение шаблона, выбор: {selection}, оригинальный системный запрос: {original_system_prompt}")
     try:
         return templates[selection]
     except:
@@ -400,19 +399,19 @@ def get_template_content(templates, selection, original_system_prompt):
 
 
 def reset_textbox():
-    logging.debug("重置文本框")
+    logging.debug("Сброс текстового поля")
     return gr.update(value="")
 
 
 def reset_default():
     default_host = shared.state.reset_api_host()
     retrieve_proxy("")
-    return gr.update(value=default_host), gr.update(value=""), "API-Host 和代理已重置"
+    return gr.update(value=default_host), gr.update(value=""), "API-Host и прокси сброшены"
 
 
 def change_api_host(host):
     shared.state.set_api_host(host)
-    msg = f"API-Host更改为了{host}"
+    msg = f"API-Host изменен на {host}"
     logging.info(msg)
     return msg
 
@@ -420,7 +419,7 @@ def change_api_host(host):
 def change_proxy(proxy):
     retrieve_proxy(proxy)
     os.environ["HTTPS_PROXY"] = proxy
-    msg = f"代理更改为了{proxy}"
+    msg = f"Прокси изменен на {proxy}"
     logging.info(msg)
     return msg
 
@@ -439,7 +438,7 @@ def hide_middle_chars(s):
 
 def submit_key(key):
     key = key.strip()
-    msg = f"API密钥更改为了{hide_middle_chars(key)}"
+    msg = f"API-ключ изменен на {hide_middle_chars(key)}"
     logging.info(msg)
     return key, msg
 
@@ -455,21 +454,21 @@ def get_geoip():
             response = requests.get("https://ipapi.co/json/", timeout=5)
         data = response.json()
     except:
-        data = {"error": True, "reason": "连接ipapi失败"}
+        data = {"error": True, "reason": "Не удалось подключиться к ipapi"}
     if "error" in data.keys():
-        logging.warning(f"无法获取IP地址信息。\n{data}")
+        logging.warning(f"Не удалось получить информацию об IP-адресе.\n{data}")
         if data["reason"] == "RateLimited":
             return (
-                i18n("您的IP区域：未知。")
+                "Ваша IP-зона: неизвестна."
             )
         else:
-            return i18n("获取IP地理位置失败。原因：") + f"{data['reason']}" + i18n("。你仍然可以使用聊天功能。")
+            return "Не удалось получить географическое положение IP-адреса. Причина: " + f"{data['reason']}" + ". Вы все равно можете использовать функцию чата."
     else:
         country = data["country_name"]
         if country == "China":
-            text = "**您的IP区域：中国。请立即检查代理设置，在不受支持的地区使用API可能导致账号被封禁。**"
+            text = "**Ваша IP-зона: Китай. Пожалуйста, проверьте настройки прокси, использование API в неподдерживаемых регионах может привести к блокировке учетной записи.**"
         else:
-            text = i18n("您的IP区域：") + f"{country}。"
+            text = "Ваша IP-зона: " + f"{country}."
         logging.info(text)
         return text
 
@@ -489,7 +488,7 @@ def find_n(lst, max_num):
 
 
 def start_outputing():
-    logging.debug("显示取消按钮，隐藏发送按钮")
+    logging.debug("Показать кнопку отмены, скрыть кнопку отправки")
     return gr.Button.update(visible=False), gr.Button.update(visible=True)
 
 
@@ -501,12 +500,12 @@ def end_outputing():
 
 
 def cancel_outputing():
-    logging.info("中止输出……")
+    logging.info("Прерывание вывода...")
     shared.state.interrupt()
 
 
 def transfer_input(inputs):
-    # 一次性返回，降低延迟
+    # Возвращаем все сразу, чтобы снизить задержку
     textbox = reset_textbox()
     outputing = start_outputing()
     return (
@@ -517,40 +516,40 @@ def transfer_input(inputs):
     )
 
 
-
 def run(command, desc=None, errdesc=None, custom_env=None, live=False):
     if desc is not None:
         print(desc)
     if live:
         result = subprocess.run(command, shell=True, env=os.environ if custom_env is None else custom_env)
         if result.returncode != 0:
-            raise RuntimeError(f"""{errdesc or 'Error running command'}.
-                Command: {command}
-                Error code: {result.returncode}""")
+            raise RuntimeError(f"""{errdesc or 'Ошибка при выполнении команды'}.
+                Команда: {command}
+                Код ошибки: {result.returncode}""")
 
         return ""
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, env=os.environ if custom_env is None else custom_env)
     if result.returncode != 0:
-        message = f"""{errdesc or 'Error running command'}.
-            Command: {command}
-            Error code: {result.returncode}
-            stdout: {result.stdout.decode(encoding="utf8", errors="ignore") if len(result.stdout)>0 else '<empty>'}
-            stderr: {result.stderr.decode(encoding="utf8", errors="ignore") if len(result.stderr)>0 else '<empty>'}
+        message = f"""{errdesc or 'Ошибка при выполнении команды'}.
+            Команда: {command}
+            Код ошибки: {result.returncode}
+            stdout: {result.stdout.decode(encoding="utf8", errors="ignore") if len(result.stdout)>0 else '<пусто>'}
+            stderr: {result.stderr.decode(encoding="utf8", errors="ignore") if len(result.stderr)>0 else '<пусто>'}
             """
         raise RuntimeError(message)
     return result.stdout.decode(encoding="utf8", errors="ignore")
+
 
 def commit_html():
     git = os.environ.get('GIT', "git")
     try:
         commit_hash = run(f"{git} rev-parse HEAD").strip()
     except Exception:
-        commit_hash = "<none>"
-    if commit_hash != "<none>":
+        commit_hash = "<неизвестно>"
+    if commit_hash != "<неизвестно>":
         short_commit = commit_hash[0:7]
         commit_info = f'<a style="text-decoration:none;color:inherit" href="https://github.com/GaiZhenbiao/ChuanhuChatGPT/commit/{short_commit}">{short_commit}</a>'
     else:
-        commit_info = "unknown \U0001F615"
+        commit_info = "неизвестно \U0001F615"
     return commit_info
 
 def tag_html():

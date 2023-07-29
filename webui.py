@@ -1,9 +1,10 @@
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
 import os
 import logging
 import sys
 
 import gradio as gr
+import asyncio
 
 from modules import config
 from modules.config import *
@@ -11,6 +12,7 @@ from modules.utils import *
 from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
+
 
 import threading
 import time
@@ -34,17 +36,17 @@ with open("assets/custom.css", "r", encoding="utf-8") as f:
     customCSS = f.read()
 
 def create_new_model():
-    return get_model(model_name = MODELS[DEFAULT_MODEL], access_key = my_api_key)[0]
+    return get_model(model_name=MODELS[DEFAULT_MODEL], access_key=my_api_key)[0]
 
 with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     user_name = gr.State("")
     promptTemplates = gr.State(load_template(get_template_names(plain=True)[0], mode=2))
     user_question = gr.State("")
-    assert type(my_api_key)==str
+    assert type(my_api_key) == str
     user_api_key = gr.State(my_api_key)
     current_model = gr.State(create_new_model)
 
-    topic = gr.State(i18n("未命名对话历史记录"))
+    topic = gr.State("История неименованного диалога")
 
     with gr.Row():
         gr.HTML(CHUANHU_TITLE, elem_id="app_title")
@@ -54,11 +56,11 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         update_info = gr.HTML(get_html("update.html").format(
             current_version=repo_html(),
             version_time=version_time(),
-            cancel_btn=i18n("取消"),
-            update_btn=i18n("更新"),
-            seenew_btn=i18n("详情"),
-            ok_btn=i18n("好"),
-            ), visible=check_update)
+            cancel_btn="Отмена",
+            update_btn="Обновить",
+            seenew_btn="Подробности",
+            ok_btn="OK",
+        ), visible=check_update)
 
     with gr.Row(equal_height=True):
         with gr.Column(scale=5):
@@ -68,7 +70,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Column(min_width=225, scale=12):
                     user_input = gr.Textbox(
                         elem_id="user_input_tb",
-                        show_label=False, placeholder=i18n("在这里输入"),
+                        show_label=False, placeholder="Введите ваш запроос здесь",
                         container=False
                     )
                 with gr.Column(min_width=42, scale=1):
@@ -76,79 +78,79 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     cancelBtn = gr.Button(value="", variant="secondary", visible=False, elem_id="cancel_btn")
             with gr.Row():
                 emptyBtn = gr.Button(
-                    i18n("🧹 新的对话"), elem_id="empty_btn"
+                    "🧹 Новый диалог", elem_id="empty_btn"
                 )
-                retryBtn = gr.Button(i18n("🔄 重新生成"))
-                delFirstBtn = gr.Button(i18n("🗑️ 删除最旧对话"))
-                delLastBtn = gr.Button(i18n("🗑️ 删除最新对话"))
+                retryBtn = gr.Button("🔄 Перегенерировать")
+                delFirstBtn = gr.Button("🗑️ Удалить самый старый диалог")
+                delLastBtn = gr.Button("🗑️ Удалить последний диалог")
                 with gr.Row(visible=False) as like_dislike_area:
                     with gr.Column(min_width=20, scale=1):
-                        likeBtn = gr.Button(i18n("👍"))
+                        likeBtn = gr.Button("👍")
                     with gr.Column(min_width=20, scale=1):
-                        dislikeBtn = gr.Button(i18n("👎"))
+                        dislikeBtn = gr.Button("👎")
 
         with gr.Column():
             with gr.Column(min_width=50, scale=1):
-                with gr.Tab(label=i18n("模型")):
+                with gr.Tab(label="Модель"):
                     keyTxt = gr.Textbox(
                         show_label=True,
-                        placeholder=f"Your API-key...",
+                        placeholder="Your API-key...",
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
                         visible=not HIDE_MY_KEY,
                         label="API-Key",
                     )
                     if multi_api_key:
-                        usageTxt = gr.Markdown(i18n("多账号模式已开启，无需输入key，可直接开始对话"), elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("Многопользовательский режим включен, не нужно вводить ключ, можно сразу начать диалог", elem_id="usage_display", elem_classes="insert_block")
                     else:
-                        usageTxt = gr.Markdown(i18n("**发送消息** 或 **提交key** 以显示额度"), elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("**Отправьте сообщение** или **Отправьте ключ** для отображения кредита", elem_id="usage_display", elem_classes="insert_block")
                     model_select_dropdown = gr.Dropdown(
-                        label=i18n("选择模型"), choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
+                        label="Выберите модель", choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
                     )
                     lora_select_dropdown = gr.Dropdown(
-                        label=i18n("选择LoRA模型"), choices=[], multiselect=False, interactive=True, visible=False
+                        label="Выберите модель LoRA", choices=[], multiselect=False, interactive=True, visible=False
                     )
                     with gr.Row():
-                        single_turn_checkbox = gr.Checkbox(label=i18n("单轮对话"), value=False, elem_classes="switch_checkbox")
-                        use_websearch_checkbox = gr.Checkbox(label=i18n("使用在线搜索"), value=False, elem_classes="switch_checkbox")
-                        
+                        single_turn_checkbox = gr.Checkbox(label="Single-turn режим диалога", value=False, elem_classes="switch_checkbox")
+                        use_websearch_checkbox = gr.Checkbox(label="Использовать онлайн-поиск", value=False, elem_classes="switch_checkbox")
+
                     language_select_dropdown = gr.Dropdown(
-                        label=i18n("选择回复语言（针对搜索&索引功能）"),
+                        label="Выберите язык ответа (для функций поиска и индексации)",
                         choices=REPLY_LANGUAGES,
                         multiselect=False,
                         value=REPLY_LANGUAGES[0],
                     )
-                    index_files = gr.Files(label=i18n("上传"), type="file")
-                    two_column = gr.Checkbox(label=i18n("双栏pdf"), value=advance_docs["pdf"].get("two_column", False))
-                    summarize_btn = gr.Button(i18n("总结"))
-                    # TODO: 公式ocr
-                    # formula_ocr = gr.Checkbox(label=i18n("识别公式"), value=advance_docs["pdf"].get("formula_ocr", False))
+                    index_files = gr.Files(label="Загрузить (ChimeraAPI)", type="file")
+                    two_column = gr.Checkbox(label="Двухстолбчатый pdf", value=advance_docs["pdf"].get("two_column", False))
+                    summarize_btn = gr.Button("Резюмировать")
+                    # TODO: OCR формулы
+                    # formula_ocr = gr.Checkbox(label="OCR формулы", value=advance_docs["pdf"].get("formula_ocr", False))
 
                 with gr.Tab(label="Prompt"):
                     systemPromptTxt = gr.Textbox(
                         show_label=True,
-                        placeholder=i18n("在这里输入System Prompt..."),
+                        placeholder="Введите здесь System Prompt...",
                         label="System prompt",
                         value=INITIAL_SYSTEM_PROMPT,
                         lines=10
                     )
-                    with gr.Accordion(label=i18n("加载Prompt模板"), open=True):
+                    with gr.Accordion(label="Загрузить шаблон Prompt", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     templateFileSelectDropdown = gr.Dropdown(
-                                        label=i18n("选择Prompt模板集合文件"),
+                                        label="Выберите файл с коллекцией шаблонов Prompt",
                                         choices=get_template_names(plain=True),
                                         multiselect=False,
                                         value=get_template_names(plain=True)[0],
                                         container=False,
                                     )
                                 with gr.Column(scale=1):
-                                    templateRefreshBtn = gr.Button(i18n("🔄 刷新"))
+                                    templateRefreshBtn = gr.Button("🔄 Обновить")
                             with gr.Row():
                                 with gr.Column():
                                     templateSelectDropdown = gr.Dropdown(
-                                        label=i18n("从Prompt模板中加载"),
+                                        label="Загрузить из шаблона Prompt",
                                         choices=load_template(
                                             get_template_names(plain=True)[0], mode=1
                                         ),
@@ -156,47 +158,47 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                         container=False,
                                     )
 
-                with gr.Tab(label=i18n("保存/加载")):
-                    with gr.Accordion(label=i18n("保存/加载对话历史记录"), open=True):
+                with gr.Tab(label="Сохранить/Загрузить"):
+                    with gr.Accordion(label="Сохранить/Загрузить историю диалога", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     historyFileSelectDropdown = gr.Dropdown(
-                                        label=i18n("从列表中加载对话"),
+                                        label="Загрузить диалог из списка",
                                         choices=get_history_names(plain=True),
                                         multiselect=False,
                                         container=False,
                                     )
                                 with gr.Row():
                                     with gr.Column(min_width=42, scale=1):
-                                        historyRefreshBtn = gr.Button(i18n("🔄 刷新"))
+                                        historyRefreshBtn = gr.Button("🔄 Обновить")
                                     with gr.Column(min_width=42, scale=1):
-                                        historyDeleteBtn = gr.Button(i18n("🗑️ 删除"))
+                                        historyDeleteBtn = gr.Button("🗑️ Удалить")
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     saveFileName = gr.Textbox(
                                         show_label=True,
-                                        placeholder=i18n("设置文件名: 默认为.json，可选为.md"),
-                                        label=i18n("设置保存文件名"),
-                                        value=i18n("对话历史记录"),
+                                        placeholder="Установить имя файла: по умолчанию .json, можно выбрать .md",
+                                        label="Выберите имя файла для сохранения",
+                                        value="История диалога",
                                         container=False,
                                     )
                                 with gr.Column(scale=1):
-                                    saveHistoryBtn = gr.Button(i18n("💾 保存对话"))
-                                    exportMarkdownBtn = gr.Button(i18n("📝 导出为Markdown"))
-                                    gr.Markdown(i18n("默认保存于history文件夹"))
+                                    saveHistoryBtn = gr.Button("💾 Сохранить диалог")
+                                    exportMarkdownBtn = gr.Button("📝 Экспортировать в Markdown")
+                                    gr.Markdown("По умолчанию сохраняется в папке истории")
                             with gr.Row():
                                 with gr.Column():
                                     downloadFile = gr.File(interactive=True)
 
-                with gr.Tab(label=i18n("高级")):
-                    gr.HTML(get_html("appearance_switcher.html").format(label=i18n("切换亮暗色主题")), elem_classes="insert_block")
+                with gr.Tab(label="Расширенный"):
+                    gr.HTML(get_html("appearance_switcher.html").format(label="Переключить светлую/темную тему"), elem_classes="insert_block")
                     use_streaming_checkbox = gr.Checkbox(
-                            label=i18n("实时传输回答"), value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
+                            label="Стриминг текста", value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
                         )
-                    checkUpdateBtn = gr.Button(i18n("🔄 检查更新..."), visible=check_update)
-                    gr.Markdown(i18n("# ⚠️ 务必谨慎更改 ⚠️"), elem_id="advanced_warning")
-                    with gr.Accordion(i18n("参数"), open=False):
+                    checkUpdateBtn = gr.Button("🔄 Проверить обновления...", visible=check_update)
+                    gr.Markdown("# ⚠️ ОСТОРОЖНО ⚠️", elem_id="advanced_warning")
+                    with gr.Accordion("Параметры", open=False):
                         temperature_slider = gr.Slider(
                             minimum=-0,
                             maximum=2.0,
@@ -223,7 +225,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         stop_sequence_txt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("停止符，用英文逗号隔开..."),
+                            placeholder="Введите здесь стоп-слова, разделенные запятой...",
                             label="stop",
                             value="",
                             lines=1,
@@ -239,7 +241,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         max_generation_slider = gr.Slider(
                             minimum=1,
                             maximum=100000,
-                            value=4000,
+                            value=2000,
                             step=1,
                             interactive=True,
                             label="max generations",
@@ -262,40 +264,40 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         logit_bias_txt = gr.Textbox(
                             show_label=True,
-                            placeholder=f"word:likelihood",
+                            placeholder="word:likelihood",
                             label="logit bias",
                             value="",
                             lines=1,
                         )
                         user_identifier_txt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("用于定位滥用行为"),
-                            label=i18n("用户名"),
+                            placeholder="Используется для локализации злоупотреблений",
+                            label="Имя пользователя",
                             value=user_name.value,
                             lines=1,
                         )
 
-                    with gr.Accordion(i18n("网络设置"), open=False):
+                    with gr.Accordion("Сетевые настройки", open=False):
                         # 优先展示自定义的api_host
                         apihostTxt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("在这里输入API-Host..."),
+                            placeholder="Введите здесь API-Host...",
                             label="API-Host",
                             value=config.api_host or shared.API_HOST,
                             lines=1,
                             container=False,
                         )
-                        changeAPIURLBtn = gr.Button(i18n("🔄 切换API地址"))
+                        changeAPIURLBtn = gr.Button("🔄 Переключить API-адрес")
                         proxyTxt = gr.Textbox(
                             show_label=True,
-                            placeholder=i18n("在这里输入代理地址..."),
-                            label=i18n("代理地址（示例：http://127.0.0.1:10809）"),
+                            placeholder="Введите здесь адрес прокси...",
+                            label="Адрес прокси (например: http://127.0.0.1:10809）",
                             value="",
                             lines=2,
                             container=False,
                         )
-                        changeProxyBtn = gr.Button(i18n("🔄 设置代理地址"))
-                        default_btn = gr.Button(i18n("🔙 恢复默认设置"))
+                        changeProxyBtn = gr.Button("🔄 Установить адрес прокси")
+                        default_btn = gr.Button("🔙 Восстановить настройки по умолчанию")
 
     gr.Markdown(CHUANHU_DESCRIPTION, elem_id="description")
     gr.HTML(get_html("footer.html").format(versions=versions_html()), elem_id="footer")
@@ -307,7 +309,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
             user_info, user_name = gr.Markdown.update(value=f"User: {request.username}"), request.username
         else:
             user_info, user_name = gr.Markdown.update(value=f"", visible=False), ""
-        current_model = get_model(model_name = MODELS[DEFAULT_MODEL], access_key = my_api_key)[0]
+        current_model = get_model(model_name=MODELS[DEFAULT_MODEL], access_key=my_api_key)[0]
         current_model.set_user_identifier(user_name)
         chatbot = gr.Chatbot.update(label=MODELS[DEFAULT_MODEL])
         return user_info, user_name, current_model, toggle_like_btn_visibility(DEFAULT_MODEL), *current_model.auto_load(), get_history_names(False, user_name), chatbot
@@ -503,7 +505,7 @@ logging.info(
     + colorama.Style.RESET_ALL
 )
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
-demo.title = i18n("川虎Chat 🚀")
+demo.title = "川虎Chat 🚀"
 
 app = Flask(__name__)
 CORS(app)
@@ -514,36 +516,42 @@ CORS(app)
 def chat_completions():
     streaming = request.json.get('stream', False)
     streaming_ = request.json.get('stream', False)
-    model = request.json.get('model', 'gpt-3.5-turbo')
+    model = request.json['model']
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
-    if not provider:
-        r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
-        data = r.json()['data']
-        random.shuffle(data)
-        for provider_info in data:
-            for model_info in provider_info['model']:
-                if model in model_info and model_info[model]['status'] == 'Active':
-                    if getattr(g4f.Provider,provider_info['provider']).supports_stream != streaming_:
-                      streaming = False
-                    else:
-                      streaming = True
-                    response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider_info['provider']),stream=streaming,
-                                     messages=messages)
-                    provider_name = provider_info['provider']
-                    print(provider_name)
-                    break
-            else:
-                continue
-            break
+    if provider == 'ClaudeAI':
+        from fp.fp import FreeProxy
+        proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.Chimera, stream=streaming,
+                                             messages=messages, proxy=proxy)
     else:
-        provider_name = provider
-        if getattr(g4f.Provider,provider).supports_stream != streaming_:
-          streaming = False
+        if not provider:
+            r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
+            data = r.json()['data']
+            random.shuffle(data)
+            for provider_info in data:
+                for model_info in provider_info['model']:
+                    if model in model_info and model_info[model]['status'] == 'Active':
+                        if getattr(g4f.Provider,provider_info['provider']).supports_stream != streaming_:
+                          streaming = False
+                        else:
+                          streaming = True
+                        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider_info['provider']),stream=streaming,
+                                         messages=messages)
+                        provider_name = provider_info['provider']
+                        print(provider_name)
+                        break
+                else:
+                    continue
+                break
         else:
-          streaming = True
-        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
-                                     messages=messages)
+            provider_name = provider
+            if getattr(g4f.Provider,provider).supports_stream != streaming_:
+              streaming = False
+            else:
+              streaming = True
+            response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
+                                         messages=messages)
     if not provider:
       while 'curl_cffi.requests.errors.RequestsError' in response:
           random.shuffle(data)
@@ -589,7 +597,7 @@ def chat_completions():
                 'index': 0
             }]
         }
-    print(response)
+    #print(response)
     def stream():
         nonlocal response
         for token in response:
@@ -611,11 +619,11 @@ def chat_completions():
                     }
                 ]
             }
-            print(token)
-            print(completion_data)
-            print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
+            #print(token)
+            #print(completion_data)
+            #print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-            time.sleep(0.1)
+            time.sleep(0.01)
     print('===Start Streaming===')
     return app.response_class(stream(), mimetype='text/event-stream')
 
@@ -628,7 +636,7 @@ def billing_subscription():
   "canceled": False,
   "canceled_at": None,
   "delinquent": None,
-  "access_until": 1690848000,
+  "access_until": 2556028800,
   "soft_limit": 6944500,
   "hard_limit": 166666666,
   "system_hard_limit": 166666666,
@@ -640,15 +648,15 @@ def billing_subscription():
     "id": "payg"
   },
   "primary": True,
-  "account_name": "Lemon SMith",
+  "account_name": "OpenAI",
   "po_number": None,
   "billing_email": None,
   "tax_ids": None,
   "billing_address": {
-    "city": "Hastings",
-    "line1": " 2 Amherst Road",
-    "country": "GB",
-    "postal_code": "TN34 1TT"
+    "city": "New York",
+    "line1": "OpenAI",
+    "country": "US",
+    "postal_code": "NY10031"
   },
   "business_address": None
 }
@@ -662,7 +670,7 @@ def billing_usage():
   "object": "list",
   "daily_costs": [
     {
-      "timestamp": 1688169600.0,
+      "timestamp": time.time(),
       "line_items": [
         {
           "name": "GPT-4",
@@ -687,600 +695,6 @@ def billing_usage():
         {
           "name": "Image models",
           "cost": 16.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688256000.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688342400.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688428800.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688515200.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688601600.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688688000.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688774400.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688860800.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1688947200.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689033600.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689120000.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689206400.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689292800.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 2.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689379200.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689465600.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689552000.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689638400.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 8.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    },
-    {
-      "timestamp": 1689724800.0,
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 0.0
         },
         {
           "name": "Audio models",
@@ -1336,39 +750,6 @@ def providers():
                 pass
   return jsonify(providers_data)
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return jsonify({
-        "error": {
-            "message": f"Invalid URL ({request.method} /)",
-            "type": "invalid_request_error",
-            "param": None,
-            "code": None
-        }
-    }), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return jsonify({
-        "error": {
-            "message": "Something went wrong on our end",
-            "type": "internal_server_error",
-            "param": None,
-            "code": None
-        }
-    }), 500
-
-@app.errorhandler(415)
-def unsupported_media_type(e):
-    return jsonify({
-        "error": {
-            "message": "Unsupported media type",
-            "type": "unsupported_media_type",
-            "param": None,
-            "code": None
-        }
-    }), 415
-
 
 def run_flask_server():
     site_config = {
@@ -1384,15 +765,18 @@ def run_flask_server():
     server.serve_forever()
 
 def run_gradio_server():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop) 
+   
     reload_javascript()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        blocked_paths=["config.json"],
-        server_name=server_name,
-        server_port=server_port,
-        share=share,
-        auth=auth_list if authflag else None,
-        favicon_path="./assets/favicon.ico",
-        inbrowser=not dockerflag, # 禁止 в docker 下 открывать inbrowser
+      blocked_paths=["config.json"],
+      server_name=server_name,
+      server_port=server_port,
+      share=share,
+      auth=auth_list if authflag else None,
+      favicon_path="./assets/favicon.ico",
+      inbrowser=not dockerflag, # 禁止 в docker 下 открывать inbrowser
     )
 
 if __name__ == '__main__':

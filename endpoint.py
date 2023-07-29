@@ -22,7 +22,7 @@ def chat_completions():
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
     if not provider:
-        r = requests.get('http://provider-list.neurochat-gpt.ru:1440/v1/status')
+        r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
         r_j = r.json()['data']
         random.shuffle(r_j)
         for p in r_j:

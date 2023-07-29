@@ -4,7 +4,7 @@ from ...typing import sha256, Dict, get_type_hints
 
 url = "https://gptleg.zeabur.app"
 model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-0613']
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working =  True
 
@@ -40,7 +40,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     }
 
     response = requests.post(url + '/api/openai/v1/chat/completions',
-                             headers=headers, json=data, stream=True)
+                             headers=headers, json=data)
 
     yield response.json()['choices'][0]['message']['content']
 

@@ -8,7 +8,7 @@ from ...typing import sha256, Dict, get_type_hints
 
 url = "https://wewordle.org/gptapi/v1/android/turbo"
 model = ['gpt-3.5-turbo']
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 

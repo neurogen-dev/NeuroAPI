@@ -6,6 +6,7 @@ from .Providers import (
     Yqcloud,
     Bard,
     Vercel,
+    Vercel2,
     Lockchat,
     Liaobots,
     H2o,
@@ -22,8 +23,21 @@ from .Providers import (
     Zeabur,
     Chimera,
     ClaudeAI,
+    Bing,
+    Theb,
+    Aichat,
+    Forefront,
+    ChatgptLogin,
+    GetGpt,
+    BingHuan,
+    ChatgptAi,
+    Ora,
+    Phind,
     Poe,
-
+    Chatty,
+    PurGPT,
+    PurGPTBing,
+    CharFree
 
 )
 

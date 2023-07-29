@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import locale
 import commentjson as json

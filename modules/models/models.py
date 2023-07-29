@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
@@ -12,6 +13,8 @@ import platform
 import base64
 from io import BytesIO
 from PIL import Image
+
+import openai
 
 from tqdm import tqdm
 import colorama
@@ -93,7 +96,7 @@ class OpenAIClient(BaseLLMModel):
             usage_percent = round(usage_data["total_usage"] / usage_limit, 2)
             # return i18n("**本月使用金额** ") + f"\u3000 ${rounded_usage}"
             return get_html("billing_info.html").format(
-                    label = i18n("本月使用金额"),
+                    label = "Ежемесячное использование",
                     usage_percent = usage_percent,
                     rounded_usage = rounded_usage,
                     usage_limit = usage_limit
@@ -115,10 +118,26 @@ class OpenAIClient(BaseLLMModel):
         history = self.history
         logging.debug(colorama.Fore.YELLOW +
                       f"{history}" + colorama.Fore.RESET)
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {openai_api_key}",
-        }
+        if self.model_name == "bing":
+            with open("config.json", "r", encoding="utf-8") as f:
+                purgpt_api_key = cjson.load(f)["purgpt_api_key"]
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {purgpt_api_key}",
+            }
+        elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+            with open("config.json", "r", encoding="utf-8") as f:
+                chatty_api_key = cjson.load(f)["chatty_api_key"]
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {chatty_api_key}",
+            }
+            #print(f"Bearer {chatty_api_key}")
+        else:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {openai_api_key}",
+            }
 
         if system_prompt is not None:
             history = [construct_system(system_prompt), *history]
@@ -134,19 +153,7 @@ class OpenAIClient(BaseLLMModel):
             "frequency_penalty": self.frequency_penalty,
         }
 
-        if self.model_name == "gpt-3.5-turbo-16k-openai (Chimera API)":
-            model = "gpt-3.5-turbo-16k-openai"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4 (Chimera API)":
+        if self.model_name == "gpt-4-chimera-api":
             model = "gpt-4"
             payload = {
             "model": model,
@@ -158,8 +165,8 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
-        elif self.model_name == "gpt-4-0613 (Chimera API)":
-            model = "gpt-4-0613"
+        elif self.model_name == "gpt-4-0314-chimera-api":
+            model = "gpt-4-0314"
             payload = {
             "model": model,
             "messages": history,
@@ -170,68 +177,56 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
-        elif self.model_name == "gpt-4-32k (Chimera API)":
+        elif self.model_name == "llama-2-70b-chat-chimera-api":
+            model = "llama-2-70b-chat"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-3.5-turbo-16k-chimera-api":
+            model = "gpt-3.5-turbo-16k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+            model = "gpt-3.5-turbo-16k"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4-chatty-api":
+            model = "gpt-4"
+            payload = {
+            "model": model,
+            "messages": history,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n_choices,
+            "stream": stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
+        elif self.model_name == "gpt-4-32k-chatty-api":
             model = "gpt-4-32k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "claude_instant (Chimera API)":
-            model = "claude_instant"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "claude-instant-100k (Chimera API)":
-            model = "claude-instant-100k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "claude-2-100k (Chimera API)":
-            model = "claude-2-100k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "sage (Chimera API)":
-            model = "sage"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4-32k-poe (Chimera API)":
-            model = "gpt-4-32k-poe"
             payload = {
             "model": model,
             "messages": history,
@@ -268,12 +263,29 @@ class OpenAIClient(BaseLLMModel):
         else:
             timeout = TIMEOUT_ALL
 
-        # 如果有自定义的api-host，使用自定义host发送请求，否则使用默认设置发送请求
-        if shared.state.completion_url != COMPLETION_URL:
-            logging.info(f"使用自定义API URL: {shared.state.completion_url}")
-
+        # Если модель gpt-4, изменяем хост API
+        if self.model_name == "gpt-3.5-turbo-16k-chimera-api" or self.model_name == "gpt-4-chimera-api" or self.model_name == "llama-2-70b-chat-chimera-api":
+            shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
+        elif self.model_name == "bing":
+            shared.state.completion_url = "https://purgpt.xyz/v1/bing"
+        elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+            shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
+        else:
+            shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
+            logging.info(f"Используется API URL: {shared.state.completion_url}")
+    
+        logging.info(f"Используется API URL: {shared.state.completion_url}")
+    
         with retrieve_proxy():
             try:
+                if self.model_name == "gpt-3.5-turbo-16k-chimera-api" or self.model_name == "gpt-4-chimera-api" or self.model_name == "llama-2-70b-chat-chimera-api":
+                    shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
+                elif self.model_name == "bing":
+                    shared.state.completion_url = "https://purgpt.xyz/v1/bing"
+                elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+                    shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
+                else:
+                    shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
                 response = requests.post(
                     shared.state.completion_url,
                     headers=headers,
@@ -316,7 +328,7 @@ class OpenAIClient(BaseLLMModel):
                 try:
                     chunk = json.loads(chunk[6:])
                 except json.JSONDecodeError:
-                    print(i18n("JSON解析错误,收到的内容: ") + f"{chunk}")
+                    logging.error("Ошибка разбора JSON, полученный контент: " + f"{chunk}")
                     error_msg += chunk
                     continue
                 if chunk_length > 6 and "delta" in chunk["choices"][0]:
@@ -335,318 +347,6 @@ class OpenAIClient(BaseLLMModel):
         self._refresh_header()
         return ret
 
-
-class ChatGLM_Client(BaseLLMModel):
-    def __init__(self, model_name, user_name="") -> None:
-        super().__init__(model_name=model_name, user=user_name)
-        from transformers import AutoTokenizer, AutoModel
-        import torch
-        global CHATGLM_TOKENIZER, CHATGLM_MODEL
-        if CHATGLM_TOKENIZER is None or CHATGLM_MODEL is None:
-            system_name = platform.system()
-            model_path = None
-            if os.path.exists("models"):
-                model_dirs = os.listdir("models")
-                if model_name in model_dirs:
-                    model_path = f"models/{model_name}"
-            if model_path is not None:
-                model_source = model_path
-            else:
-                model_source = f"THUDM/{model_name}"
-            CHATGLM_TOKENIZER = AutoTokenizer.from_pretrained(
-                model_source, trust_remote_code=True
-            )
-            quantified = False
-            if "int4" in model_name:
-                quantified = True
-            model = AutoModel.from_pretrained(
-                model_source, trust_remote_code=True
-            )
-            if torch.cuda.is_available():
-                # run on CUDA
-                logging.info("CUDA is available, using CUDA")
-                model = model.half().cuda()
-            # mps加速还存在一些问题，暂时不使用
-            elif system_name == "Darwin" and model_path is not None and not quantified:
-                logging.info("Running on macOS, using MPS")
-                # running on macOS and model already downloaded
-                model = model.half().to("mps")
-            else:
-                logging.info("GPU is not available, using CPU")
-                model = model.float()
-            model = model.eval()
-            CHATGLM_MODEL = model
-
-    def _get_glm_style_input(self):
-        history = [x["content"] for x in self.history]
-        query = history.pop()
-        logging.debug(colorama.Fore.YELLOW +
-                      f"{history}" + colorama.Fore.RESET)
-        assert (
-            len(history) % 2 == 0
-        ), f"History should be even length. current history is: {history}"
-        history = [[history[i], history[i + 1]]
-                   for i in range(0, len(history), 2)]
-        return history, query
-
-    def get_answer_at_once(self):
-        history, query = self._get_glm_style_input()
-        response, _ = CHATGLM_MODEL.chat(
-            CHATGLM_TOKENIZER, query, history=history)
-        return response, len(response)
-
-    def get_answer_stream_iter(self):
-        history, query = self._get_glm_style_input()
-        for response, history in CHATGLM_MODEL.stream_chat(
-            CHATGLM_TOKENIZER,
-            query,
-            history,
-            max_length=self.token_upper_limit,
-            top_p=self.top_p,
-            temperature=self.temperature,
-        ):
-            yield response
-
-
-class LLaMA_Client(BaseLLMModel):
-    def __init__(
-        self,
-        model_name,
-        lora_path=None,
-        user_name=""
-    ) -> None:
-        super().__init__(model_name=model_name, user=user_name)
-        from lmflow.datasets.dataset import Dataset
-        from lmflow.pipeline.auto_pipeline import AutoPipeline
-        from lmflow.models.auto_model import AutoModel
-        from lmflow.args import ModelArguments, DatasetArguments, InferencerArguments
-
-        self.max_generation_token = 1000
-        self.end_string = "\n\n"
-        # We don't need input data
-        data_args = DatasetArguments(dataset_path=None)
-        self.dataset = Dataset(data_args)
-        self.system_prompt = ""
-
-        global LLAMA_MODEL, LLAMA_INFERENCER
-        if LLAMA_MODEL is None or LLAMA_INFERENCER is None:
-            model_path = None
-            if os.path.exists("models"):
-                model_dirs = os.listdir("models")
-                if model_name in model_dirs:
-                    model_path = f"models/{model_name}"
-            if model_path is not None:
-                model_source = model_path
-            else:
-                model_source = f"decapoda-research/{model_name}"
-                # raise Exception(f"models目录下没有这个模型: {model_name}")
-            if lora_path is not None:
-                lora_path = f"lora/{lora_path}"
-            model_args = ModelArguments(model_name_or_path=model_source, lora_model_path=lora_path, model_type=None, config_overrides=None, config_name=None, tokenizer_name=None, cache_dir=None,
-                                        use_fast_tokenizer=True, model_revision='main', use_auth_token=False, torch_dtype=None, use_lora=False, lora_r=8, lora_alpha=32, lora_dropout=0.1, use_ram_optimized_load=True)
-            pipeline_args = InferencerArguments(
-                local_rank=0, random_seed=1, deepspeed='configs/ds_config_chatbot.json', mixed_precision='bf16')
-
-            with open(pipeline_args.deepspeed, "r", encoding="utf-8") as f:
-                ds_config = json.load(f)
-            LLAMA_MODEL = AutoModel.get_model(
-                model_args,
-                tune_strategy="none",
-                ds_config=ds_config,
-            )
-            LLAMA_INFERENCER = AutoPipeline.get_pipeline(
-                pipeline_name="inferencer",
-                model_args=model_args,
-                data_args=data_args,
-                pipeline_args=pipeline_args,
-            )
-
-    def _get_llama_style_input(self):
-        history = []
-        instruction = ""
-        if self.system_prompt:
-            instruction = (f"Instruction: {self.system_prompt}\n")
-        for x in self.history:
-            if x["role"] == "user":
-                history.append(f"{instruction}Input: {x['content']}")
-            else:
-                history.append(f"Output: {x['content']}")
-        context = "\n\n".join(history)
-        context += "\n\nOutput: "
-        return context
-
-    def get_answer_at_once(self):
-        context = self._get_llama_style_input()
-
-        input_dataset = self.dataset.from_dict(
-            {"type": "text_only", "instances": [{"text": context}]}
-        )
-
-        output_dataset = LLAMA_INFERENCER.inference(
-            model=LLAMA_MODEL,
-            dataset=input_dataset,
-            max_new_tokens=self.max_generation_token,
-            temperature=self.temperature,
-        )
-
-        response = output_dataset.to_dict()["instances"][0]["text"]
-        return response, len(response)
-
-    def get_answer_stream_iter(self):
-        context = self._get_llama_style_input()
-        partial_text = ""
-        step = 1
-        for _ in range(0, self.max_generation_token, step):
-            input_dataset = self.dataset.from_dict(
-                {"type": "text_only", "instances": [
-                    {"text": context + partial_text}]}
-            )
-            output_dataset = LLAMA_INFERENCER.inference(
-                model=LLAMA_MODEL,
-                dataset=input_dataset,
-                max_new_tokens=step,
-                temperature=self.temperature,
-            )
-            response = output_dataset.to_dict()["instances"][0]["text"]
-            if response == "" or response == self.end_string:
-                break
-            partial_text += response
-            yield partial_text
-
-
-class XMChat(BaseLLMModel):
-    def __init__(self, api_key, user_name=""):
-        super().__init__(model_name="xmchat", user=user_name)
-        self.api_key = api_key
-        self.session_id = None
-        self.reset()
-        self.image_bytes = None
-        self.image_path = None
-        self.xm_history = []
-        self.url = "https://xmbot.net/web"
-        self.last_conv_id = None
-
-    def reset(self):
-        self.session_id = str(uuid.uuid4())
-        self.last_conv_id = None
-        return [], "已重置"
-
-    def image_to_base64(self, image_path):
-        # 打开并加载图片
-        img = Image.open(image_path)
-
-        # 获取图片的宽度和高度
-        width, height = img.size
-
-        # 计算压缩比例，以确保最长边小于4096像素
-        max_dimension = 2048
-        scale_ratio = min(max_dimension / width, max_dimension / height)
-
-        if scale_ratio < 1:
-            # 按压缩比例调整图片大小
-            new_width = int(width * scale_ratio)
-            new_height = int(height * scale_ratio)
-            img = img.resize((new_width, new_height), Image.ANTIALIAS)
-
-        # 将图片转换为jpg格式的二进制数据
-        buffer = BytesIO()
-        if img.mode == "RGBA":
-            img = img.convert("RGB")
-        img.save(buffer, format='JPEG')
-        binary_image = buffer.getvalue()
-
-        # 对二进制数据进行Base64编码
-        base64_image = base64.b64encode(binary_image).decode('utf-8')
-
-        return base64_image
-
-    def try_read_image(self, filepath):
-        def is_image_file(filepath):
-            # 判断文件是否为图片
-            valid_image_extensions = [
-                ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff"]
-            file_extension = os.path.splitext(filepath)[1].lower()
-            return file_extension in valid_image_extensions
-
-        if is_image_file(filepath):
-            logging.info(f"读取图片文件: {filepath}")
-            self.image_bytes = self.image_to_base64(filepath)
-            self.image_path = filepath
-        else:
-            self.image_bytes = None
-            self.image_path = None
-
-    def like(self):
-        if self.last_conv_id is None:
-            return "点赞失败，你还没发送过消息"
-        data = {
-            "uuid": self.last_conv_id,
-            "appraise": "good"
-        }
-        requests.post(self.url, json=data)
-        return "👍点赞成功，感谢反馈～"
-
-    def dislike(self):
-        if self.last_conv_id is None:
-            return "点踩失败，你还没发送过消息"
-        data = {
-            "uuid": self.last_conv_id,
-            "appraise": "bad"
-        }
-        requests.post(self.url, json=data)
-        return "👎点踩成功，感谢反馈～"
-
-    def prepare_inputs(self, real_inputs, use_websearch, files, reply_language, chatbot):
-        fake_inputs = real_inputs
-        display_append = ""
-        limited_context = False
-        return limited_context, fake_inputs, display_append, real_inputs, chatbot
-
-    def handle_file_upload(self, files, chatbot, language):
-        """if the model accepts multi modal input, implement this function"""
-        if files:
-            for file in files:
-                if file.name:
-                    logging.info(f"尝试读取图像: {file.name}")
-                    self.try_read_image(file.name)
-            if self.image_path is not None:
-                chatbot = chatbot + [((self.image_path,), None)]
-            if self.image_bytes is not None:
-                logging.info("使用图片作为输入")
-                # XMChat的一轮对话中实际上只能处理一张图片
-                self.reset()
-                conv_id = str(uuid.uuid4())
-                data = {
-                    "user_id": self.api_key,
-                    "session_id": self.session_id,
-                    "uuid": conv_id,
-                    "data_type": "imgbase64",
-                    "data": self.image_bytes
-                }
-                response = requests.post(self.url, json=data)
-                response = json.loads(response.text)
-                logging.info(f"图片回复: {response['data']}")
-        return None, chatbot, None
-
-    def get_answer_at_once(self):
-        question = self.history[-1]["content"]
-        conv_id = str(uuid.uuid4())
-        self.last_conv_id = conv_id
-        data = {
-            "user_id": self.api_key,
-            "session_id": self.session_id,
-            "uuid": conv_id,
-            "data_type": "text",
-            "data": question
-        }
-        response = requests.post(self.url, json=data)
-        try:
-            response = json.loads(response.text)
-            return response["data"], len(response["data"])
-        except Exception as e:
-            return response.text, len(response.text)
-
-
 def get_model(
     model_name,
     lora_model_path=None,
@@ -656,7 +356,7 @@ def get_model(
     system_prompt=None,
     user_name=""
 ) -> BaseLLMModel:
-    msg = i18n("模型设置为了：") + f" {model_name}"
+    msg = "Модель установлена на: " + f" {model_name}"
     model_type = ModelType.get_type(model_name)
     lora_selector_visibility = False
     lora_choices = []
@@ -668,7 +368,7 @@ def get_model(
     chatbot = gr.Chatbot.update(label=model_name)
     try:
         if model_type == ModelType.OpenAI:
-            logging.info(f"正在加载OpenAI模型: {model_name}")
+            logging.info(f"Загрузка модели OpenAI: {model_name}")
             model = OpenAIClient(
                 model_name=model_name,
                 api_key=access_key,
@@ -677,48 +377,6 @@ def get_model(
                 top_p=top_p,
                 user_name=user_name,
             )
-        elif model_type == ModelType.ChatGLM:
-            logging.info(f"正在加载ChatGLM模型: {model_name}")
-            model = ChatGLM_Client(model_name, user_name=user_name)
-        elif model_type == ModelType.LLaMA and lora_model_path == "":
-            msg = f"现在请为 {model_name} 选择LoRA模型"
-            logging.info(msg)
-            lora_selector_visibility = True
-            if os.path.isdir("lora"):
-                lora_choices = get_file_names(
-                    "lora", plain=True, filetypes=[""])
-            lora_choices = ["No LoRA"] + lora_choices
-        elif model_type == ModelType.LLaMA and lora_model_path != "":
-            logging.info(f"正在加载LLaMA模型: {model_name} + {lora_model_path}")
-            dont_change_lora_selector = True
-            if lora_model_path == "No LoRA":
-                lora_model_path = None
-                msg += " + No LoRA"
-            else:
-                msg += f" + {lora_model_path}"
-            model = LLaMA_Client(
-                model_name, lora_model_path, user_name=user_name)
-        elif model_type == ModelType.XMChat:
-            if os.environ.get("XMCHAT_API_KEY") != "":
-                access_key = os.environ.get("XMCHAT_API_KEY")
-            model = XMChat(api_key=access_key, user_name=user_name)
-        elif model_type == ModelType.StableLM:
-            from .StableLM import StableLM_Client
-            model = StableLM_Client(model_name, user_name=user_name)
-        elif model_type == ModelType.MOSS:
-            from .MOSS import MOSS_Client
-            model = MOSS_Client(model_name, user_name=user_name)
-        elif model_type == ModelType.YuanAI:
-            from .inspurai import Yuan_Client
-            model = Yuan_Client(model_name, api_key=access_key, user_name=user_name, system_prompt=system_prompt)
-        elif model_type == ModelType.Minimax:
-            from .minimax import MiniMax_Client
-            if os.environ.get("MINIMAX_API_KEY") != "":
-                access_key = os.environ.get("MINIMAX_API_KEY")
-            model = MiniMax_Client(model_name, api_key=access_key, user_name=user_name, system_prompt=system_prompt)
-        elif model_type == ModelType.ChuanhuAgent:
-            from .ChuanhuAgent import ChuanhuAgent_Client
-            model = ChuanhuAgent_Client(model_name, access_key, user_name=user_name)
         elif model_type == ModelType.Unknown:
             logging.info(f"正在加载OpenAI模型: {model_name}")
             model = OpenAIClient(

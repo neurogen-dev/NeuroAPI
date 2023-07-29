@@ -2,9 +2,6 @@
 import os
 from pathlib import Path
 import gradio as gr
-from .webui_locale import I18nAuto
-
-i18n = I18nAuto()  # internationalization
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -12,53 +9,53 @@ LLAMA_MODEL = None
 LLAMA_INFERENCER = None
 
 # ChatGPT 设置
-INITIAL_SYSTEM_PROMPT = "You are a helpful assistant."
+INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. Respond using markdown."
 API_HOST = "http://127.0.0.1:1337"
 COMPLETION_URL = "http://127.0.0.1:1337/v1/chat/completions"
-BALANCE_API_URL="https://api.openai.com/dashboard/billing/credit_grants"
-USAGE_API_URL="https://api.openai.com/dashboard/billing/usage"
+BALANCE_API_URL="http://127.0.0.1:1337/v1/dashboard/billing/credit_grants"
+USAGE_API_URL="http://127.0.0.1:1337/v1/dashboard/billing/usage"
 HISTORY_DIR = Path("history")
 HISTORY_DIR = "history"
 TEMPLATES_DIR = "templates"
 
 # 错误信息
-STANDARD_ERROR_MSG = i18n("☹️发生了错误：")  # 错误信息的标准前缀
-GENERAL_ERROR_MSG = i18n("获取对话时发生错误，请查看后台日志")
-ERROR_RETRIEVE_MSG = i18n("请检查网络连接，或者API-Key是否有效。")
-CONNECTION_TIMEOUT_MSG = i18n("连接超时，无法获取对话。")  # 连接超时
-READ_TIMEOUT_MSG = i18n("读取超时，无法获取对话。")  # 读取超时
-PROXY_ERROR_MSG = i18n("代理错误，无法获取对话。")  # 代理错误
-SSL_ERROR_PROMPT = i18n("SSL错误，无法获取对话。")  # SSL 错误
-NO_APIKEY_MSG = i18n("API key为空，请检查是否输入正确。")  # API key 长度不足 51 位
-NO_INPUT_MSG = i18n("请输入对话内容。")  # 未输入对话内容
-BILLING_NOT_APPLICABLE_MSG = i18n("账单信息不适用") # 本地运行的模型返回的账单信息
+STANDARD_ERROR_MSG = "☹️Произошла ошибка:"# Стандартный префикс для сообщений об ошибках 
+GENERAL_ERROR_MSG = "Произошла ошибка при получении диалога, пожалуйста, проверьте лог бэкенда"
+ERROR_RETRIEVE_MSG = "Пожалуйста, проверьте свое интернет-соединение или валидность API-Key."
+CONNECTION_TIMEOUT_MSG = "Тайм-аут соединения, не удалось получить диалог."# Тайм-аут соединения 
+READ_TIMEOUT_MSG = "Тайм-аут чтения, не удалось получить диалог."# Тайм-аут чтения 
+PROXY_ERROR_MSG = "Ошибка прокси, не удалось получить диалог."# Ошибка прокси 
+SSL_ERROR_PROMPT = "Ошибка SSL, не удалось получить диалог."# Ошибка SSL 
+NO_APIKEY_MSG = "API key пуст, пожалуйста, проверьте, правильно ли он введен."# Длина API key меньше 51 бита 
+NO_INPUT_MSG = "Пожалуйста, введите содержание диалога."# Не введено содержание диалога 
+BILLING_NOT_APPLICABLE_MSG = "Информация о биллинге не применима"# Информация о биллинге, возвращаемая локально запущенной моделью
 
-TIMEOUT_STREAMING = 60  # 流式对话时的超时时间
-TIMEOUT_ALL = 200  # 非流式对话时的超时时间
-ENABLE_STREAMING_OPTION = True  # 是否启用选择选择是否实时显示回答的勾选框
-HIDE_MY_KEY = True  # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
-CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
+TIMEOUT_STREAMING = 60 # Время ожидания для потокового диалога 
+TIMEOUT_ALL = 400 # Время ожидания для непотокового диалога 
+ENABLE_STREAMING_OPTION = True # Включить ли флажок для выбора отображения ответа в режиме реального времени 
+HIDE_MY_KEY = False # Если вы хотите скрыть свой API ключ в UI, установите это значение в True 
+CONCURRENT_COUNT = 100 # Количество пользователей, которые могут использовать одновременно
 
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-CHUANHU_TITLE = i18n("川虎Chat 🚀")
+CHUANHU_TITLE = "NeuroGPT (v 1.1.1)"
 
-CHUANHU_DESCRIPTION = i18n("由Bilibili [土川虎虎虎](https://space.bilibili.com/29125536)、[明昭MZhao](https://space.bilibili.com/24807452) 和 [Keldos](https://github.com/Keldos-Li) 开发<br />访问川虎Chat的 [GitHub项目](https://github.com/GaiZhenbiao/ChuanhuChatGPT) 下载最新版脚本")
+CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.1.1"
 
 
 ONLINE_MODELS = [
-    "gpt-3.5-turbo",
-    "gpt-3.5-turbo-16k",
-    "claude-2",
-    'gpt-3.5-turbo-16k-openai (Chimera API)',
-    'gpt-4 (Chimera API)',
-    'gpt-4-0613 (Chimera API)',
-    'gpt-4-32k-poe (Chimera API)',
-    'claude_instant (Chimera API)',
-    'claude-instant-100k (Chimera API)',
-    'claude-2-100k (Chimera API)',
-    'sage (Chimera API)'
+    'gpt-3.5-turbo',
+    #'gpt-3.5-turbo-16k',
+    'gpt-3.5-turbo-16k-chimera-api',
+    'gpt-3.5-turbo-16k-chatty-api',
+    'gpt-4-chimera-api',
+    'gpt-4-chatty-api',
+    #'gpt-4 (Нестабильно)',
+    'gpt-4-32k-chatty-api',
+    'llama-2-70b-chat-chimera-api',
+    'claude-2'
+    #'bing',
 ]
 
 LOCAL_MODELS = [
@@ -110,9 +107,9 @@ MODEL_TOKEN_LIMIT = {
     "claude-2-100k": 100000,
 }
 
-TOKEN_OFFSET = 1000 # Вычитайте это значение из лимита токенов модели, чтобы получить мягкий предел. После достижения мягкого предела попробуйте снизить использование токенов. 
-DEFAULT_TOKEN_LIMIT = 4096 # Предел токенов по умолчанию 
-REDUCE_TOKEN_FACTOR = 0.5 # Умножьте на лимит токенов модели, чтобы получить целевое количество токенов. При снижении использования токенов уменьшите его до значения ниже целевого количества токенов.
+TOKEN_OFFSET = 1000 
+DEFAULT_TOKEN_LIMIT = 4096 
+REDUCE_TOKEN_FACTOR = 0.5
 
 REPLY_LANGUAGES = [
     "Русский",
@@ -162,7 +159,7 @@ SUMMARIZE_PROMPT = """Write a concise summary of the following:
 
 {text}
 
-CONCISE SUMMARY IN РУССКИЙ:"""
+CONCISE SUMMARY IN RUSSIAN:"""
 
 ALREADY_CONVERTED_MARK = "<!-- ALREADY CONVERTED BY PARSER. -->"
 

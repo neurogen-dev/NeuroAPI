@@ -1,5 +1,5 @@
-gradio
-gradio_client
+gradio==3.36.1
+gradio_client==0.2.7
 psycopg2-binary
 pypinyin
 tiktoken
@@ -8,7 +8,7 @@ tqdm
 colorama
 googlesearch-python
 Pygments
-langchain
+langchain==0.0.173
 markdown
 PyPDF2
 pdfplumber
@@ -17,7 +17,7 @@ commentjson
 openpyxl
 pandoc
 wolframalpha
-faiss-cpu
+faiss-cpu==1.7.4
 git+https://github.com/deedy5/duckduckgo_search
 arxiv
 wikipedia

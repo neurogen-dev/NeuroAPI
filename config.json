@@ -1,7 +1,8 @@
 {
-    // Ваш OpenAI API Key, обычно обязателен,
-    // Если пропущен, то "openai_api_key": "" требуется ввести в графическом интерфейсе
-    "openai_api_key": " ",
+    "openai_api_key": "", // Введите тут ваш ключ Chimera API
+    "purgpt_api_key":"purgpt-bnuz1whhuumfpb18y62emd", // Введите тут ваш ключ PurGPT API
+    "chatty_api_key":"sk-mPzulsWu8bgsEPfo001cF33fDeE8464eA72024F82e5eE654", // Введите тут ваш ключ Chatty API
+    "pawan_api_key": " ", // Введите тут ваш ключ Pawan.krd
     "google_palm_api_key": "",
     "xmchat_api_key": "",
     "usage_limit": 999, // Месячный лимит API Key, в долларах США
