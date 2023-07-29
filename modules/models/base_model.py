@@ -413,8 +413,7 @@ class BaseLLMModel:
                 yield chatbot, status_text
         except Exception as e:
             traceback.print_exc()
-            status_text = STANDARD_ERROR_MSG + str(e)
-            yield chatbot, status_text
+            yield chatbot, "Ошибка: " + str(e)
 
         if len(self.history) > 1 and self.history[-1]["content"] != inputs:
             logging.info(
@@ -425,8 +424,6 @@ class BaseLLMModel:
             )
 
         if limited_context:
-            # self.history = self.history[-4:]
-            # self.all_token_counts = self.all_token_counts[-2:]
             self.history = []
             self.all_token_counts = []
 
@@ -442,9 +439,7 @@ class BaseLLMModel:
                 count += 1
                 del self.all_token_counts[0]
                 del self.history[:2]
-            logging.info(status_text)
-            status_text = f"Чтобы избежать превышения лимита токенов, модель забыла {count} предыдущих диалогов"
-            yield chatbot, status_text
+            yield chatbot, f"Чтобы избежать превышения лимита токенов, модель забыла {count} предыдущих ответов"
 
         self.auto_save(chatbot)
 
@@ -505,7 +500,7 @@ class BaseLLMModel:
 
     def set_token_upper_limit(self, new_upper_limit):
         self.token_upper_limit = new_upper_limit
-        print(f"Верхний лимит токенов установлен на {new_upper_limit}")
+        print(f"Максимальный лимит токенов установлен на {new_upper_limit}")
 
     def set_temperature(self, new_temperature):
         self.temperature = new_temperature
@@ -577,12 +572,12 @@ class BaseLLMModel:
             self.history.pop()
             self.history.pop()
         if len(chatbot) > 0:
-            msg = "Удалена одна пара диалогов chatbot"
+            msg = "Удалена одна пара ответов chatbot"
             chatbot.pop()
         if len(self.all_token_counts) > 0:
-            msg = "Удалена одна пара диалогов с подсчетом токенов"
+            msg = "Удалена одна пара ответов с подсчетом токенов"
             self.all_token_counts.pop()
-        msg = "Удалена одна пара диалогов"
+        msg = "Удалена одна пара ответов"
         return chatbot, msg
 
     def token_message(self, token_lst=None):
@@ -591,7 +586,7 @@ class BaseLLMModel:
         token_sum = 0
         for i in range(len(token_lst)):
             token_sum += sum(token_lst[: i + 1])
-        return "Количество токенов: " + f"{sum(token_lst)}" + "Текущий диалог использовал " + f"{token_sum} токенов"
+        return "Количество токенов: " + f"{sum(token_lst)}" + " Текущий диалог использовал " + f"{token_sum} токенов"
 
     def save_chat_history(self, filename, chatbot, user_name):
         if filename == "":

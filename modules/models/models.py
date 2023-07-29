@@ -264,11 +264,11 @@ class OpenAIClient(BaseLLMModel):
             timeout = TIMEOUT_ALL
 
         # Если модель gpt-4, изменяем хост API
-        if self.model_name == "gpt-3.5-turbo-16k-chimera-api" or self.model_name == "gpt-4-chimera-api" or self.model_name == "llama-2-70b-chat-chimera-api":
+        if "chimera" in self.model_name:
             shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
-        elif self.model_name == "bing":
+        elif "bing" in self.model_name:
             shared.state.completion_url = "https://purgpt.xyz/v1/bing"
-        elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+        elif "chatty" in self.model_name:
             shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
         else:
             shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
@@ -278,11 +278,11 @@ class OpenAIClient(BaseLLMModel):
     
         with retrieve_proxy():
             try:
-                if self.model_name == "gpt-3.5-turbo-16k-chimera-api" or self.model_name == "gpt-4-chimera-api" or self.model_name == "llama-2-70b-chat-chimera-api":
+                if "chimera" in self.model_name:
                     shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
                 elif self.model_name == "bing":
                     shared.state.completion_url = "https://purgpt.xyz/v1/bing"
-                elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
+                elif "chatty" in self.model_name:
                     shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
                 else:
                     shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
@@ -328,7 +328,6 @@ class OpenAIClient(BaseLLMModel):
                 try:
                     chunk = json.loads(chunk[6:])
                 except json.JSONDecodeError:
-                    logging.error("Ошибка разбора JSON, полученный контент: " + f"{chunk}")
                     error_msg += chunk
                     continue
                 if chunk_length > 6 and "delta" in chunk["choices"][0]:
@@ -337,10 +336,9 @@ class OpenAIClient(BaseLLMModel):
                     try:
                         yield chunk["choices"][0]["delta"]["content"]
                     except Exception as e:
-                        # logging.error(f"Error: {e}")
                         continue
         if error_msg:
-            raise Exception(error_msg)
+            yield "Ошибка разбора JSON, полученный контент: " + error_msg
 
     def set_key(self, new_access_key):
         ret = super().set_key(new_access_key)
