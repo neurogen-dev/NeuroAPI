@@ -519,9 +519,11 @@ def chat_completions():
     model = request.json['model']
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
-    if provider == 'Chimera':
-        response = g4f.ChatCompletion.create(model='gpt-4', provider=g4f.Provider.Chimera, stream=streaming,
-                                             messages=messages)
+    if provider == 'ClaudeAI':
+        from fp.fp import FreeProxy
+        proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.Chimera, stream=streaming,
+                                             messages=messages, proxy=proxy)
     else:
         if not provider:
             r = requests.get('https://provider.neurochat-gpt.ru/v1/status')

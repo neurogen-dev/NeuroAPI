@@ -2,7 +2,7 @@ import g4f
 
 # Set with provider
 stream = False
-response = g4f.ChatCompletion.create(model='gpt-3.5-turbo', provider=g4f.Provider.PurGPT, messages=[
+response = g4f.ChatCompletion.create(model='claude-2', provider=g4f.Provider.ClaudeAI, messages=[
                                      {"role": "user", "content": "hello"}], stream=stream)
 
 if stream:

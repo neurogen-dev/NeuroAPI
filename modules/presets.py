@@ -41,7 +41,7 @@ INDEX_QUERY_TEMPRATURE = 1.0
 
 CHUANHU_TITLE = "NeuroGPT (v 1.1.0)"
 
-CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.1.0"
+CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.1.1"
 
 
 ONLINE_MODELS = [
@@ -54,6 +54,7 @@ ONLINE_MODELS = [
     #'gpt-4 (Нестабильно)',
     'gpt-4-32k-chatty-api',
     'llama-2-70b-chat-chimera-api',
+    'claude-2'
     #'bing',
 ]
 
