@@ -44,13 +44,13 @@ CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https
 
 
 ONLINE_MODELS = [
-    'gpt-3.5-turbo-openai',
-    'gpt-3.5-turbo-16k-openai',
-    'gpt-4-openai',
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
     'gpt-3.5-turbo-16k-chimera-api',
     'gpt-3.5-turbo-16k-chatty-api',
     'gpt-4-chimera-api',
     'gpt-4-chatty-api',
+    #'gpt-4 (Нестабильно)',
     'gpt-4-32k-chatty-api',
     'llama-2-70b-chat-chimera-api',
     'claude-2'
@@ -68,6 +68,9 @@ CHATTY_MODELS = [
     'gpt-3.5-turbo-16k-chatty-api',
     'gpt-4-chatty-api',
     'gpt-4-32k-chatty-api',
+    'llama-2-70b-chat-chimera-api',
+    'claude-2'
+    #'bing',
 ]
 
 LOCAL_MODELS = [

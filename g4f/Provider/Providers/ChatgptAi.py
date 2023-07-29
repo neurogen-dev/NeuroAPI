@@ -3,7 +3,7 @@ import requests, re
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://chatgpt.ai/gpt-4/'
-model = ['gpt-4']
+model = ['gpt-3.5-turbo']
 supports_stream = False
 needs_auth = False
 working = True

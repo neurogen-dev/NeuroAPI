@@ -223,54 +223,6 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
-        elif self.model_name == "gpt-3.5-turbo-openai":
-            model = "gpt-3.5-turbo"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-3.5-turbo-16k-openai":
-            model = "gpt-3.5-turbo-16k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-3.5-turbo-16k-openai":
-            model = "gpt-3.5-turbo-16k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4-openai":
-            model = "gpt-4"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
         else:
             payload = {
             "model": self.model_name,

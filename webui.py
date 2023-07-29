@@ -498,11 +498,11 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
 
 logging.info(
     colorama.Back.GREEN
-    + "\n川虎的温馨提示：访问 http://localhost:7860 查看界面"
+    + "\nСтандартный адрес webui: http://127.0.0.1:7860 "
     + colorama.Style.RESET_ALL
 )
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
-demo.title = "川虎Chat 🚀"
+demo.title = "NeuroGPT 🚀"
 
 app = Flask(__name__)
 CORS(app)
@@ -616,9 +616,9 @@ def chat_completions():
                     }
                 ]
             }
-            print(token)
-            print(completion_data)
-            print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
+            #print(token)
+            #print(completion_data)
+            #print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
             time.sleep(0.01)
     print('===Start Streaming===')
