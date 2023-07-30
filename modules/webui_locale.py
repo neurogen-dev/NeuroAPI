@@ -5,7 +5,7 @@ import commentjson as json
 class I18nAuto:
     def __init__(self):
         if os.path.exists("config.json"):
-            with open("config.json", "r", encoding='utf-8') as f:
+            with open("config.json", "r") as f:
                 config = json.load(f)
         else:
             config = {}
@@ -16,7 +16,7 @@ class I18nAuto:
         self.language_map = {}
         self.file_is_exists = os.path.isfile(f"./locale/{language}.json")
         if self.file_is_exists:
-            with open(f"./locale/{language}.json", "r", encoding="utf-8") as f:
+            with open(f"./locale/{language}.json", "r") as f:
                 self.language_map.update(json.load(f))
 
     def __call__(self, key):

@@ -29,7 +29,7 @@ logging.getLogger("httpx").setLevel(logging.INFO)
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
 
-with open("assets/custom.css", "r", encoding="utf-8") as f:
+with open("assets/custom.css", "r") as f:
     customCSS = f.read()
 
 def create_new_model():

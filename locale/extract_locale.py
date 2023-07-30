@@ -7,13 +7,13 @@ import re
 pattern = r'i18n\((\"{3}.*?\"{3}|\".*?\")\)'
 
 # Load the .py file
-with open('ChuanhuChatbot.py', 'r', encoding='utf-8') as f:
+with open('ChuanhuChatbot.py', 'r') as f:
     contents = f.read()
 
 # Load the .py files in the modules folder
 for filename in os.listdir("modules"):
     if filename.endswith(".py"):
-        with open(os.path.join("modules", filename), "r", encoding="utf-8") as f:
+        with open(os.path.join("modules", filename), "r") as f:
             contents += f.read()
 
 # Matching with regular expressions
@@ -23,5 +23,5 @@ matches = re.findall(pattern, contents, re.DOTALL)
 data = {match.strip('()"'): '' for match in matches}
 
 # Save as a JSON file
-with open('labels.json', 'w', encoding='utf-8') as f:
+with open('labels.json', 'w') as f:
     json.dump(data, f, ensure_ascii=False, indent=4)

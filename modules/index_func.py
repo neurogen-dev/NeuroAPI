@@ -76,7 +76,7 @@ def get_documents(file_src):
             else:
                 logging.debug("Loading text file...")
                 from langchain.document_loaders import TextLoader
-                loader = TextLoader(filepath, "utf8")
+                loader = TextLoader(filepath)
                 texts = loader.load()
         except Exception as e:
             import traceback

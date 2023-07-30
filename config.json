@@ -1,52 +1,36 @@
 {
-    "openai_api_key": "", // Введите тут ваш ключ Chimera API
-    "purgpt_api_key":"purgpt-bnuz1whhuumfpb18y62emd", // Введите тут ваш ключ PurGPT API
-    "chatty_api_key":"sk-mPzulsWu8bgsEPfo001cF33fDeE8464eA72024F82e5eE654", // Введите тут ваш ключ Chatty API
-    "pawan_api_key": " ", // Введите тут ваш ключ Pawan.krd
+    "openai_api_key": "",
+    "purgpt_api_key":"purgpt-bnuz1whhuumfpb18y62emd",
+    "chatty_api_key":"sk-mPzulsWu8bgsEPfo001cF33fDeE8464eA72024F82e5eE654",
+    "pawan_api_key": " ",
     "google_palm_api_key": "",
     "xmchat_api_key": "",
-    "usage_limit": 999, // Месячный лимит API Key, в долларах США
-    // Ваш xmchat API Key, отличается от OpenAI API Key
-    // APIKey MiniMax (смотрите страницу управления учетной записью https://api.minimax.chat/basic-information) и Group ID, используется для модели диалога MiniMax
+    "usage_limit": 999,
     "minimax_api_key": "",
     "minimax_group_id": "",
     "language": "ru_RU",
-    // Поддержка настройки базового адреса OpenAI API
-    // "openai_api_base": "http://127:0.0.1:1337",
-    // Если используется прокси, раскомментируйте следующие две строки и замените URL прокси
-    // "https_proxy": "http://127.0.0.1:1079",
-    // "http_proxy": "http://127.0.0.1:1079",
-    "users": [], // Список пользователей, [[имя пользователя1, пароль1], [имя пользователя2, пароль2], ...]
-    "local_embedding": false, //Создать ли индекс локально
-    "hide_history_when_not_logged_in": false, //Скрыть ли историю диалогов, если пользователь не вошел в систему
-    "check_update": false, //Включить ли проверку обновлений
-    "default_model": "gpt-3.5-turbo", // Модель по умолчанию
-
-    //Настройки помощника Chuanhu
-    "default_chuanhu_assistant_model": "gpt-3.5-turbo", //Модель, используемая помощником Chuanhu, может быть gpt-3.5-turbo или gpt-4
-    "GOOGLE_CSE_ID": "", //ID поискового движка Google, используется в режиме Chuanhu Assistant Pro, способ получения смотрите здесь https://stackoverflow.com/questions/37083058/programmatically-searching-google-in-python-using-custom-search
-    "GOOGLE_API_KEY": "", //Google API Key, используется в режиме Chuanhu Assistant Pro
-    "WOLFRAM_ALPHA_APPID": "", //Wolfram Alpha API Key, используется в режиме Chuanhu Assistant Pro, способ получения смотрите здесь https://products.wolframalpha.com/api/
-    "SERPAPI_API_KEY": "", //SerpAPI API Key, используется в режиме Chuanhu Assistant Pro, способ получения смотрите здесь https://serpapi.com/
-
+    "users": [],
+    "local_embedding": false,
+    "hide_history_when_not_logged_in": false,
+    "check_update": false,
+    "default_model": "gpt-3.5-turbo",
+    "default_chuanhu_assistant_model": "gpt-3.5-turbo",
+    "GOOGLE_CSE_ID": "",
+    "GOOGLE_API_KEY": "",
+    "WOLFRAM_ALPHA_APPID": "",
+    "SERPAPI_API_KEY": "",
     "advance_docs": {
         "pdf": {
-            // Считать ли PDF двухколоночным
             "two_column": false,
-            // Использовать ли OCR для распознавания формул в PDF
             "formula_ocr": true
         }
     },
-    // Использовать ли несколько API Key по очереди
     "multi_api_key": false,
     "api_key_list": [
         "sk-xxxxxxxxxxxxxxxxxxxxxxxx1",
         "sk-xxxxxxxxxxxxxxxxxxxxxxxx2",
         "sk-xxxxxxxxxxxxxxxxxxxxxxxx3"
     ],
-    // Если используется пользовательский порт или пользовательский IP, раскомментируйте и замените соответствующий контент
      "server_name": "0.0.0.0",
-    // "server_port": 7860,
-    // Если хотите поделиться через gradio, установите значение true
      "share": false
 }

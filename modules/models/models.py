@@ -34,7 +34,7 @@ class OpenAIClient(BaseLLMModel):
             system_prompt=system_prompt,
             user=user_name
         )
-        with open("config.json", "r", encoding="utf-8") as f:
+        with open("config.json", "r") as f:
             self.configuration_json = cjson.load(f)
         self.api_key = api_key
         self.need_api_key = True
@@ -292,7 +292,7 @@ def get_model(
 
 
 if __name__ == "__main__":
-    with open("config.json", "r", encoding="utf-8") as f:
+    with open("config.json", "r") as f:
         openai_api_key = cjson.load(f)["openai_api_key"]
     # set logging level to debug
     logging.basicConfig(level=logging.DEBUG)
