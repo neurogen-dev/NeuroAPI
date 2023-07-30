@@ -233,7 +233,14 @@ class OpenAIClient(BaseLLMModel):
                     except Exception as e:
                         continue
         if error_msg:
-            yield "Провайдер API ответил ошибкой: " + error_msg
+            if "Not authenticated" in error_msg:
+                yield "ОШИБКА: Ключ ChimeraAPI не обнаружен. Убедитесь что ввели его."
+            elif "Invalid API key" in error_msg:
+                yield "ОШИБКА: Неверный ключ ChimeraAPI. Возможно вы ввели его неправильно либо он деактивирован. Вы можете сгенерировать его заново в Discord: https://discord.gg/chimeragpt"
+            elif "one_api_error" in error_msg:
+                yield "ОШИБКА: Сервер Chatty API недоступен. Попробуйте позднее."
+            else:
+                yield "Провайдер API ответил ошибкой: " + error_msg
 
     def set_key(self, new_access_key):
         ret = super().set_key(new_access_key)
