@@ -5,9 +5,8 @@ import json
 import commentjson as cjson
 import requests
 
-
 import colorama
-from g4f import ChatCompletion, Provider
+
 
 from ..presets import *
 from ..index_func import *
@@ -35,6 +34,8 @@ class OpenAIClient(BaseLLMModel):
             system_prompt=system_prompt,
             user=user_name
         )
+        with open("config.json", "r", encoding="utf-8") as f:
+            self.configuration_json = cjson.load(f)
         self.api_key = api_key
         self.need_api_key = True
         self._refresh_header()
@@ -49,6 +50,7 @@ class OpenAIClient(BaseLLMModel):
                 yield partial_text
         else:
             yield STANDARD_ERROR_MSG + GENERAL_ERROR_MSG
+
 
     def get_answer_at_once(self):
         response = self._get_response()
@@ -77,10 +79,8 @@ class OpenAIClient(BaseLLMModel):
                 usage_data = self._get_billing_data(usage_url)
             except Exception as e:
                 None
-            # rounded_usage = "{:.5f}".format(usage_data["total_usage"] / 100)
             rounded_usage = round(usage_data["total_usage"] / 100, 5)
             usage_percent = round(usage_data["total_usage"] / usage_limit, 2)
-            # return i18n("**本月使用金额** ") + f"\u3000 ${rounded_usage}"
             return get_html("billing_info.html").format(
                     label = "Ежемесячное использование",
                     usage_percent = usage_percent,
@@ -99,49 +99,66 @@ class OpenAIClient(BaseLLMModel):
 
     @shared.state.switching_api_key  # 在不开启多账号模式的时候，这个装饰器不会起作用
     def _get_response(self, stream=False):
-        openai_api_key = self.api_key
-        system_prompt = self.system_prompt
-        history = self.history
-        logging.debug(colorama.Fore.YELLOW +
-                      f"{history}" + colorama.Fore.RESET)
+        headers = self._get_headers()
+        history = self._get_history()
+        payload = self._get_payload(history, stream)
+        shared.state.completion_url = self._get_api_url()
+        logging.info(f"Используется API URL: {shared.state.completion_url}")
+        with retrieve_proxy():
+            response = self._make_request(headers, payload, stream)
+        return response
+
+    def _get_api_url(self):
+        if "chimera" in self.model_name: 
+            url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
+        elif "bing" in self.model_name:
+            url = "https://purgpt.xyz/v1/bing"
+        elif "chatty" in self.model_name:
+            url = "https://chattyapi.tech/v1/chat/completions"
+        else:
+            url = "http://127.0.0.1:1337/v1/chat/completions"
+        return url
+      
+    def _get_headers(self):
         if self.model_name == "bing":
-            with open("config.json", "r", encoding="utf-8") as f:
-                purgpt_api_key = cjson.load(f)["purgpt_api_key"]
+            purgpt_api_key = self.configuration_json["purgpt_api_key"]
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {purgpt_api_key}",
             }
-        elif self.model_name == "gpt-4-32k-chatty-api" or self.model_name == "gpt-4-chatty-api" or self.model_name == "gpt-3.5-turbo-16k-chatty-api":
-            with open("config.json", "r", encoding="utf-8") as f:
-                chatty_api_key = cjson.load(f)["chatty_api_key"]
+        elif "chatty" in self.model_name:
+            chatty_api_key = self.configuration_json["chatty_api_key"]
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {chatty_api_key}",
             }
-            #print(f"Bearer {chatty_api_key}")
         else:
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {openai_api_key}",
+                "Authorization": f"Bearer {self.api_key}",
             }
-
+        return headers
+         
+    def _get_history(self):
+        system_prompt = self.system_prompt
+        history = self.history
+        logging.debug(colorama.Fore.YELLOW + f"{history}" + colorama.Fore.RESET)
         if system_prompt is not None:
             history = [construct_system(system_prompt), *history]
+        return history
 
+    def _get_payload(self, history, stream): 
+        model_names = {
+            'gpt-4-chimera-api': 'gpt-4',
+            'gpt-4-0314-chimera-api': 'gpt-4-0314',
+            'llama-2-70b-chat-chimera-api': 'llama-2-70b-chat',
+            'gpt-3.5-turbo-16k-chimera-api': 'gpt-3.5-turbo-16k',
+            'gpt-3.5-turbo-16k-chatty-api': 'gpt-3.5-turbo-16k',
+            'gpt-4-chatty-api': 'gpt-4',
+            'gpt-4-32k-chatty-api': 'gpt-4-32k'
+        }
+        model = model_names.get(self.model_name, self.model_name)
         payload = {
-            "model": self.model_name,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-
-        if self.model_name == "gpt-4-chimera-api":
-            model = "gpt-4"
-            payload = {
             "model": model,
             "messages": history,
             "temperature": self.temperature,
@@ -151,90 +168,6 @@ class OpenAIClient(BaseLLMModel):
             "presence_penalty": self.presence_penalty,
             "frequency_penalty": self.frequency_penalty,
         }
-        elif self.model_name == "gpt-4-0314-chimera-api":
-            model = "gpt-4-0314"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "llama-2-70b-chat-chimera-api":
-            model = "llama-2-70b-chat"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-3.5-turbo-16k-chimera-api":
-            model = "gpt-3.5-turbo-16k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-3.5-turbo-16k-chatty-api":
-            model = "gpt-3.5-turbo-16k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4-chatty-api":
-            model = "gpt-4"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        elif self.model_name == "gpt-4-32k-chatty-api":
-            model = "gpt-4-32k"
-            payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        else:
-            payload = {
-            "model": self.model_name,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-
         if self.max_generation_token is not None:
             payload["max_tokens"] = self.max_generation_token
         if self.stop_sequence is not None:
@@ -243,45 +176,23 @@ class OpenAIClient(BaseLLMModel):
             payload["logit_bias"] = self.logit_bias
         if self.user_identifier:
             payload["user"] = self.user_identifier
+        return payload
 
+    def _make_request(self, headers, payload, stream):
         if stream:
             timeout = TIMEOUT_STREAMING
         else:
             timeout = TIMEOUT_ALL
-
-        # Если модель gpt-4, изменяем хост API
-        if "chimera" in self.model_name:
-            shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
-        elif "bing" in self.model_name:
-            shared.state.completion_url = "https://purgpt.xyz/v1/bing"
-        elif "chatty" in self.model_name:
-            shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
-        else:
-            shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
-            logging.info(f"Используется API URL: {shared.state.completion_url}")
-    
-        logging.info(f"Используется API URL: {shared.state.completion_url}")
-    
-        with retrieve_proxy():
-            try:
-                if "chimera" in self.model_name:
-                    shared.state.completion_url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
-                elif self.model_name == "bing":
-                    shared.state.completion_url = "https://purgpt.xyz/v1/bing"
-                elif "chatty" in self.model_name:
-                    shared.state.completion_url = "https://chattyapi.tech/v1/chat/completions"
-                else:
-                    shared.state.completion_url = "http://127.0.0.1:1337/v1/chat/completions"
-                
-                response = requests.post(
-                    shared.state.completion_url,
-                    headers=headers,
-                    json=payload,
-                    stream=stream,
-                    timeout=timeout,
-                )
-            except:
-                return None
+        try:
+            response = requests.post(
+                shared.state.completion_url,
+                headers=headers,
+                json=payload,
+                stream=stream,
+                timeout=timeout,
+            )
+        except:
+            return None
         return response
 
     def _refresh_header(self):
@@ -297,14 +208,11 @@ class OpenAIClient(BaseLLMModel):
                 headers=self.headers,
                 timeout=TIMEOUT_ALL,
             )
-
         if response.status_code == 200:
             data = response.json()
             return data
         else:
-            raise Exception(
-                f"API request failed with status code {response.status_code}: {response.text}"
-            )
+            raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
 
     def _decode_chat_response(self, response):
         error_msg = ""
