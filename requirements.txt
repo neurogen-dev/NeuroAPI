@@ -43,7 +43,6 @@ retrying
 mailgw_temporary_email
 pycryptodome
 random-password-generator
-numpy==1.24.4
 tornado>=6.3.2
 PyExecJS
 browser_cookie3
@@ -53,7 +52,5 @@ flask-cors
 gevent
 pytz
 gunicorn
-transformers
 huggingface_hub
-protobuf==3.19.5
 free-proxy

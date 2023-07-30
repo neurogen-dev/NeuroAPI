@@ -24,7 +24,7 @@ from flask_cors import CORS
 
 import g4f
 
-logging.getLogger("httpx").setLevel(logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
@@ -497,11 +497,17 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     checkUpdateBtn.click(fn=None, _js='()=>{manualCheckUpdate();}')
 
 logging.info(
-    colorama.Back.GREEN
-    + "\nСтандартный адрес webui: http://127.0.0.1:7860 "
+    colorama.Back.BLUE
+    + "Версия программы: " + VERSION
     + colorama.Style.RESET_ALL
 )
-# 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
+
+logging.info(
+    colorama.Back.GREEN
+    + "\nАдрес webui: http://127.0.0.1:7860 "
+    + colorama.Style.RESET_ALL
+)
+
 demo.title = "NeuroGPT 🚀"
 
 app = Flask(__name__)
@@ -773,7 +779,7 @@ def run_gradio_server():
       share=share,
       auth=auth_list if authflag else None,
       favicon_path="./assets/favicon.ico",
-      inbrowser=not dockerflag, # 禁止 в docker 下 открывать inbrowser
+      inbrowser=not dockerflag,
     )
 
 if __name__ == '__main__':

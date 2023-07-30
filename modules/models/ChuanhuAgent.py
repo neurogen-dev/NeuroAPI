@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from langchain.chains.summarize import load_summarize_chain
 from langchain import PromptTemplate, LLMChain
 from langchain.chat_models import ChatOpenAI
@@ -33,7 +32,7 @@ from collections import deque
 
 from .base_model import BaseLLMModel, CallbackToIterator, ChuanhuCallbackHandler
 from ..config import default_chuanhu_assistant_model
-from ..presets import SUMMARIZE_PROMPT, i18n
+from ..presets import SUMMARIZE_PROMPT
 from ..index_func import construct_index
 
 from langchain.callbacks import get_openai_callback
@@ -111,11 +110,11 @@ class ChuanhuAgent_Client(BaseLLMModel):
         status = gr.Markdown.update()
         if files:
             index = construct_index(file_src=files)
-            assert index is not None, "获取索引失败"
+            assert index is not None, "Сбой получения индексации"
             self.index = index
-            status = i18n("索引构建完成")
+            status = "Создание индексации завершено"
             # Summarize the document
-            logging.info(i18n("生成内容总结中……"))
+            logging.info("Генерирация краткого изложения контента……")
             with get_openai_callback() as cb:
                 os.environ["OPENAI_API_KEY"] = self.api_key
                 from langchain.chains.summarize import load_summarize_chain
@@ -149,7 +148,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # 提取所有的文本
+        # Извлеките весь текст
         text = ''.join(s.getText() for s in soup.find_all('p'))
         logging.info(f"Extracted text from {url}")
         return text
@@ -176,13 +175,13 @@ class ChuanhuAgent_Client(BaseLLMModel):
         db = FAISS.from_documents(texts, embeddings)
         retriever = db.as_retriever()
         qa = RetrievalQA.from_chain_type(llm=self.cheap_llm, chain_type="stuff", retriever=retriever)
-        return qa.run(f"{question} Reply in 中文")
+        return qa.run(f"{question} Reply in Русский")
 
     def get_answer_at_once(self):
         question = self.history[-1]["content"]
         # llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
         agent = initialize_agent(self.tools, self.llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
-        reply = agent.run(input=f"{question} Reply in 简体中文")
+        reply = agent.run(input=f"{question} Reply in Русский")
         return reply, -1
 
     def get_answer_stream_iter(self):
@@ -202,7 +201,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
                 )
             agent = initialize_agent(self.tools, self.llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True, callback_manager=manager)
             try:
-                reply = agent.run(input=f"{question} Reply in 简体中文")
+                reply = agent.run(input=f"{question} Reply in Русский")
             except Exception as e:
                 import traceback
                 traceback.print_exc()

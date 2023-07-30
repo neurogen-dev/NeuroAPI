@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 import gradio as gr
 
+VERSION = "v 1.1.2"
+
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
 LLAMA_MODEL = None
@@ -38,9 +40,9 @@ CONCURRENT_COUNT = 100 # Количество пользователей, кот
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-CHUANHU_TITLE = "NeuroGPT (v 1.1.1)"
+CHUANHU_TITLE = "NeuroGPT " + VERSION
 
-CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br> Версия: 1.1.1"
+CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br>"
 
 
 ONLINE_MODELS = [
@@ -94,8 +96,6 @@ else:
 
 DEFAULT_MODEL = 0
 
-os.makedirs("models", exist_ok=True)
-os.makedirs("lora", exist_ok=True)
 os.makedirs("history", exist_ok=True)
 for dir_name in os.listdir("models"):
     if os.path.isdir(os.path.join("models", dir_name)):

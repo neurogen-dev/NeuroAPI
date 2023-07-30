@@ -114,8 +114,10 @@ def construct_index(
     index_name = get_index_name(file_src)
     index_path = f"./index/{index_name}"
     if local_embedding:
-        from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-        embeddings = HuggingFaceEmbeddings(model_name = "sentence-transformers/distiluse-base-multilingual-cased-v2")
+        #from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+       #embeddings = HuggingFaceEmbeddings(model_name = "sentence-transformers/distiluse-base-multilingual-cased-v2")
+        from langchain.embeddings import OpenAIEmbeddings
+        embeddings = OpenAIEmbeddings(openai_api_base=os.environ.get("OPENAI_API_BASE", None), openai_api_key=os.environ.get("OPENAI_EMBEDDING_API_KEY", api_key))
     else:
         from langchain.embeddings import OpenAIEmbeddings
         embeddings = OpenAIEmbeddings(openai_api_base=os.environ.get("OPENAI_API_BASE", None), openai_api_key=os.environ.get("OPENAI_EMBEDDING_API_KEY", api_key))
