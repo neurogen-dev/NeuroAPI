@@ -515,7 +515,6 @@ CORS(app)
 
 @app.route("/chat/completions", methods=['POST'])
 @app.route("/v1/chat/completions", methods=['POST'])
-@app.route("/", methods=['POST'])
 def chat_completions():
     streaming = request.json.get('stream', False)
     streaming_ = request.json.get('stream', False)
@@ -587,6 +586,8 @@ def chat_completions():
             'object': 'chat.completion',
             'created': completion_timestamp,
             'model': model,
+            'provider':provider_name,	
+            'supports_stream':getattr(g4f.Provider,provider_name).supports_stream,
             'usage': {
                 'prompt_tokens': len(messages),
                 'completion_tokens': len(response),
