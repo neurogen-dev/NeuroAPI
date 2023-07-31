@@ -75,8 +75,8 @@ CHIMERA_MODELS = [
 
 CHATTY_MODELS = [
     'gpt-3.5-turbo-16k-chatty-api',
-    'gpt-4-chatty-api',
-    'gpt-4-32k-chatty-api',
+    #'gpt-4-chatty-api',
+    #'gpt-4-32k-chatty-api',
 ]
 
 
