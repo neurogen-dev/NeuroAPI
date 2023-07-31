@@ -4,7 +4,7 @@ from ...typing import sha256, Dict, get_type_hints
 url = 'https://liaobots.com'
 model = ['gpt-3.5-turbo', 'gpt-4']
 supports_stream = True
-needs_auth = True
+needs_auth = False
 working = True
 
 models = {

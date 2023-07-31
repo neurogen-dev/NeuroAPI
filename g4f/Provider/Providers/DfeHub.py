@@ -3,7 +3,7 @@ from ...typing import sha256, Dict, get_type_hints
 import json
 
 url = "https://chat.dfehub.com/api/chat"
-model = ['gpt-4-standart']
+model = ['gpt-4']
 supports_stream = False
 needs_auth = False
 working = True
@@ -29,7 +29,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
 
     json_data = {
         'messages': messages,
-        'model': 'gpt-4',
+        'model': model,
         'temperature': 0.5,
         'presence_penalty': 0,
         'frequency_penalty': 0,
