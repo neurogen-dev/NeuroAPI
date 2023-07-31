@@ -524,7 +524,7 @@ def chat_completions():
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
     if provider == 'ClaudeAI':
-        proxy = FreeProxy(country_id=['NL', 'FL', 'US', 'GB'], timeout=1.0, rand=True).get()
+        proxy = FreeProxy(country_id=['NL','FL', 'US', 'GB'], timeout=1.0, rand=True).get()
         print(proxy)
         response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.ClaudeAI, stream=False,
                                              messages=messages, proxy=proxy)
@@ -606,7 +606,6 @@ def chat_completions():
             }]
         }
     
-    print(response)
     def stream():
         nonlocal response
         for token in response:
@@ -628,12 +627,12 @@ def chat_completions():
                     }
                 ]
             }
-            print(token)
-            print(completion_data)
-            print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
+            #print(token)
+            #print(completion_data)
+            #print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
             time.sleep(0.01)
-    print('===Start Streaming===')
+    #print('===Start Streaming===')
     return app.response_class(stream(), mimetype='text/event-stream')
 
 @app.route("/v1/dashboard/billing/subscription")
