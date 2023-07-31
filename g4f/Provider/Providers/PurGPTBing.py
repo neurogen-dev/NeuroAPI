@@ -13,22 +13,8 @@ with open("config.json", "r", encoding="utf-8") as f:
 purgpt_api_key = os.environ.get("PURGPT_API_KEY", purgpt_api_key)
 
 
-url = 'https://beta.purgpt.xyz/v1/chat/completions'
+url = 'https://purgpt.xyz/v1/bing'
 model = [
-    'babbage',
-    'davinci',
-    'text-davinci-001',
-    'ada',
-    'text-curie-001',
-    'text-ada-001',
-    'curie-instruct-beta',
-    'davinci-instruct-beta',
-    'text-davinci-003',
-    'text-babbage-001',
-    'curie',
-    'text-davinci-002',
-    'gpt-3.5-turbo',
-    'gpt-3.5-turbo-16k',
     'bing'
 ]
 

@@ -113,6 +113,8 @@ class OpenAIClient(BaseLLMModel):
             url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
+        elif "claude" in self.model_name:
+            url = "https://provider.neurochat-gpt.ru/v1/chat/completions"
         else:
             url = "http://127.0.0.1:1337/v1/chat/completions"
         return url

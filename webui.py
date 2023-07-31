@@ -24,6 +24,8 @@ from flask_cors import CORS
 
 import g4f
 
+from fp.fp import FreeProxy
+
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
@@ -522,13 +524,15 @@ def chat_completions():
     messages = request.json.get('messages')
     provider = request.json.get('provider', False)
     if provider == 'ClaudeAI':
-        from fp.fp import FreeProxy
-        proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
-        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.ClaudeAI, stream=True,
+        proxy = FreeProxy(country_id=['NL', 'FL', 'US', 'GB'], timeout=1.0, rand=True).get()
+        print(proxy)
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.ClaudeAI, stream=False,
                                              messages=messages, proxy=proxy)
-    elif "text" in model:
-        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.Vercel, stream=False,
-                                             messages=messages)
+    elif provider == "BingHuan":
+        proxy = FreeProxy(country_id=['FL'], timeout=1.0, rand=True).get()
+        print(proxy)
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.BingHuan, stream=False,
+                                             messages=messages, proxy=proxy)
     else:
         if not provider:
             r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
@@ -605,48 +609,31 @@ def chat_completions():
     print(response)
     def stream():
         nonlocal response
-        completion_timestamp = int(time.time())
-        completion_id = ''.join(random.choices(
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
-
-        completion_data = {
-            'id': 'chatcmpl-%s' % completion_id,
-            'object': 'chat.completion.chunk',
-            'created': completion_timestamp,
-            'model': model,
-            'choices': [
-                {
-                    'delta': {
-                        'content': response
-                    },
-                    'index': 0,
-                    'finish_reason': None
-                }
-            ]
-        }
-
         for token in response:
-            completion_id = ''.join(
-                random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
             completion_timestamp = int(time.time())
-            completion_data['id'] = f'chatcmpl-{completion_id}'
-            completion_data['created'] = completion_timestamp
-            completion_data['choices'][0]['delta']['content'] = token
-            if token.startswith("an error occured"):
-                completion_data['choices'][0]['delta']['content'] = "Server Response Error, please try again.\n"
-                completion_data['choices'][0]['delta']['stop'] = "error"
-                yield 'data: %s\n\ndata: [DONE]\n\n' % json.dumps(completion_data, separators=(',' ':'))
-                return
-            
+            completion_id = ''.join(random.choices(
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
+
+            completion_data = {
+                'id': f'chatcmpl-{completion_id}',
+                'object': 'chat.completion.chunk',
+                'created': completion_timestamp,
+                'choices': [
+                    {
+                        'delta': {
+                            'content': token
+                        },
+                        'index': 0,
+                        'finish_reason': None
+                    }
+                ]
+            }
+            print(token)
+            print(completion_data)
+            print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-
-        completion_data['choices'][0]['finish_reason'] = "stop"
-        completion_data['choices'][0]['delta']['content'] = ""
-        print(completion_data)
-        print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
-        yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-        yield 'data: [DONE]\n\n'
-
+            time.sleep(0.01)
+    print('===Start Streaming===')
     return app.response_class(stream(), mimetype='text/event-stream')
 
 @app.route("/v1/dashboard/billing/subscription")

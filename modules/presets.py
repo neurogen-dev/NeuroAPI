@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import gradio as gr
+import requests
 
 VERSION = "v 1.2.0"
 
@@ -44,24 +45,29 @@ CHUANHU_TITLE = "NeuroGPT " + VERSION
 
 CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br>"
 
+def get_online_models():
+    url = "https://provider.neurochat-gpt.ru/v1/status"
+    response = requests.get(url).json()
+    online_models = set()  # Используем множество для хранения уникальных моделей
+    for provider in response["data"]:
+        for model_info in provider["model"]:
+            for model_name, model_status in model_info.items():
+                if model_status["status"] == "Active":
+                    online_models.add(model_name)  # Добавляем модель в множество
+    return list(online_models)  # Преобразуем множество обратно в список
 
-ONLINE_MODELS = [
-    'gpt-3.5-turbo',
-    'gpt-3.5-turbo-16k',
+ONLINE_MODELS = get_online_models()
+
+OTHER_MODELS = [
     'gpt-3.5-turbo-16k-chimera-api',
     'gpt-3.5-turbo-16k-chatty-api',
     'gpt-4-chimera-api',
     'gpt-4-chatty-api',
-    #'gpt-4 (Нестабильно)',
     'gpt-4-32k-chatty-api',
     'llama-2-70b-chat-chimera-api',
-    'claude-2',
-    #'bing',
-    'text-davinci-003',
 ]
 
 CHIMERA_MODELS = [
-
     'gpt-3.5-turbo-16k-chimera-api',
     'gpt-4-chimera-api',
     'llama-2-70b-chat-chimera-api',
@@ -71,29 +77,13 @@ CHATTY_MODELS = [
     'gpt-3.5-turbo-16k-chatty-api',
     'gpt-4-chatty-api',
     'gpt-4-32k-chatty-api',
-    'llama-2-70b-chat-chimera-api',
-    'claude-2'
-    #'bing',
 ]
 
-LOCAL_MODELS = [
-    "chatglm-6b",
-    "chatglm-6b-int4",
-    "chatglm-6b-int4-ge",
-    "chatglm2-6b",
-    "chatglm2-6b-int4",
-    "StableLM",
-    "MOSS",
-    "llama-7b-hf",
-    "llama-13b-hf",
-    "llama-30b-hf",
-    "llama-65b-hf",
-]
 
-if os.environ.get('HIDE_LOCAL_MODELS', 'false') == 'true':
+if os.environ.get('HIDE_API_MODELS', 'false') == 'true':
     MODELS = ONLINE_MODELS
 else:
-    MODELS = ONLINE_MODELS
+    MODELS = ONLINE_MODELS + CHIMERA_MODELS + CHATTY_MODELS
 
 DEFAULT_MODEL = 0
 
