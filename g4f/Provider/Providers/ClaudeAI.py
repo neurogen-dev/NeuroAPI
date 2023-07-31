@@ -5,7 +5,7 @@ import os
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://claude.ai/chats'
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 model = ['claude-2']
@@ -62,7 +62,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         try:
            yield str(data['completion'].encode('utf-8').decode('utf-8') )
         except:
-           continue
+           pass
   r = session.delete("https://claude.ai/api/organizations/"+user+"/chat_conversations/"+_uuid,headers=h1)
   
 
