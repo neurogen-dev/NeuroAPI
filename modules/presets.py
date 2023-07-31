@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import gradio as gr
 
-VERSION = "v 1.1.2"
+VERSION = "v 1.2.0"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
