@@ -177,6 +177,11 @@ class Model:
         name: str = 'text-davinci-003'
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.Vercel
+
+    class ada:
+        name: str = 'ada'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.PurGPT
         
     class palm:
         name: str = 'palm2'
@@ -236,6 +241,8 @@ class ModelUtils:
         'text-curie-001': Model.text_curie_001,
         'text-davinci-002': Model.text_davinci_002,
         'text-davinci-003': Model.text_davinci_003,
+
+        'ada': Model.ada,
         
         'palm2': Model.palm,
         'palm': Model.palm,

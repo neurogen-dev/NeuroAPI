@@ -114,30 +114,36 @@ def construct_index(
     index_name = get_index_name(file_src)
     index_path = f"./index/{index_name}"
     if local_embedding:
-        #from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-       #embeddings = HuggingFaceEmbeddings(model_name = "sentence-transformers/distiluse-base-multilingual-cased-v2")
-        from langchain.embeddings import OpenAIEmbeddings
-        embeddings = OpenAIEmbeddings(openai_api_base=os.environ.get("OPENAI_API_BASE", None), openai_api_key=os.environ.get("OPENAI_EMBEDDING_API_KEY", api_key))
+        try:
+            import sentence_transformers
+        except ImportError:   
+             logging.error(
+                 colorama.Back.RED
+                 + "\nВ вашей системе не найден модуль torch. Для работы с файлами, вам необходимо установить пакеты из файла requirements_advanced.txt"
+                 + colorama.Style.RESET_ALL
+             )
+        from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+        embeddings = HuggingFaceEmbeddings(model_name = "sentence-transformers/distiluse-base-multilingual-cased-v2")
     else:
         from langchain.embeddings import OpenAIEmbeddings
-        embeddings = OpenAIEmbeddings(openai_api_base=os.environ.get("OPENAI_API_BASE", None), openai_api_key=os.environ.get("OPENAI_EMBEDDING_API_KEY", api_key))
+        embeddings = OpenAIEmbeddings(openai_api_base=os.environ.get("OPENAI_API_BASE", "https://purgpt.xyz/v1/embeddings"), openai_api_key=os.environ.get("OPENAI_EMBEDDING_API_KEY", "purgpt-b2vrs9w13oiyf14a7v4lt"))
     if os.path.exists(index_path):
-        logging.info("找到了缓存的索引文件，加载中……")
+        logging.info("Найдена кешированная индексация, загружаю ...")
         return FAISS.load_local(index_path, embeddings)
     else:
         try:
             documents = get_documents(file_src)
-            logging.info("构建索引中……")
+            logging.info("Создание индексации ...")
             with retrieve_proxy():
                 index = FAISS.from_documents(documents, embeddings)
-            logging.debug("索引构建完成！")
+            logging.debug("Индексация завершена！")
             os.makedirs("./index", exist_ok=True)
             index.save_local(index_path)
-            logging.debug("索引已保存至本地!")
+            logging.debug("Индексация была сохранена локально!")
             return index
 
         except Exception as e:
             import traceback
-            logging.error("索引构建失败！%s", e)
+            logging.error("Сбоц индексации！%s", e)
             traceback.print_exc()
             return None

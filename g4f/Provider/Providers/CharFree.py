@@ -3,7 +3,7 @@ from ...typing import sha256, Dict, get_type_hints
 import json
 
 url = "https://v.chatfree.cc"
-model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k']
+model = ['gpt-3.5-turbo-16k']
 supports_stream = False
 needs_auth = False
 working = True
@@ -11,7 +11,7 @@ working = True
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     headers = {
-        'authority': 'chat.dfehub.com',
+        'authority': 'v.chatfree.cc',
         'accept': '*/*',
         'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
         'content-type': 'application/json',

@@ -7,15 +7,13 @@ import requests
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://gpt-gm.h2o.ai'
-model = ['falcon-40b', 'falcon-7b', 'llama-13b']
+model = ['llama-70b']
 supports_stream = True
 needs_auth = False
 working = True
 
 models = {
-    'falcon-7b': 'h2oai/h2ogpt-gm-oasst1-en-2048-falcon-7b-v3',
-    'falcon-40b': 'h2oai/h2ogpt-gm-oasst1-en-2048-falcon-40b-v1',
-    'llama-13b': 'h2oai/h2ogpt-gm-oasst1-en-2048-open-llama-13b'
+    'llama-70b': 'meta-llama/Llama-2-70b-chat-hf',
 }
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):

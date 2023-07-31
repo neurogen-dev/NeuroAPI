@@ -111,8 +111,6 @@ class OpenAIClient(BaseLLMModel):
     def _get_api_url(self):
         if "chimera" in self.model_name: 
             url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
-        elif "bing" in self.model_name:
-            url = "https://purgpt.xyz/v1/bing"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
         else:
@@ -232,15 +230,17 @@ class OpenAIClient(BaseLLMModel):
                         yield chunk["choices"][0]["delta"]["content"]
                     except Exception as e:
                         continue
-        if error_msg:
+        if error_msg: 
             if "Not authenticated" in error_msg:
-                yield "ОШИБКА: Ключ ChimeraAPI не обнаружен. Убедитесь что ввели его."
+                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Ключ ChimeraAPI не обнаружен. Убедитесь что ввели его.'
             elif "Invalid API key" in error_msg:
-                yield "ОШИБКА: Неверный ключ ChimeraAPI. Возможно вы ввели его неправильно либо он деактивирован. Вы можете сгенерировать его заново в Discord: https://discord.gg/chimeragpt"
+                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Неверный ключ ChimeraAPI. Возможно вы ввели его неправильно либо он деактивирован. Вы можете сгенерировать его заново в Discord: https://discord.gg/chimeragpt'
+            elif "Reverse engineered site does not respond" in error_msg:
+                yield '<span style="color: red;">Провайдер API ответил ошибкой: На данный момент, все сайты-провайдеры недоступны. Попробуйте позже.'
             elif "one_api_error" in error_msg:
-                yield "ОШИБКА: Сервер Chatty API недоступен. Попробуйте позднее."
+                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Сервер Chatty API недоступен. Попробуйте позднее.'
             else:
-                yield "Провайдер API ответил ошибкой: " + error_msg
+                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> ' + error_msg
 
     def set_key(self, new_access_key):
         ret = super().set_key(new_access_key)

@@ -5,7 +5,7 @@ proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
 # Set with provider
 stream = False
 
-response = g4f.ChatCompletion.create(model='llama-2-70b-chat', provider=g4f.Provider.H2o, messages=[
+response = g4f.ChatCompletion.create(model='ada', provider=g4f.Provider.PurGPT, messages=[
                                      {"role": "user", "content": "hello"}], stream=stream)
 
 if stream:

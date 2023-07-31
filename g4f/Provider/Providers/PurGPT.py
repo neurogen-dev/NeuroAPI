@@ -20,9 +20,9 @@ with open("config.json", "r", encoding="utf-8") as f:
 purgpt_api_key = os.environ.get("PURGPT_API_KEY", purgpt_api_key)
 
 openai.api_key = purgpt_api_key
-openai.api_base = "https://beta.purgpt.xyz/v1/chat/completions"
+openai.api_base = "https://beta.purgpt.xyz"
 
-url = 'https://beta.purgpt.xyz/v1/chat/completions'
+url = 'https://beta.purgpt.xyz'
 model = [
     'babbage',
     'davinci',
@@ -40,7 +40,7 @@ model = [
     'gpt-3.5-turbo-16k',
 ]
 
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 

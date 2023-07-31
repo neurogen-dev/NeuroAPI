@@ -1,0 +1,7 @@
+transformers
+huggingface_hub
+torch
+protobuf==3.19.5
+sentence_transformers
+accelerate
+sentencepiece

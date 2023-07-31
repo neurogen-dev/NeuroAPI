@@ -9,7 +9,7 @@ from curl_cffi import requests
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://sdk.vercel.ai'
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 
@@ -29,7 +29,7 @@ models = {
     'command-xlarge-nightly': 'cohere:command-xlarge-nightly',
     'code-cushman-001': 'openai:code-cushman-001',
     'code-davinci-002': 'openai:code-davinci-002',
-    'gpt-3.5-turbo': 'openai:gpt-3.5-turbo',
+    #'gpt-3.5-turbo': 'openai:gpt-3.5-turbo',
     'text-ada-001': 'openai:text-ada-001',
     'text-babbage-001': 'openai:text-babbage-001',
     'text-curie-001': 'openai:text-curie-001',
