@@ -55,8 +55,9 @@ ONLINE_MODELS = [
     #'gpt-4 (Нестабильно)',
     'gpt-4-32k-chatty-api',
     'llama-2-70b-chat-chimera-api',
-    'claude-2'
+    'claude-2',
     #'bing',
+    'text-davinci-003',
 ]
 
 CHIMERA_MODELS = [

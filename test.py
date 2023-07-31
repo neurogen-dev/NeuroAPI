@@ -5,8 +5,8 @@ proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
 # Set with provider
 stream = False
 
-response = g4f.ChatCompletion.create(model='ada', provider=g4f.Provider.PurGPT, messages=[
-                                     {"role": "user", "content": "hello"}], stream=stream)
+response = g4f.ChatCompletion.create(model='gpt-3.5-turbo', provider=g4f.Provider.Vercel, messages=[
+                                     {"role": "user", "content": "hello"}], stream=False)
 
 if stream:
     for message in response:

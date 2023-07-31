@@ -527,6 +527,9 @@ def chat_completions():
         proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
         response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.ClaudeAI, stream=streaming,
                                              messages=messages, proxy=proxy)
+    elif "code" or "text" in model:
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.Vercel, stream=False,
+                                             messages=messages)
     else:
         if not provider:
             r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
@@ -584,8 +587,6 @@ def chat_completions():
             'object': 'chat.completion',
             'created': completion_timestamp,
             'model': model,
-            'provider':provider_name,
-            'supports_stream':getattr(g4f.Provider,provider_name).supports_stream,
             'usage': {
                 'prompt_tokens': len(messages),
                 'completion_tokens': len(response),
@@ -600,6 +601,7 @@ def chat_completions():
                 'index': 0
             }]
         }
+    
     print(response)
     def stream():
         nonlocal response
