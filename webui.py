@@ -524,9 +524,9 @@ def chat_completions():
     if provider == 'ClaudeAI':
         from fp.fp import FreeProxy
         proxy = FreeProxy(country_id=['US', 'GB '], timeout=0.5, rand=True).get()
-        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.ClaudeAI, stream=streaming,
+        response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.ClaudeAI, stream=True,
                                              messages=messages, proxy=proxy)
-    elif "code" or "text" in model:
+    elif "text" in model:
         response = g4f.ChatCompletion.create(model=model, provider=g4f.Provider.Vercel, stream=False,
                                              messages=messages)
     else:
@@ -587,7 +587,6 @@ def chat_completions():
             'created': completion_timestamp,
             'model': model,
             'provider':provider_name,	
-            'supports_stream':getattr(g4f.Provider,provider_name).supports_stream,
             'usage': {
                 'prompt_tokens': len(messages),
                 'completion_tokens': len(response),
@@ -606,15 +605,19 @@ def chat_completions():
     print(response)
     def stream():
         nonlocal response
+        completion_timestamp = int(time.time())
+        completion_id = ''.join(random.choices(
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
+
         completion_data = {
-            'id': '',
+            'id': 'chatcmpl-%s' % completion_id,
             'object': 'chat.completion.chunk',
-            'created': 0,
-            'model': 'gpt-3.5-turbo-0301',
+            'created': completion_timestamp,
+            'model': model,
             'choices': [
                 {
                     'delta': {
-                        'content': ""
+                        'content': response
                     },
                     'index': 0,
                     'finish_reason': None
@@ -636,10 +639,11 @@ def chat_completions():
                 return
             
             yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-            time.sleep(0.01)
 
         completion_data['choices'][0]['finish_reason'] = "stop"
         completion_data['choices'][0]['delta']['content'] = ""
+        print(completion_data)
+        print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
         yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
         yield 'data: [DONE]\n\n'
 

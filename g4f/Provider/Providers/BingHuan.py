@@ -5,7 +5,7 @@ from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://bing.lemonsoftware.eu.org'
 model = ['gpt-4']
-supports_stream = False
+supports_stream = True
 needs_auth = False
 working = True
 
