@@ -3,7 +3,7 @@ from pathlib import Path
 import gradio as gr
 import requests
 
-VERSION = "v 1.2.0"
+VERSION = "v 1.2.1"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -59,12 +59,7 @@ def get_online_models():
 ONLINE_MODELS = get_online_models()
 
 OTHER_MODELS = [
-    'gpt-3.5-turbo-16k-chimera-api',
-    'gpt-3.5-turbo-16k-chatty-api',
-    'gpt-4-chimera-api',
-    'gpt-4-chatty-api',
-    'gpt-4-32k-chatty-api',
-    'llama-2-70b-chat-chimera-api',
+    #'bing',
 ]
 
 CHIMERA_MODELS = [
@@ -75,15 +70,21 @@ CHIMERA_MODELS = [
 
 CHATTY_MODELS = [
     'gpt-3.5-turbo-16k-chatty-api',
-    #'gpt-4-chatty-api',
+    'gpt-4-chatty-api',
     #'gpt-4-32k-chatty-api',
 ]
 
 
+PURGPT_MODELS = [
+    'gpt-3.5-turbo-16k-purgpt-api',
+    'gpt-3.5-turbo-purgpt-api',
+    'text-davinci-003-purgpt-api'
+]
+
 if os.environ.get('HIDE_API_MODELS', 'false') == 'true':
     MODELS = ONLINE_MODELS
 else:
-    MODELS = ONLINE_MODELS + CHIMERA_MODELS + CHATTY_MODELS
+    MODELS = ONLINE_MODELS + OTHER_MODELS + CHIMERA_MODELS + CHATTY_MODELS
 
 DEFAULT_MODEL = 0
 
@@ -107,6 +108,14 @@ MODEL_TOKEN_LIMIT = {
     'claude-2': 100000,
     "claude-instant-100k": 100000,
     "claude-2-100k": 100000,
+    'gpt-3.5-turbo-16k-chimera-api': 16384,
+    'gpt-4-chimera-api': 8192,
+    'llama-2-70b-chat-chimera-api': 4096,
+    'gpt-3.5-turbo-16k-chatty-api': 16384,
+    'gpt-4-chatty-api': 8192,
+    'gpt-3.5-turbo-16k-purgpt-api': 16384,
+    'gpt-3.5-turbo-purgpt-api': 4096,
+    'text-davinci-003-purgpt-api': 4096,
 }
 
 TOKEN_OFFSET = 1000 

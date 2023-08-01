@@ -113,18 +113,16 @@ class OpenAIClient(BaseLLMModel):
             url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
-        #elif "claude" in self.model_name:
-            #url = "https://provider.neurochat-gpt.ru/v1/chat/completions"
         else:
             url = "http://127.0.0.1:1337/v1/chat/completions"
         return url
       
     def _get_headers(self):
-        if self.model_name == "bing":
+        if self.model_name == "purgpt":
             purgpt_api_key = self.configuration_json["purgpt_api_key"]
             headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {purgpt_api_key}",
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {purgpt_api_key}',
             }
         elif "chatty" in self.model_name:
             chatty_api_key = self.configuration_json["chatty_api_key"]
@@ -154,8 +152,9 @@ class OpenAIClient(BaseLLMModel):
             'llama-2-70b-chat-chimera-api': 'llama-2-70b-chat',
             'gpt-3.5-turbo-16k-chimera-api': 'gpt-3.5-turbo-16k',
             'gpt-3.5-turbo-16k-chatty-api': 'gpt-3.5-turbo-16k',
+            'gpt-3.5-turbo-chatty-api': 'gpt-3.5-turbo',
             'gpt-4-chatty-api': 'gpt-4',
-            'gpt-4-32k-chatty-api': 'gpt-4-32k'
+
         }
         model = model_names.get(self.model_name, self.model_name)
         payload = {
@@ -183,14 +182,23 @@ class OpenAIClient(BaseLLMModel):
             timeout = TIMEOUT_STREAMING
         else:
             timeout = TIMEOUT_ALL
-        try:
-            response = requests.post(
-                shared.state.completion_url,
-                headers=headers,
-                json=payload,
-                stream=stream,
-                timeout=timeout,
-            )
+        try: #Заготовочка для переписания системы отправки запросов
+            if self.model_name == "purgpt" or self.model_name == "chimera" or self.model_name == "chatty":
+                response = requests.post(
+                    shared.state.completion_url,
+                    headers = headers,
+                    json=payload,
+                    stream=stream,
+                    timeout=timeout,
+                )
+            else:
+                response = requests.post(
+                    shared.state.completion_url,
+                    headers=headers,
+                    json=payload,
+                    stream=stream,
+                    timeout=timeout,
+                )
         except:
             return None
         return response
@@ -242,7 +250,7 @@ class OpenAIClient(BaseLLMModel):
             elif "one_api_error" in error_msg:
                 yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Сервер Chatty API недоступен. Попробуйте позднее.'
             else:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> ' + error_msg
+                yield '<span style="color: red;">Ошибка:</span> ' + error_msg
 
     def set_key(self, new_access_key):
         ret = super().set_key(new_access_key)

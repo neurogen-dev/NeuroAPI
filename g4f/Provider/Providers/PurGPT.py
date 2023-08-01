@@ -7,30 +7,20 @@ __all__ = [
 ]
 
 
-with open("config.json", "r", encoding="utf-8") as f:
+with open("config.json", "r") as f:
     purgpt_api_key = json.load(f)["purgpt_api_key"]
 
 purgpt_api_key = os.environ.get("PURGPT_API_KEY", purgpt_api_key)
 
 
 url = 'https://beta.purgpt.xyz/v1/chat/completions'
-model = [
-    'babbage',
-    'davinci',
-    'text-davinci-001',
-    'ada',
-    'text-curie-001',
-    'text-ada-001',
-    'curie-instruct-beta',
-    'davinci-instruct-beta',
-    'text-davinci-003',
-    'text-babbage-001',
-    'curie',
-    'text-davinci-002',
-    'gpt-3.5-turbo',
-    'gpt-3.5-turbo-16k',
-    'bing'
-]
+models = {
+
+    'gpt-3.5-turbo-16k-purgpt-api': 'gpt-3.5-turbo-16k',
+    'gpt-3.5-turbo-purgpt-api': 'gpt-3.5-turbo',
+    'text-davinci-003-purgpt-api': 'text-davinci-003',
+}
+
 
 supports_stream = False
 needs_auth = False
@@ -45,10 +35,10 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
 
     headers = {
         'Content-Type': 'application/json',
-		'Authorization': 'Bearer purgpt-b2vrs9w13oiyf14a7v4lt'
+		'Authorization': f'Bearer {purgpt_api_key}',
     }
     data = {
-        "model": model,
+        "model": models[model],
         "messages": [
             {
                 "role": "user",

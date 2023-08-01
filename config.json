@@ -1,7 +1,7 @@
 {
     "openai_api_key": "",
-    "purgpt_api_key":"purgpt-b2vrs9w13oiyf14a7v4lt",
-    "chatty_api_key":"sk-mPzulsWu8bgsEPfo001cF33fDeE8464eA72024F82e5eE654",
+    "purgpt_api_key": "",
+    "chatty_api_key": "",
     "pawan_api_key": " ",
     "usage_limit": 999,
     "language": "ru_RU",

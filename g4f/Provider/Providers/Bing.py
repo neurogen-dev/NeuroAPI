@@ -13,7 +13,9 @@ import requests
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://bing.com/chat'
-model = ['gpt-4']
+models = {
+    'bing': 'gpt-4',
+}
 supports_stream = True
 needs_auth = False
 working = True

@@ -1,4 +1,5 @@
 import random
+import requests
 from g4f import Provider
 
 
@@ -9,11 +10,33 @@ class Model:
         best_provider: str
 
     class gpt_35_turbo:
+
+        # Function to get the status response from the API
+        @staticmethod
+        def get_status_response():
+            status_url = 'https://provider.neurochat-gpt.ru/v1/status'
+            response = requests.get(status_url)
+            return response.json()
+
+        # Get the providers with status 'Active'
+        status_response = get_status_response()
+        active_providers = [
+            provider_info['provider']
+            for provider_info in status_response['data']
+            if any(
+                model_info.get('gpt-3.5-turbo', {}).get('status') == 'Active'
+                for model_info in provider_info.get('model', [])
+            )
+        ]
+
+        if not active_providers:
+            active_providers = ['Wewordle']
+
         name: str = 'gpt-3.5-turbo'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Yqcloud
-        #best_provider: Provider.Provider = random.choice([Provider.Gravityengine, Provider.Yqcloud, Provider.AItianhu])
-        best_providers: list = [Provider.Chatty, Provider.Wewordle, Provider.AItianhu]
+        # Generate the 'best_providers' list with active providers
+        best_provider: Provider.Provider = random.choice([getattr(Provider, active_provider) for active_provider in active_providers])
+        best_providers: list = [getattr(Provider, active_provider) for active_provider in active_providers]
 
     class gpt_35_turbo_0613:
         name: str = 'gpt-3.5-turbo-0613'
@@ -31,11 +54,33 @@ class Model:
         best_providers: list = [Provider.Zeabur]
 
     class gpt_35_turbo_16k:
+
+        # Function to get the status response from the API
+        @staticmethod
+        def get_status_response():
+            status_url = 'https://provider.neurochat-gpt.ru/v1/status'
+            response = requests.get(status_url)
+            return response.json()
+
+        # Get the providers with status 'Active'
+        status_response = get_status_response()
+        active_providers = [
+            provider_info['provider']
+            for provider_info in status_response['data']
+            if any(
+                model_info.get('gpt-3.5-turbo-16k', {}).get('status') == 'Active'
+                for model_info in provider_info.get('model', [])
+            )
+        ]
+
+        if not active_providers:
+            active_providers = ['CharFree']
+
         name: str = 'gpt-3.5-turbo-16k'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.CharFree
-        #best_provider: Provider.Provider = random.choice([Provider.Zeabur, Provider.Gravityengine])
-        best_providers: list = [Provider.EasyChat, Provider.CharFree]
+        # Generate the 'best_providers' list with active providers
+        best_provider: Provider.Provider = random.choice([getattr(Provider, active_provider) for active_provider in active_providers])
+        best_providers: list = [getattr(Provider, active_provider) for active_provider in active_providers]
 
     #POE
 
@@ -202,6 +247,21 @@ class Model:
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.BingHuan
     
+    class gpt_35_turbo_16k_purgpt_api:
+        name: str = 'gpt-3.5-turbo-16k-purgpt-api'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.PurGPT
+
+    class gpt_35_turbo_purgpt_api:
+        name: str = 'gpt-3.5-turbo-purgpt-api'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.PurGPT
+
+    class text_davinci_003_purgpt_api:
+        name: str = 'text-davinci-003-purgpt-api'
+        base_provider: str = 'openai'
+        best_provider: Provider.Provider = Provider.PurGPT
+    
 class ModelUtils:
     convert: dict = {
         'gpt-3.5-turbo': Model.gpt_35_turbo,
@@ -254,4 +314,8 @@ class ModelUtils:
         'llama-13b': Model.llama_13b,
         'llama-2-70b-chat': Model.llama_2_70b_chat,
         'bing': Model.bing,
+
+        'gpt-3.5-turbo-16k-purgpt-api': Model.gpt_35_turbo_16k_purgpt_api,
+        'gpt-3.5-turbo-purgpt-api': Model.gpt_35_turbo_purgpt_api,
+        'text-davinci-003-purgpt-api': Model.text_davinci_003_purgpt_api,
     }

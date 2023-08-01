@@ -1,12 +1,16 @@
 import g4f
 from fp.fp import FreeProxy
+import os, requests
+from g4f.typing import sha256, Dict, get_type_hints
+import json
 
 proxy = FreeProxy(country_id=['US'], timeout=0.5, rand=True).get()
-# Set with provider
 stream = False
 print(proxy)
-response = g4f.ChatCompletion.create(model='text-davinci-003', provider=g4f.Provider.Vercel, messages=[
-                                     {"role": "user", "content": "hello"}], stream=False, proxy=proxy)
+response = g4f.ChatCompletion.create(model='gpt-4', provider=g4f.Provider.Bing, messages=[
+                                    {"role": "user", "content": "hello"}], stream=True, proxy=proxy)
+
+
 
 if stream:
     for message in response:

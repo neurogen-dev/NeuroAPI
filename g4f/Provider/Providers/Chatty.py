@@ -15,7 +15,7 @@ __all__ = [
 load_dotenv()
 
 if os.path.exists("config.json"):
-    with open("config.json", "r", encoding='utf-8') as f:
+    with open("config.json", "r") as f:
         config = json.load(f)
 else:
     config = {}
