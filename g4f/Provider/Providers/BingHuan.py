@@ -1,14 +1,12 @@
-import os,sys
+import os
+import sys
 import json
 import subprocess
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://bing.lemonsoftware.eu.org'
-models = {
-    'bing': 'gpt-4',
-}
-
-supports_stream = True
+model = ['gpt-3.5-turbo', 'gpt-4']
+supports_stream = False
 needs_auth = False
 working = True
 
@@ -17,7 +15,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     path = os.path.dirname(os.path.realpath(__file__))
     config = json.dumps({
         'messages': messages,
-        'model': 'gpt-4'}, separators=(',', ':'))
+        'model': model}, separators=(',', ':'))
     cmd = ['python', f'{path}/helpers/binghuan.py', config]
 
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

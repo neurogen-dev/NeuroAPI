@@ -20,7 +20,7 @@ if os.path.exists("config.json"):
 else:
     config = {}
 
-chatty_api_key = config.get("chatty_api_key", "sk-CNXqqHnq1Nv541Ec94A2E5170eAe4c9692F4Cd06E4B28489")
+chatty_api_key = config.get("chatty_api_key", "")
 chatty_api_key = os.environ.get("CHATTY_API_KEY", chatty_api_key)
 
 openai.api_key = chatty_api_key
