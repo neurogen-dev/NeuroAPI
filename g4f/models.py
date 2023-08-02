@@ -29,13 +29,12 @@ class Model:
             )
         ]
 
-        if not active_providers:
-            active_providers = ['Wewordle']
+        random_provider = random.choice(active_providers)
 
         name: str = 'gpt-3.5-turbo'
         base_provider: str = 'openai'
         # Generate the 'best_providers' list with active providers
-        best_provider: Provider.Provider = random.choice([getattr(Provider, active_provider) for active_provider in active_providers])
+        best_provider: Provider.Provider = getattr(Provider, random_provider)
         best_providers: list = [getattr(Provider, active_provider) for active_provider in active_providers]
 
     class gpt_35_turbo_0613:
@@ -76,10 +75,12 @@ class Model:
         if not active_providers:
             active_providers = ['CharFree']
 
+        random_provider = random.choice(active_providers)
+
         name: str = 'gpt-3.5-turbo-16k'
         base_provider: str = 'openai'
         # Generate the 'best_providers' list with active providers
-        best_provider: Provider.Provider = random.choice([getattr(Provider, active_provider) for active_provider in active_providers])
+        best_provider: Provider.Provider = getattr(Provider, random_provider)
         best_providers: list = [getattr(Provider, active_provider) for active_provider in active_providers]
 
     #POE

@@ -7,8 +7,8 @@ import json
 proxy = FreeProxy(country_id=['US'], timeout=0.5, rand=True).get()
 stream = False
 print(proxy)
-response = g4f.ChatCompletion.create(model='gpt-4', provider=g4f.Provider.Bing, messages=[
-                                    {"role": "user", "content": "hello"}], stream=True, proxy=proxy)
+response = g4f.ChatCompletion.create(model='gpt-3.5-turbo-16k', provider=g4f.Provider.CharFree, messages=[
+                                    {"role": "user", "content": "hello"}], stream=stream)
 
 
 
