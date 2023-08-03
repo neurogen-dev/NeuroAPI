@@ -5,14 +5,9 @@
 ## Поддерживаются модели:
 
 - ChatGPT-3.5-Turbo
-- ChatGPT-3.5-Turbo-0613
 - ChatGPT-3.5-Turbo-16K
-- ChatGPT-3.5-Turbo-16K-0613
 - GPT-4 (Нужен ключ ChimeraAPI)
-- Sage (Нужен ключ ChimeraAPI)
-- Claude Instant (Нужен ключ ChimeraAPI)
-- Claude Instant 100K (Нужен ключ ChimeraAPI)
-- Claude 2 (Нужен ключ ChimeraAPI)
+- llama-2-70b-chat (Нужен ключ ChimeraAPI)
 
 ## Возможности программы:
 
@@ -25,7 +20,7 @@
 
 ## Портативная версия
 
-Портативную версию, не требующую установку зависимостей и запускающуюся в 1 клик можно [скачать тут](https://github.com/Em1tSan/NeuroGPT/releases/download/v1.0.0/NeuroGPT-Portable.v1.0.7z). 
+Портативную версию, не требующую установку зависимостей и запускающуюся в 1 клик можно [скачать тут](https://github.com/Em1tSan/NeuroGPT/releases). 
 
 ## Docker
 
