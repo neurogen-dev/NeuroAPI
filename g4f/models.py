@@ -73,7 +73,7 @@ class Model:
         ]
 
         if not active_providers:
-            active_providers = ['CharFree']
+            active_providers = ['EasyChat']
 
         random_provider = random.choice(active_providers)
 
