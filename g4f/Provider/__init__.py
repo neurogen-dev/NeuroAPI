@@ -38,7 +38,9 @@ from .Providers import (
     PurGPT,
     PurGPTBing,
     CharFree,
-    CoffeCat
+    CoffeCat,
+    GptBz,
+    Qidinam
 
 )
 
