@@ -311,18 +311,23 @@ function toggleDarkMode(isEnabled) {
 function adjustDarkMode() {
   const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-  // set initial state based on current color scheme
-  apSwitch.checked = darkModeQuery.matches;
-  toggleDarkMode(darkModeQuery.matches);
-  // listen for changes to color scheme
-  darkModeQuery.addEventListener("change", (e) => {
-    apSwitch.checked = e.matches;
-    toggleDarkMode(e.matches);
-  });
-  // apSwitch = document.querySelector('.apSwitch input[type="checkbox"]');
-  apSwitch.addEventListener("change", (e) => {
-    toggleDarkMode(e.target.checked);
-  }); 
+// set initial state based on current color scheme or saved theme
+let isDarkMode = localStorage.getItem('darkMode') === 'true' || darkModeQuery.matches;
+apSwitch.checked = isDarkMode;
+toggleDarkMode(isDarkMode);
+// listen for changes to color scheme
+darkModeQuery.addEventListener("change", (e) => {
+  isDarkMode = e.matches;
+  localStorage.setItem('darkMode', isDarkMode);
+  apSwitch.checked = isDarkMode;
+  toggleDarkMode(isDarkMode);
+});
+// apSwitch = document.querySelector(".apSwitch input[type="checkbox"]");
+apSwitch.addEventListener("change", (e) => {
+  isDarkMode = e.target.checked;
+  localStorage.setItem('darkMode', isDarkMode);
+  toggleDarkMode(isDarkMode);
+});
 }
 
 function setChatbotHeight() {
