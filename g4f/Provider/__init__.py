@@ -37,7 +37,8 @@ from .Providers import (
     Chatty,
     PurGPT,
     PurGPTBing,
-    CharFree
+    CharFree,
+    CoffeCat
 
 )
 
