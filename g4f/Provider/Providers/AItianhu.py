@@ -2,7 +2,7 @@ import os, requests
 from ...typing import sha256, Dict, get_type_hints
 import json
 
-url = "https://www.aitianhu.com/api/chat-process"
+url = "https://2t2yo.aitianhu.fit/api/chat-process"
 model = ['gpt-3.5-turbo']
 supports_stream = False
 needs_auth = False

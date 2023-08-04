@@ -40,7 +40,8 @@ from .Providers import (
     CharFree,
     CoffeCat,
     GptBz,
-    Qidinam
+    Qidinam,
+    Unifyai
 
 )
 
