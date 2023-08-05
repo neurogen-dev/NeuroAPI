@@ -2,7 +2,7 @@ import os, uuid, requests
 from ...typing import sha256, Dict, get_type_hints
 
 url = 'https://liaobots.com'
-model = ['gpt-3.5-turbo', 'gpt-4']
+model = ['gpt-3.5-turbo-16k', 'gpt-4']
 supports_stream = True
 needs_auth = False
 working = True
@@ -14,11 +14,11 @@ models = {
         "maxLength":24000,
         "tokenLimit":8000
     },
-    'gpt-3.5-turbo': {
+    'gpt-3.5-turbo-16k': {
         "id":"gpt-3.5-turbo",
-        "name":"GPT-3.5",
-        "maxLength":12000,
-        "tokenLimit":4000
+        "name":"GPT-3.5-16k",
+        "maxLength":4800,
+        "tokenLimit":16000
     },
 }
 
@@ -32,7 +32,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         'origin': 'https://liaobots.com',
         'referer': 'https://liaobots.com/',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
-        'x-auth-code': kwargs.get('auth')
+        'x-auth-code': 'U7kSCcsxAaknW'
     }
 
     json_data = {
