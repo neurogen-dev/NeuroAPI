@@ -11,11 +11,10 @@ working = True
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     headers = {
-        'authority': 'free.easychat.work',
+        'authority': 'chat8.fastgpt.me',
         'accept': 'text/event-stream',
         'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
         'content-type': 'application/json',
-        'endpoint': '',
         'origin': 'https://chat8.fastgpt.me',
         'plugins': '0',
         'referer': 'https://chat8.fastgpt.me/',
