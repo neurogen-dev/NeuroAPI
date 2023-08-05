@@ -83,37 +83,12 @@ class Model:
         best_provider: Provider.Provider = getattr(Provider, random_provider)
         best_providers: list = [getattr(Provider, active_provider) for active_provider in active_providers]
 
-    #POE
-
-    class gpt_35_turbo_poe:
-        name: str = 'gpt-3.5-turbo-poe'
-        base_provider: str = 'poe'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class gpt_35_turbo_openai:
-        name: str = 'gpt-3.5-turbo-openai'
-        base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class gpt_35_turbo_16k_openai:
-        name: str = 'gpt-3.5-turbo-16k-openai'
-        base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class gpt_35_turbo_16k_poe:
-        name: str = 'gpt-3.5-turbo-16k-poe'
-        base_provider: str = 'poe'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
 
     class gpt_4:
         name: str = 'gpt-4'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
+        best_provider: Provider.Provider = Provider.Chatty
+        best_providers: list = [Provider.Chatty]
         
     class gpt_4_standart:
         name: str = 'gpt-4-standart'
@@ -124,70 +99,19 @@ class Model:
     class gpt_4_0613:
         name: str = 'gpt-4-0613'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class gpt_4_poe:
-        name: str = 'gpt-4-poe'
-        base_provider: str = 'poe'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
+        best_provider: Provider.Provider = Provider.Chatty
+        best_providers: list = [Provider.Chatty]
 
     class gpt_4_32k:
         name: str = 'gpt-4-32k'
         base_provider: str = 'reversed'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class gpt_4_32k_poe:
-        name: str = 'gpt-4-32k-poe'
-        base_provider: str = 'poe'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class claude_instant_100k:
-        name: str = 'claude-instant-100k'
-        base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class claude_instant:
-        name: str = 'claude-instant'
-        base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class claude_2_100k:
-        name: str = 'claude-2-100k'
-        base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
+        best_provider: Provider.Provider = Provider.Chatty
+        best_providers: list = [Provider.Chatty]
 
     class claude_2:
         name: str = 'claude-2'
         base_provider: str = 'anthropic'
         best_provider: Provider.Provider = Provider.ClaudeAI
-
-    class sage:
-        name: str = 'sage'
-        base_provider: str = 'poe'
-        best_provider: Provider.Provider = Provider.Chimera
-        best_providers: list = [Provider.Chimera]
-
-    class claude_instant_v1:
-        name: str = 'claude-instant-v1'
-        base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class claude_v1_100k:
-        name: str = 'claude-v1-100k'
-        base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Vercel
-
-    class claude_v1:
-        name: str = 'claude-v1'
-        base_provider: str = 'anthropic'
-        best_provider: Provider.Provider = Provider.Vercel
 
     class code_cushman_001:
         name: str = 'code-cushman-001'
@@ -243,6 +167,7 @@ class Model:
         name: str = 'llama-2-70b-chat'
         base_provider: str = 'huggingface'
         best_provider: Provider.Provider = Provider.Chimera
+        
     class bing:
         name: str = 'bing'
         base_provider: str = 'openai'
@@ -272,27 +197,8 @@ class ModelUtils:
         'gpt-4-0613': Model.gpt_4_0613,
         'gpt-3.5-turbo-16k': Model.gpt_35_turbo_16k,
         'gpt-3.5-turbo-16k-0613': Model.gpt_35_turbo_16k_0613,
-
-        #POE
-        'gpt-3.5-turbo-poe': Model.gpt_35_turbo_poe,
-        'gpt-3.5-turbo-openai': Model.gpt_35_turbo_openai,
-        'gpt-3.5-turbo-16k-openai': Model.gpt_35_turbo_16k_openai,
-        'gpt-3.5-turbo-16k-poe': Model.gpt_35_turbo_16k_poe,
-        'gpt-4-poe': Model.gpt_4_poe,
-        'gpt-4-32k': Model.gpt_4_32k,
-        'gpt-4-32k-poe': Model.gpt_4_32k_poe,
-
-        'claude-instant-100k': Model.claude_instant_100k,
-        'claude-instant': Model.claude_instant,
-        'claude-2-100k': Model.claude_2_100k,
         
         'claude-2': Model.claude_2,
-
-        'claude-v1-100k': Model.claude_v1_100k,
-        'claude-instant-v1': Model.claude_instant_v1,
-        'claude-v1': Model.claude_v1,
-
-        'sage': Model.sage,
         
         'code-cushman-001': Model.code_cushman_001,
         'code-davinci-002': Model.code_davinci_002,

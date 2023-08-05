@@ -3,10 +3,10 @@ from ...typing import sha256, Dict, get_type_hints
 import json
 
 url = "https://chat8.fastgpt.me"
-model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'bing']
+model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k']
 supports_stream = False
 needs_auth = False
-working = True
+working = False
 
 
 def _create_completion(model: str, messages: list, stream: bool, **kwargs):
