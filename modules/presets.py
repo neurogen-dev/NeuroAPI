@@ -3,7 +3,7 @@ from pathlib import Path
 import gradio as gr
 import requests
 
-VERSION = "v 1.2.1"
+VERSION = "v 1.2.2"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -66,6 +66,7 @@ CHIMERA_MODELS = [
     'gpt-3.5-turbo-16k-chimera-api',
     'gpt-4-chimera-api',
     'llama-2-70b-chat-chimera-api',
+    'text-davinci-003-chimera-api',
 ]
 
 CHATTY_MODELS = [
@@ -116,6 +117,8 @@ MODEL_TOKEN_LIMIT = {
     'gpt-3.5-turbo-16k-purgpt-api': 16384,
     'gpt-3.5-turbo-purgpt-api': 4096,
     'text-davinci-003-purgpt-api': 4096,
+    'text-davinci-003-chimera-api': 4096,
+    'text-davinci-003': 4096,
 }
 
 TOKEN_OFFSET = 1000 

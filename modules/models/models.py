@@ -149,6 +149,7 @@ class OpenAIClient(BaseLLMModel):
         model_names = {
             'gpt-4-chimera-api': 'gpt-4',
             'gpt-4-0314-chimera-api': 'gpt-4-0314',
+            'text-davinci-003-chimera-api': 'text-davinci-003',
             'llama-2-70b-chat-chimera-api': 'llama-2-70b-chat',
             'gpt-3.5-turbo-16k-chimera-api': 'gpt-3.5-turbo-16k',
             'gpt-3.5-turbo-16k-chatty-api': 'gpt-3.5-turbo-16k',
