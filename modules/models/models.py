@@ -111,6 +111,8 @@ class OpenAIClient(BaseLLMModel):
     def _get_api_url(self):
         if "chimera" in self.model_name: 
             url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
+        elif "text-davinci-003-chimera-api" in self.model_name: 
+            url = "https://chimeragpt.adventblocks.cc/api/v1/completions"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
         else:
