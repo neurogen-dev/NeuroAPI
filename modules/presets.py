@@ -63,23 +63,23 @@ OTHER_MODELS = [
 ]
 
 CHIMERA_MODELS = [
-    'gpt-3.5-turbo-16k-chimera-api',
-    'gpt-4-chimera-api',
-    'llama-2-70b-chat-chimera-api',
-    'text-davinci-003-chimera-api',
+    'chimera-gpt-3.5-turbo-16k',
+    'chimera-gpt-4',
+    'chimera-llama-2-70b-chat',
+    #'chimera-text-davinci-003',
 ]
 
 CHATTY_MODELS = [
-    'gpt-3.5-turbo-16k-chatty-api',
-    'gpt-4-chatty-api',
+    'chatty-gpt-3.5-turbo-16k',
+    'chatty-gpt-4',
     #'gpt-4-32k-chatty-api',
 ]
 
 
 PURGPT_MODELS = [
-    'gpt-3.5-turbo-16k-purgpt-api',
-    'gpt-3.5-turbo-purgpt-api',
-    'text-davinci-003-purgpt-api'
+    'purgpt-gpt-3.5-turbo-16k',
+    'purgpt-gpt-3.5-turbo',
+    'purgpt-text-davinci-003'
 ]
 
 if os.environ.get('HIDE_API_MODELS', 'false') == 'true':
@@ -109,15 +109,15 @@ MODEL_TOKEN_LIMIT = {
     'claude-2': 100000,
     "claude-instant-100k": 100000,
     "claude-2-100k": 100000,
-    'gpt-3.5-turbo-16k-chimera-api': 16384,
-    'gpt-4-chimera-api': 8192,
-    'llama-2-70b-chat-chimera-api': 4096,
-    'gpt-3.5-turbo-16k-chatty-api': 16384,
-    'gpt-4-chatty-api': 8192,
-    'gpt-3.5-turbo-16k-purgpt-api': 16384,
-    'gpt-3.5-turbo-purgpt-api': 4096,
-    'text-davinci-003-purgpt-api': 4096,
-    'text-davinci-003-chimera-api': 4096,
+    'chimera-gpt-3.5-turbo-16k': 16384,
+    'chimera-gpt-4': 8192,
+    'chimera-llama-2-70b-chat': 4096,
+    'chatty-gpt-3.5-turbo-16k': 16384,
+    'chatty-gpt-4': 8192,
+    'purgpt-gpt-3.5-turbo-16k': 16384,
+    'purgpt-gpt-3.5-turbo': 4096,
+    'purgpt-text-davinci-003': 4096,
+    'chimera-text-davinci-003': 4096,
     'text-davinci-003': 4096,
 }
 

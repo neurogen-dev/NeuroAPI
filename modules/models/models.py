@@ -109,9 +109,9 @@ class OpenAIClient(BaseLLMModel):
         return response
 
     def _get_api_url(self):
-        if "chimera" in self.model_name: 
+        if "chimera-gpt" in self.model_name or "chimera-llama" in self.model_name: 
             url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
-        elif "text-davinci-003-chimera-api" in self.model_name: 
+        elif "chimera-text" in self.model_name:
             url = "https://chimeragpt.adventblocks.cc/api/v1/completions"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
@@ -149,36 +149,48 @@ class OpenAIClient(BaseLLMModel):
 
     def _get_payload(self, history, stream): 
         model_names = {
-            'gpt-4-chimera-api': 'gpt-4',
+            'chimera-gpt-4': 'gpt-4',
             'gpt-4-0314-chimera-api': 'gpt-4-0314',
-            'text-davinci-003-chimera-api': 'text-davinci-003',
-            'llama-2-70b-chat-chimera-api': 'llama-2-70b-chat',
-            'gpt-3.5-turbo-16k-chimera-api': 'gpt-3.5-turbo-16k',
-            'gpt-3.5-turbo-16k-chatty-api': 'gpt-3.5-turbo-16k',
+            'chimera-text-davinci-003': 'text-davinci-003',
+            'chimera-llama-2-70b-chat': 'llama-2-70b-chat',
+            'chimera-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
+            'chatty-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
             'gpt-3.5-turbo-chatty-api': 'gpt-3.5-turbo',
-            'gpt-4-chatty-api': 'gpt-4',
+            'chatty-gpt-4': 'gpt-4',
 
         }
         model = model_names.get(self.model_name, self.model_name)
-        payload = {
-            "model": model,
-            "messages": history,
-            "temperature": self.temperature,
-            "top_p": self.top_p,
-            "n": self.n_choices,
-            "stream": stream,
-            "presence_penalty": self.presence_penalty,
-            "frequency_penalty": self.frequency_penalty,
-        }
-        if self.max_generation_token is not None:
-            payload["max_tokens"] = self.max_generation_token
-        if self.stop_sequence is not None:
-            payload["stop"] = self.stop_sequence
-        if self.logit_bias is not None:
-            payload["logit_bias"] = self.logit_bias
-        if self.user_identifier:
-            payload["user"] = self.user_identifier
-        return payload
+        if "chimera-text" in self.model_name:
+            last_msg = self.history[-1]
+            last_user_input = last_msg["role"] == "user"
+            if last_user_input:
+                last_text = last_msg["content"]
+            payload = {
+                "model": model,
+                "prompt": last_text,
+                "stream": stream,
+            }
+            return payload
+        else:
+            payload = {
+                "model": model,
+                "messages": history,
+                "temperature": self.temperature,
+                "top_p": self.top_p,
+                "n": self.n_choices,
+                "stream": stream,
+                "presence_penalty": self.presence_penalty,
+                "frequency_penalty": self.frequency_penalty,
+            }
+            if self.max_generation_token is not None:
+                payload["max_tokens"] = self.max_generation_token
+            if self.stop_sequence is not None:
+                payload["stop"] = self.stop_sequence
+            if self.logit_bias is not None:
+                payload["logit_bias"] = self.logit_bias
+            if self.user_identifier:
+                payload["user"] = self.user_identifier
+            return payload
 
     def _make_request(self, headers, payload, stream):
         if stream:
