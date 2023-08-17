@@ -29,6 +29,9 @@ class Model:
             )
         ]
 
+        if not active_providers:
+            active_providers = ['GetGpt']
+
         random_provider = random.choice(active_providers)
 
         name: str = 'gpt-3.5-turbo'

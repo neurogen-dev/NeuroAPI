@@ -19,15 +19,8 @@ import json
 import random
 import time
 
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, StreamingResponse
-import json
-from typing import List
-import os
-import random
-import time
-import asyncio
-from starlette.middleware.cors import CORSMiddleware
+import backend
+from multiprocessing import Process
 
 import logging
 import uvicorn
@@ -40,7 +33,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
 
-with open("assets/custom.css", "r", encoding="utf-8") as f:
+with open("assets/custom.css", "r") as f:
     customCSS = f.read()
 
 def create_new_model():
@@ -102,11 +95,11 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Tab(label="Модель"):
                     keyTxt = gr.Textbox(
                         show_label=True,
-                        placeholder="Your API-key...",
+                        placeholder="Ваш API-ключ...",
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
                         visible=not HIDE_MY_KEY,
-                        label="API-Key",
+                        label="Ключ ChimeraAPI",
                     )
                     if multi_api_key:
                         usageTxt = gr.Markdown("Многопользовательский режим включен, не нужно вводить ключ, можно сразу начать диалог", elem_id="usage_display", elem_classes="insert_block")
@@ -240,7 +233,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         max_context_length_slider = gr.Slider(
                             minimum=1,
-                            maximum=32768,
+                            maximum=100000,
                             value=4000,
                             step=1,
                             interactive=True,
@@ -248,7 +241,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
                         max_generation_slider = gr.Slider(
                             minimum=1,
-                            maximum=32768,
+                            maximum=100000,
                             value=2000,
                             step=1,
                             interactive=True,
@@ -508,275 +501,39 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     checkUpdateBtn.click(fn=None, _js='()=>{manualCheckUpdate();}')
 
 logging.info(
-    colorama.Back.GREEN
-    + "\n川虎的温馨提示：访问 http://localhost:7860 查看界面"
+    colorama.Back.BLUE
+    + "Версия программы: " + VERSION
     + colorama.Style.RESET_ALL
 )
-# 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
-demo.title = "川虎Chat 🚀"
 
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+logging.info(
+    colorama.Back.GREEN
+    + "\nАдрес webui: http://127.0.0.1:7860 "
+    + colorama.Style.RESET_ALL
 )
 
-@app.post("/chat/completions")
-@app.post("/v1/chat/completions")
-@app.post("/")
-async def chat_completions(request: Request):
-    req_data = await request.json()
-    streaming = req_data.get('stream', False)
-    req_data = await request.json()
-    streaming = req_data.get('stream', False)
-    streaming_ = req_data.json.get('stream', False)
-    model = req_data.json['model']
-    messages = req_data.json.get('messages')
-    provider = req_data.json.get('provider', False)
-    if provider == 'Chimera':
-        response = g4f.ChatCompletion.create(model='gpt-4', provider=g4f.Provider.Chimera, stream=streaming,
-                                             messages=messages)
-    else:
-        if not provider:
-            r = requests.get('https://provider.neurochat-gpt.ru/v1/status')
-            data = r.json()['data']
-            random.shuffle(data)
-            for provider_info in data:
-                for model_info in provider_info['model']:
-                    if model in model_info and model_info[model]['status'] == 'Active':
-                        if getattr(g4f.Provider,provider_info['provider']).supports_stream != streaming_:
-                          streaming = False
-                        else:
-                          streaming = True
-                        response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider_info['provider']),stream=streaming,
-                                         messages=messages)
-                        provider_name = provider_info['provider']
-                        print(provider_name)
-                        break
-                else:
-                    continue
-                break
-        else:
-            provider_name = provider
-            if getattr(g4f.Provider,provider).supports_stream != streaming_:
-              streaming = False
-            else:
-              streaming = True
-            response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider),stream=streaming,
-                                         messages=messages)
-    if not provider:
-      while 'curl_cffi.requests.errors.RequestsError' in response:
-          random.shuffle(data)
-          for provider_info in data:
-              for model_info in provider_info['model']:
-                  if model in model_info and model_info[model]['status'] == 'Active':
-                      if getattr(g4f.Provider,provider_info['provider']).supports_stream != streaming_:
-                        streaming = False
-                      else:
-                        streaming = True
-                      response = g4f.ChatCompletion.create(model=model, provider=getattr(g4f.Provider,provider_info['provider']),stream=streaming,
-                                      messages=messages)
-                      provider_name = provider_info['provider']
-                      print(provider_name)
-                      break
-              else:
-                  continue
-              break
-                
-    if not streaming_:
-        completion_timestamp = int(time.time())
-        completion_id = ''.join(random.choices(
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
+demo.title = "NeuroGPT 🚀"
 
-        return {
-            'id': 'chatcmpl-%s' % completion_id,
-            'object': 'chat.completion',
-            'created': completion_timestamp,
-            'model': model,
-            'provider':provider_name,
-            'supports_stream':getattr(g4f.Provider,provider_name).supports_stream,
-            'usage': {
-                'prompt_tokens': len(messages),
-                'completion_tokens': len(response),
-                'total_tokens': len(messages)+len(response)
-            },
-            'choices': [{
-                'message': {
-                    'role': 'assistant',
-                    'content': response
-                },
-                'finish_reason': 'stop',
-                'index': 0
-            }]
-        }
-    #print(response)
-    def stream():
-        nonlocal response
-        for token in response:
-            completion_timestamp = int(time.time())
-            completion_id = ''.join(random.choices(
-                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
+def run_gradio_server():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop) 
+   
+    reload_javascript()
+    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+      blocked_paths=["config.json"],
+      server_name=server_name,
+      server_port=server_port,
+      share=share,
+      auth=auth_list if authflag else None,
+      favicon_path="./assets/favicon.ico",
+      inbrowser=not dockerflag,
+    )
 
-            completion_data = {
-                'id': f'chatcmpl-{completion_id}',
-                'object': 'chat.completion.chunk',
-                'created': completion_timestamp,
-                'choices': [
-                    {
-                        'delta': {
-                            'content': token
-                        },
-                        'index': 0,
-                        'finish_reason': None
-                    }
-                ]
-            }
-            #print(token)
-            #print(completion_data)
-            #print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
-            yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-            time.sleep(0.01)
-    print('===Start Streaming===')
-    return app.response_class(stream(), mimetype='text/event-stream')
-
-@app.get("/v1/dashboard/billing/subscription")
-@app.get("/dashboard/billing/subscription")
-async def billing_subscription():
-    return JSONResponse({
-  "object": "billing_subscription",
-  "has_payment_method": True,
-  "canceled": False,
-  "canceled_at": None,
-  "delinquent": None,
-  "access_until": 2556028800,
-  "soft_limit": 6944500,
-  "hard_limit": 166666666,
-  "system_hard_limit": 166666666,
-  "soft_limit_usd": 416.67,
-  "hard_limit_usd": 9999.99996,
-  "system_hard_limit_usd": 9999.99996,
-  "plan": {
-    "title": "Pay-as-you-go",
-    "id": "payg"
-  },
-  "primary": True,
-  "account_name": "OpenAI",
-  "po_number": None,
-  "billing_email": None,
-  "tax_ids": None,
-  "billing_address": {
-    "city": "New York",
-    "line1": "OpenAI",
-    "country": "US",
-    "postal_code": "NY10031"
-  },
-  "business_address": None
-}
-)
-
-
-@app.get("/v1/dashboard/billing/usage")
-@app.get("/dashboard/billing/usage")
-async def billing_usage():
-    return JSONResponse({
-  "object": "list",
-  "daily_costs": [
-    {
-      "timestamp": time.time(),
-      "line_items": [
-        {
-          "name": "GPT-4",
-          "cost": 0.0
-        },
-        {
-          "name": "Chat models",
-          "cost": 1.01
-        },
-        {
-          "name": "InstructGPT",
-          "cost": 0.0
-        },
-        {
-          "name": "Fine-tuning models",
-          "cost": 0.0
-        },
-        {
-          "name": "Embedding models",
-          "cost": 0.0
-        },
-        {
-          "name": "Image models",
-          "cost": 16.0
-        },
-        {
-          "name": "Audio models",
-          "cost": 0.0
-        }
-      ]
-    }
-  ],
-  "total_usage": 1.01
-}
-)
-
-@app.get("/v1/models")
-@app.get("/models")
-async def models():
-  import g4f.models
-  model = {"data":[]}
-  for i in g4f.models.ModelUtils.convert:
-    model['data'].append({
-            "id": i,
-            "object": "model",
-            "owned_by": g4f.models.ModelUtils.convert[i].base_provider,
-            "tokens": 99999,
-            "fallbacks": None,
-            "endpoints": [
-                "/v1/chat/completions"
-            ],
-            "limits": None,
-            "permission": []
-        })
-  return JSONResponse(model)
-
-@app.get("/v1/providers")
-@app.get("/providers")
-async def providers():
-  files = os.listdir("g4f/Provider/Providers")
-  files = [f for f in files if os.path.isfile(os.path.join("g4f/Provider/Providers", f))]
-  files.sort(key=str.lower)
-  providers_data = {"data":[]}
-  for file in files:
-      if file.endswith(".py"):
-          name = file[:-3]
-          try:
-              p = getattr(g4f.Provider,name)
-              providers_data["data"].append({
-              "provider": str(name),
-              "model": list(p.model),
-              "url": str(p.url),
-              "working": bool(p.working),
-              "supports_stream": bool(p.supports_stream)
-              })
-          except:
-                pass
-  return JSONResponse(providers_data)
-
-
-def setup_logging():
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
-    
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-
-    root_logger.addHandler(handler)
-
+def run_api_server():
+    uvicorn.run("backend:app", host="127.0.0.1", port=1337)
 
 if __name__ == "__main__":
-    setup_logging()
-    uvicorn.run("webui-fastapi:app", host="0.0.0.0", port=5000, log_level="info", lifespan='on')
+    api_process = Process(target=run_api_server) 
+    api_process.start()
+
+    run_gradio_server()
