@@ -15,12 +15,11 @@ del config_temp.json
 python -m venv venv
 python -m pip install --upgrade pip
 python -m pip install -U setuptools
+call venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
 
 echo Completed.
 echo Running NeuroGPT...
-
-call venv\Scripts\activate.bat
 
 python endpoint.py
 pause
