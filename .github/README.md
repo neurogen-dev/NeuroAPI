@@ -82,4 +82,8 @@ wip
 # MacOS [нестабильно]
 ## Ручная установка:
 
+# В проекте использовались:
+[ChuanhuChatGPT](https://github.com/GaiZhenbiao/ChuanhuChatGPT) - как основа для основной части чата
+[gpt4free](https://github.com/xtekky/gpt4free) - для реализации reverse api
+
 `wip
