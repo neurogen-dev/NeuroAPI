@@ -47,6 +47,7 @@ tornado>=6.3.2
 PyExecJS
 browser_cookie3
 aiohttp
+aiofiles
 flask
 flask-cors
 gevent
