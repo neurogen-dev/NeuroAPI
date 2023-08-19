@@ -13,9 +13,9 @@ copy /Y config_temp.json config.json
 del config_temp.json
 
 python -m venv venv
+call venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 python -m pip install -U setuptools
-call venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
 
 echo Completed.
