@@ -48,6 +48,7 @@ PyExecJS
 browser_cookie3
 aiohttp
 aiofiles
+aiohttp-wsgi
 flask
 flask-cors
 gevent

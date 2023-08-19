@@ -5,6 +5,10 @@ import sys
 import gradio as gr
 import asyncio
 
+import aiohttp
+from aiohttp import web
+import aiofiles
+
 from modules import config
 from modules.config import *
 from modules.utils import *
@@ -19,7 +23,6 @@ import json
 import random
 import time
 
-import backend
 from multiprocessing import Process
 
 import logging
@@ -532,8 +535,22 @@ def run_gradio_server():
 def run_api_server():
     uvicorn.run("backend:app", host="127.0.0.1", port=1337)
 
-if __name__ == "__main__":
-    api_process = Process(target=run_api_server) 
-    api_process.start()
+async def run_backend():
+  app = web.Application()
+  # регистрация роутов и middleware
+  
+  runner = web.AppRunner(app)
+  await runner.setup()
+  
+  site = web.TCPSite(runner, '0.0.0.0', 1337)
+  await site.start()
+  
+  # запуск сервера
+  print('Server started on http://127.0.0.1:1337')
+  
+asyncio.run(run_backend())
 
+if __name__ == "__main__":
+    #api_process = Process(target=run_api_server) 
+    #api_process.start()
     run_gradio_server()
