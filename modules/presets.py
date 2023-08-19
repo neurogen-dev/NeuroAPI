@@ -3,7 +3,7 @@ from pathlib import Path
 import gradio as gr
 import requests
 
-VERSION = "v 1.2.3"
+VERSION = "v 1.3.0"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
