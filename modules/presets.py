@@ -43,7 +43,7 @@ INDEX_QUERY_TEMPRATURE = 1.0
 
 CHUANHU_TITLE = "NeuroGPT " + VERSION
 
-CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://www.donationalerts.com/r/em1t) </br>"
+CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://boosty.to/neurogen) </br>"
 
 def get_online_models():
     url = "https://provider.neurochat-gpt.ru/v1/status"
