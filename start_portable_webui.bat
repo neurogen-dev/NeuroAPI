@@ -12,7 +12,7 @@ if not exist python (
   curl -L -o python.zip https://github.com/Em1tSan/NeuroGPT/releases/download/v1.2.1/python.zip
 
   echo Unpacking python folder...
-  Expand-Archive python.zip
+  tar -xf python.zip
   del python.zip /q
 )
 
