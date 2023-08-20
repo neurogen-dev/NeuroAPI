@@ -57,5 +57,4 @@ gunicorn
 huggingface_hub
 free-proxy
 js2py
-quickjs
 protobuf==3.19.5
