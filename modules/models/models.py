@@ -150,8 +150,9 @@ class OpenAIClient(BaseLLMModel):
     def _get_payload(self, history, stream): 
         model_names = {
             'chimera-gpt-4': 'gpt-4',
-            'gpt-4-0314-chimera-api': 'gpt-4-0314',
+            'chiera-gpt-4-0314': 'gpt-4-0314',
             'chimera-text-davinci-003': 'text-davinci-003',
+            'chimera-claude-2': 'claude-2',
             'chimera-llama-2-70b-chat': 'llama-2-70b-chat',
             'chimera-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
             'chatty-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',

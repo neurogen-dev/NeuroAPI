@@ -66,6 +66,7 @@ CHIMERA_MODELS = [
     'chimera-gpt-3.5-turbo-16k',
     'chimera-gpt-4',
     'chimera-llama-2-70b-chat',
+    'chimera-claude-2'
     #'chimera-text-davinci-003',
 ]
 
