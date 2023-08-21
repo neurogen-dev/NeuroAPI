@@ -109,7 +109,7 @@ class OpenAIClient(BaseLLMModel):
         return response
 
     def _get_api_url(self):
-        if "chimera-gpt" in self.model_name or "chimera-llama" in self.model_name: 
+        if "chimera-gpt" in self.model_name or "chimera-llama" in self.model_name or "chimera-claude" in self.model_name: 
             url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
         elif "chimera-text" in self.model_name:
             url = "https://chimeragpt.adventblocks.cc/api/v1/completions"
@@ -205,7 +205,6 @@ class OpenAIClient(BaseLLMModel):
                     headers = headers,
                     json=payload,
                     stream=stream,
-                    timeout=timeout,
                 )
             else:
                 response = requests.post(

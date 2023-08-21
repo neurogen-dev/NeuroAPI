@@ -16,9 +16,9 @@ purgpt_api_key = os.environ.get("PURGPT_API_KEY", purgpt_api_key)
 url = 'https://beta.purgpt.xyz/openai/chat/completions'
 models = {
 
-    'gpt-3.5-turbo-16k-purgpt-api': 'gpt-3.5-turbo-16k',
-    'gpt-3.5-turbo-purgpt-api': 'gpt-3.5-turbo',
-    'text-davinci-003-purgpt-api': 'text-davinci-003',
+    'purgpt-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
+    'purgpt-gpt-3.5-turbo': 'gpt-3.5-turbo',
+    'purgpt-text-davinci-003': 'text-davinci-003',
 }
 
 
