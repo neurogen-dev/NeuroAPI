@@ -177,17 +177,17 @@ class Model:
         best_provider: Provider.Provider = Provider.BingHuan
     
     class gpt_35_turbo_16k_purgpt_api:
-        name: str = 'gpt-3.5-turbo-16k-purgpt-api'
+        name: str = 'purgpt-gpt-3.5-turbo-16k'
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.PurGPT
 
     class gpt_35_turbo_purgpt_api:
-        name: str = 'gpt-3.5-turbo-purgpt-api'
+        name: str = 'purgpt-gpt-3.5-turbo'
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.PurGPT
 
     class text_davinci_003_purgpt_api:
-        name: str = 'text-davinci-003-purgpt-api'
+        name: str = 'purgpt-text-davinci-003'
         base_provider: str = 'openai'
         best_provider: Provider.Provider = Provider.PurGPT
     
@@ -225,7 +225,7 @@ class ModelUtils:
         'llama-2-70b-chat': Model.llama_2_70b_chat,
         'bing': Model.bing,
 
-        'gpt-3.5-turbo-16k-purgpt-api': Model.gpt_35_turbo_16k_purgpt_api,
-        'gpt-3.5-turbo-purgpt-api': Model.gpt_35_turbo_purgpt_api,
-        'text-davinci-003-purgpt-api': Model.text_davinci_003_purgpt_api,
+        'purgpt-gpt-3.5-turbo-16k': Model.gpt_35_turbo_16k_purgpt_api,
+        'purgpt-gpt-3.5-turbo': Model.gpt_35_turbo_purgpt_api,
+        'purgpt-text-davinci-003': Model.text_davinci_003_purgpt_api,
     }

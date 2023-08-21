@@ -205,7 +205,6 @@ class OpenAIClient(BaseLLMModel):
                     headers = headers,
                     json=payload,
                     stream=stream,
-                    timeout=timeout,
                 )
             else:
                 response = requests.post(
