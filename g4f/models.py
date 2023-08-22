@@ -102,14 +102,14 @@ class Model:
     class gpt_4_0613:
         name: str = 'gpt-4-0613'
         base_provider: str = 'openai'
-        best_provider: Provider.Provider = Provider.Chatty
-        best_providers: list = [Provider.Chatty]
+        best_provider: Provider.Provider = Provider.Acytoo
+        best_providers: list = [Provider.Acytoo]
 
     class gpt_4_32k:
         name: str = 'gpt-4-32k'
         base_provider: str = 'reversed'
-        best_provider: Provider.Provider = Provider.Chatty
-        best_providers: list = [Provider.Chatty]
+        best_provider: Provider.Provider = Provider.Acytoo
+        best_providers: list = [Provider.Acytoo]
 
     class claude_2:
         name: str = 'claude-2'
@@ -198,6 +198,7 @@ class ModelUtils:
         'gpt-4': Model.gpt_4,
         'gpt-4-standart': Model.gpt_4_standart,
         'gpt-4-0613': Model.gpt_4_0613,
+        'gpt-4-32k': Model.gpt_4_32k,
         'gpt-3.5-turbo-16k': Model.gpt_35_turbo_16k,
         'gpt-3.5-turbo-16k-0613': Model.gpt_35_turbo_16k_0613,
         
