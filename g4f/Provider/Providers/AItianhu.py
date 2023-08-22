@@ -27,10 +27,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
     }
     response = requests.post(url, headers=headers, json=data, verify=False)
 
-    for line in response.iter_lines():
-        if b'content' in line:
-            line_json = json.loads(line.decode('utf-8').split('data: ')[1])
-            yield (line_json['choices'][0]['delta']['content'])
+    yield response.text
 
 params = f'g4f.Providers.{os.path.basename(__file__)[:-3]} supports: ' + \
     '(%s)' % ', '.join([f"{name}: {get_type_hints(_create_completion)[name].__name__}" for name in _create_completion.__code__.co_varnames[:_create_completion.__code__.co_argcount]])
