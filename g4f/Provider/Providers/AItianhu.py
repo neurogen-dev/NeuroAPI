@@ -2,8 +2,8 @@ import os, requests
 from ...typing import sha256, Dict, get_type_hints
 import json
 
-url = "https://2t2yo.aitianhu.fit/api/chat-process"
-model = ['gpt-3.5-turbo']
+url = "https://ixlc0.aitianhu.site/api/chat-process"
+model = ['gpt-4']
 supports_stream = False
 needs_auth = False
 working = True
@@ -25,14 +25,12 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         "temperature": 0.8,
         "top_p": 1
     }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 200:
-        lines = response.text.strip().split('\n')
-        res = json.loads(lines[-1])
-        yield res['text']
-    else:
-        print(f"Error Occurred::{response.status_code}")
-        return None
+    response = requests.post(url, headers=headers, json=data, verify=False)
+
+    for line in response.iter_lines():
+        if b'content' in line:
+            line_json = json.loads(line.decode('utf-8').split('data: ')[1])
+            yield (line_json['choices'][0]['delta']['content'])
 
 params = f'g4f.Providers.{os.path.basename(__file__)[:-3]} supports: ' + \
     '(%s)' % ', '.join([f"{name}: {get_type_hints(_create_completion)[name].__name__}" for name in _create_completion.__code__.co_varnames[:_create_completion.__code__.co_argcount]])

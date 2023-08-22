@@ -4,7 +4,7 @@ import json
 
 url = "https://caffcat.com"
 model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k']
-supports_stream = True
+supports_stream = False
 needs_auth = False
 working = True
 
@@ -32,7 +32,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
 
     json_data = {
         'messages': messages,
-        'stream': True,
+        'stream': False,
         'model': model,
         'temperature': 0.5,
         'presence_penalty': 0,
