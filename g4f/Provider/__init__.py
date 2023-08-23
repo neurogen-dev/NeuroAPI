@@ -2,6 +2,7 @@ from . import Provider
 from .Providers import (
     AItianhu,
     Ails,
+    Valethealth,
     You,
     Yqcloud,
     Bard,
@@ -41,7 +42,9 @@ from .Providers import (
     CoffeCat,
     GptBz,
     Qidinam,
-    Unifyai
+    Unifyai,
+    Valethealth,
+    i207
 
 )
 

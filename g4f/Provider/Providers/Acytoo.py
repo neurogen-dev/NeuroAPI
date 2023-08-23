@@ -3,8 +3,8 @@ from ...typing import sha256, Dict, get_type_hints
 import json
 
 url = "https://chat.acytoo.com/api/completions"
-model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4-0613', 'gpt-4-32k']
-supports_stream = False
+model = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4-0613', 'gpt-4-32k', 'gpt-4']
+supports_stream = True
 needs_auth = False
 working = True
 
@@ -31,7 +31,7 @@ def _create_completion(model: str, messages: list, stream: bool, **kwargs):
         "password": ""
     }
 
-    response = requests.post(url, headers=headers, data=json.dumps(data))
+    response = requests.post(url, headers=headers, data=json.dumps(data), stream=True)
     if response.status_code == 200:
         yield response.text
     else:
