@@ -3,7 +3,7 @@ from pathlib import Path
 import gradio as gr
 import requests
 
-VERSION = "v 1.3.0"
+VERSION = "v 1.3.1-beta"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -12,10 +12,10 @@ LLAMA_INFERENCER = None
 
 # ChatGPT 设置
 INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. Respond using markdown."
-API_HOST = "http://127.0.0.1:1337"
-COMPLETION_URL = "http://127.0.0.1:1337/v1/chat/completions"
-BALANCE_API_URL="http://127.0.0.1:1337/v1/dashboard/billing/credit_grants"
-USAGE_API_URL="http://127.0.0.1:1337/v1/dashboard/billing/usage"
+API_HOST = "https://neurochat-gpt.ru"
+COMPLETION_URL = "https://neurochat-gpt.ru/v1/chat/completions"
+BALANCE_API_URL="https://neurochat-gpt.ru/v1/dashboard/billing/credit_grants"
+USAGE_API_URL="https://neurochat-gpt.ru/v1/dashboard/billing/usage"
 HISTORY_DIR = Path("history")
 HISTORY_DIR = "history"
 TEMPLATES_DIR = "templates"
