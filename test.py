@@ -7,7 +7,7 @@ import json
 proxy = FreeProxy(country_id=['FL'], timeout=0.5, rand=True).get()
 stream = False
 #print(proxy)
-response = g4f.ChatCompletion.create(model='gpt-3.5-turbo-16k', provider=g4f.Provider.Acytoo, messages=[
+response = g4f.ChatCompletion.create(model='gpt-4', provider=g4f.Provider.i207, messages=[
                                     {"role": "user", "content": "hello"}], stream=False)
 
 
@@ -17,3 +17,4 @@ if stream:
         print(message)
 else:
     print(response)
+    
