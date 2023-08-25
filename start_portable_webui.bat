@@ -57,8 +57,8 @@ python -m venv venv
 call venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 python -m pip install -U setuptools 
-python -m pip install -r requirements.txt
 python -m pip install whl\quickjs-1.19.2-cp311-cp311-win_amd64.whl
+python -m pip install -r requirements.txt
 python -m pip install -r requirements_advanced.txt
 
 echo Completed.
