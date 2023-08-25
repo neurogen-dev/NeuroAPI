@@ -3,7 +3,7 @@
   <img src="https://readme-typing-svg.herokuapp.com?font=Inconsolata&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+Neurogen...;Opening..." alt="NeuroGPT" />
 </a>
 
-<strong> Русский | English </strong>
+<strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README.md">English </a></strong>
 
 <p> NeuroGPT позволяет бесплатно пользоваться gpt-3.5, gpt-4 и другими языковыми моделями без VPN и регистрации аккаунта. Работает через API Reverse Engineering.
 
