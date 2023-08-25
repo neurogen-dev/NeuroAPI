@@ -14,7 +14,7 @@ We extend our gratitude to the authors.
   <img src="https://img.shields.io/badge/license-GPL_3.0-indigo.svg" alt="license"/>
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
-  <img src="https://img.shields.io/badge/latest-v1.3.2-indigo.svg" alt="latest"/>
+  <img src="https://img.shields.io/badge/latest-v1.4.0-indigo.svg" alt="latest"/>
 </a>
 
 <br> Installation instructions: <br/>
