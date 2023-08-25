@@ -3,7 +3,7 @@ from pathlib import Path
 import gradio as gr
 import requests
 
-VERSION = "v 1.3.1-beta"
+VERSION = "v 1.3.2"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -12,10 +12,10 @@ LLAMA_INFERENCER = None
 
 # ChatGPT 设置
 INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. Respond using markdown."
-API_HOST = "https://neurochat-gpt.ru"
-COMPLETION_URL = "https://neurochat-gpt.ru/v1/chat/completions"
-BALANCE_API_URL="https://neurochat-gpt.ru/v1/dashboard/billing/credit_grants"
-USAGE_API_URL="https://neurochat-gpt.ru/v1/dashboard/billing/usage"
+API_HOST = "http://127.0.0.0.1:1337"
+COMPLETION_URL = "http://127.0.0.0.1:1337/v1/chat/completions"
+BALANCE_API_URL="http://127.0.0.0.1:1337/v1/dashboard/billing/credit_grants"
+USAGE_API_URL="http://127.0.0.0.1:1337/v1/dashboard/billing/usage"
 HISTORY_DIR = Path("history")
 HISTORY_DIR = "history"
 TEMPLATES_DIR = "templates"
@@ -45,21 +45,21 @@ CHUANHU_TITLE = "NeuroGPT " + VERSION
 
 CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://boosty.to/neurogen) </br>"
 
-def get_online_models():
-    url = "https://provider.neurochat-gpt.ru/v1/status"
-    response = requests.get(url).json()
-    online_models = set()  # Используем множество для хранения уникальных моделей
-    for provider in response["data"]:
-        for model_info in provider["model"]:
-            for model_name, model_status in model_info.items():
-                if model_status["status"] == "Active":
-                    online_models.add(model_name)  # Добавляем модель в множество
-    return list(online_models)  # Преобразуем множество обратно в список
+#def get_online_models():
+#    url = "https://status.neurochat-gpt.ru/v1/status"
+#    response = requests.get(url).json()
+#    online_models = set()  # Используем множество для хранения уникальных моделей
+#    for provider in response["data"]:
+#        for model_info in provider["model"]:
+#            for model_name, model_status in model_info.items():
+#                if model_status["status"] == "Active":
+#                    online_models.add(model_name)  # Добавляем модель в множество
+#    return list(online_models)  # Преобразуем множество обратно в список
 
-ONLINE_MODELS = get_online_models()
 
-OTHER_MODELS = [
-    #'bing',
+ONLINE_MODELS = [
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k'
 ]
 
 CHIMERA_MODELS = [
@@ -83,10 +83,16 @@ PURGPT_MODELS = [
     'purgpt-text-davinci-003'
 ]
 
+NEURO_MODELS = [
+    'neuro-gpt-4',
+    'neuro-gpt-4-0613',
+    'neuro-gpt-4-32k'
+]
+
 if os.environ.get('HIDE_API_MODELS', 'false') == 'true':
     MODELS = ONLINE_MODELS
 else:
-    MODELS = ONLINE_MODELS + OTHER_MODELS + CHIMERA_MODELS + CHATTY_MODELS + PURGPT_MODELS
+    MODELS = ONLINE_MODELS + NEURO_MODELS + CHIMERA_MODELS + CHATTY_MODELS + PURGPT_MODELS
 
 DEFAULT_MODEL = 0
 
@@ -101,6 +107,11 @@ MODEL_TOKEN_LIMIT = {
     "gpt-4-0314": 8192,
     "gpt-4-0613": 8192,
     "gpt-4-32k": 32768,
+    "neuro-gpt-4": 8192,
+    "neuro-gpt-4-0314": 8192,
+    "neuro-gpt-4-0613": 8192,
+    "neuro-gpt-4-32k": 32768,
+    "neuro-gpt-4-32k-0613": 32768,
     "gpt-4-32k-poe": 32768,
     "gpt-3.5-turbo-16k-openai": 16384,
     "gpt-3.5-turbo-16k-poe": 16384,

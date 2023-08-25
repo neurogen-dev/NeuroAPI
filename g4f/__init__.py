@@ -1,45 +1,45 @@
-import sys
-from . import Provider
-from g4f.models import Model, ModelUtils
+from . import models
+from .Provider import BaseProvider
+from .typing import Any, CreateResult, Union
 
 logging = True
 
+
 class ChatCompletion:
     @staticmethod
-    def create(model: Model.model or str, messages: list, provider: Provider.Provider = None, stream: bool = False, auth: str = False, **kwargs):
-        kwargs['auth'] = auth
-        if provider and provider.working == False:
-            return f'{provider.__name__} не работает. Пожалуйста, отправьте ваш запрос заново, чтобы он переадресовался новому провайдеру.'
-        
-        if provider and provider.needs_auth and not auth:
-            print(
-                f'ValueError: {provider.__name__} requires authentication (use auth="cookie or token or jwt ..." param)', file=sys.stderr)
-            sys.exit(1)
+    def create(
+        model: Union[models.Model, str],
+        messages: list[dict[str, str]],
+        provider: Union[type[BaseProvider], None] = None,
+        stream: bool = False,
+        auth: Union[str, None] = None,
+        **kwargs: Any,
+    ) -> Union[CreateResult, str]:
+        if isinstance(model, str):
+            try:
+                model = models.ModelUtils.convert[model]
+            except KeyError:
+                raise Exception(f"The model: {model} does not exist")
 
-        try:
-            if isinstance(model, str):
-                try:
-                    model = ModelUtils.convert[model]
-                except KeyError:
-                    raise Exception(f'The model: {model} does not exist')
+        provider = model.best_provider if provider == None else provider
 
-            engine = model.best_provider if not provider else provider
+        if not provider.working:
+            raise Exception(f"{provider.__name__} is not working")
 
-            if not engine.supports_stream and stream == True:
-                print(
-                    f"ValueError: {engine.__name__} does not support 'stream' argument", file=sys.stderr)
+        if provider.needs_auth and not auth:
+            raise Exception(
+                f'ValueError: {provider.__name__} requires authentication (use auth="cookie or token or jwt ..." param)'
+            )
+        if provider.needs_auth:
+            kwargs["auth"] = auth
 
-            if logging: print(f'Using {engine.__name__} provider')
+        if not provider.supports_stream and stream:
+            raise Exception(
+                f"ValueError: {provider.__name__} does not support 'stream' argument"
+            )
 
-            return (engine._create_completion(model.name, messages, stream, **kwargs)
-                    if stream else ''.join(engine._create_completion(model.name, messages, stream, **kwargs)))
-        except TypeError as e:
-            print(e)
-            arg: str = str(e).split("'")[1]
-            print(
-                f"ValueError: {engine.__name__} does not support '{arg}' argument", file=sys.stderr)
-            sys.exit(1)
-        except Exception as e:
-            if 'Internal Server Error' in str(e):
-                return f'Провайдер {provider.__name__} недоступен'
-            raise e
+        if logging:
+            print(f"Using {provider.__name__} provider for {model.name}")
+
+        result = provider.create_completion(model.name, messages, stream, **kwargs)
+        return result if stream else "".join(result)

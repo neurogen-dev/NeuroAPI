@@ -29,9 +29,6 @@ from multiprocessing import Process
 import logging
 import uvicorn
 
-import g4f
-from g4f import Model, ChatCompletion, Provider
-
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
@@ -537,7 +534,7 @@ def run_api_server():
     uvicorn.run("backend:app", host="127.0.0.1", port=1337)
 
 if __name__ == "__main__":
-    #api_process = Process(target=run_api_server) 
-    #api_process.start()
+    api_process = Process(target=run_api_server) 
+    api_process.start()
 
     run_gradio_server()
