@@ -64,7 +64,7 @@
 - Сохранение и загрузка истории диалогов
 
 <div align="center">
-  <img src="https://github.com/NealBelov/screenshots/blob/main/img_01.png?raw=true" width="70%">
+  <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="80%">
 </div>
 
 ## Список моделей:
