@@ -1,89 +1,138 @@
-# [NeuroGPT](https://t.me/neurogen_news) - Бесплатный доступ к ChatGPT 3.5 / 4 
+<div align="center">
+<a href="https://t.me/neurogen_news">
+  <img src="https://readme-typing-svg.herokuapp.com?font=Inconsolata&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+Neurogen...;Opening..." alt="NeuroGPT" />
+</a>
 
-Данный проект позволяет пользоваться ChatGPT 3.5, 4 без VPN и регистрации аккаунта, работающий через reverse engineering API, на базе проекта gpt4free
+<strong> Русский | English </strong>
 
-Проект основан на модицифицированных версиях [gpt4free](https://github.com/xtekky/gpt4free) и [ChuanhuChatGPT](https://github.com/GaiZhenbiao/ChuanhuChatGPT)
+<p> NeuroGPT позволяет бесплатно пользоваться gpt-3.5, gpt-4 и другими языковыми моделями без VPN и регистрации аккаунта. Работает через API Reverse Engineering.
 
-Ремарка: Так как проект работает не через официальный api, а через доступ, полученный путем обратной инженерии, а кроме того, разрабатывается на чистом энтузиазме, то страдает стабильность работы. Различные модели периодически могут отключаться, а API провайдеры падать. Имейте это в виду. Если для вашей работы нужная высокая стабильность, то лучше обойти данный проект стороной. 
+Проект основан на модифицированных версиях <a href="https://github.com/xtekky/gpt4free">gpt4free</a> и <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a></p>
+Благодарность авторам.
 
-## Поддерживаются модели:
+<a href="https://github.com/Em1tSan/NeuroGPT/blob/main/LICENSE">
+  <img src="https://img.shields.io/badge/license-GPL_3.0-indigo.svg" alt="license"/>
+</a>
+<a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
+  <img src="https://img.shields.io/badge/latest-v1.3.1_beta-indigo.svg" alt="latest"/>
+</a>
 
-- ChatGPT-3.5-Turbo
-- ChatGPT-3.5-Turbo-16K
-- GPT-4 (Нужен ключ ChimeraAPI)
-- llama-2-70b-chat (Нужен ключ ChimeraAPI)
+<br> Инструкции по установке: <br/>
 
-## Возможности программы:
+<a href="https://github.com/Em1tSan/NeuroGPT#windows">
+  <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
+</a>
+<a href="https://github.com/Em1tSan/NeuroGPT#linux">
+  <img src="https://img.shields.io/badge/-Linux-F1502F?logo=linux" alt="linux"/>
+</a>
+<a href="https://github.com/Em1tSan/NeuroGPT#macos">
+  <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
+</a> </p>
+<a href="https://github.com/Em1tSan/NeuroGPT#%D0%BF%D0%BE%D1%80%D1%82%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F">
+  <img src="https://img.shields.io/badge/-Портативная версия-008000?logo=portable" alt="portable"/>
+</a>
 
-- Веб поиск
-- Большое количество ролей для бота, а также режимов
-- Джейлбрейки для расширения возможностей и снятия цензуры
+<br> Новости и обратная связь: <br/>
+
+<a href="https://t.me/neurogen_news">
+  <img src="https://img.shields.io/badge/-Telegram канал-0088CC?logo=telegram" alt="telegram"/>
+</a>
+<a href="https://t.me/neurogen_chat">
+  <img src="https://img.shields.io/badge/-Telegram чат-0088CC?logo=telegram" alt="telegram_chat"/>
+</a>
+
+<br> Поддержать проект: <br/>
+
+<a href="https://boosty.to/neurogen">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Boosty_logo.svg/512px-Boosty_logo.svg.png?20230209172145" alt="neurogen_boosty" width="20%">
+</a>
+
+</div>
+
+## Дисклеймер:
+
+Поскольку данный проект функционирует не через официальное API, а благодаря доступу, полученному путем обратной инженерии, то API провайдеры могут падать, а различные модели отключаться. Пожалуйста, учтите это. Если вам необходима высокая стабильность для работы, то стоит обойти этот проект стороной. Также важно помнить, что поддержка осуществляется на чистом энтузиазме.
+
+## Возможности:
+
+- Веб-поиск
+- Встроенные шаблоны промптов под разные задачи
+- Встроенные джейлбрейки для снятия цензуры
 - Контекст беседы
 - Режим endpoint для работы с API
-- Тонкая настройка модели (При использловании сторонних провайдеров)
+- Тонкая настройка модели
 - Сохранение и загрузка истории диалогов
 
-## Портативная версия
+<div align="center">
+  <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
+</div>
 
-Портативную версию, не требующую установку зависимостей и запускающуюся в 1 клик можно [скачать тут](https://github.com/Em1tSan/NeuroGPT/releases). После распаковки, обновитесь через hard_update_portable.bat
+## Список моделей:
 
-## Поддержка и вопросы
+- gpt-3.5-turbo-16k
+- gpt-3.5-turbo
+- gpt-4
+- gpt-4-32k
+- gpt-4-0613
+- llama-2-70b-chat
+- claude-2
+- text-davinci-003
 
-Все новости проекта публикуются в моем [Телеграм канале](https://t.me/neurogen_news).
+# Установка и запуск
 
-Вопросы по проекту можно задать в [чате](https://t.me/neurogen_chat). 
+### Портативная версия
 
-Поддержать автора можно подписавшись на [Boosty](https://boosty.to/neurogen)
+Запуск и автообновление в один клик. Не требует установки зависимостей.
+Распаковать архив в папку без кириллицы в пути. Нажать `start_portable_webui`
+
+<a href="https://github.com/Em1tSan/NeuroGPT/releases/download/v1.3.0/NeuroGPT-Portable.v1.3.7z">Скачать</a>
 
 ---
 
-### [Инструкция по получению API ключей ChimeraAI и Chatty](https://github.com/Em1tSan/NeuroGPT/wiki/%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D1%8E-API-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B9-ChimeraAI-%D0%B8-Chatty)
+### [Инструкция по получению API ключей ChimeraAI, PurGPT и Chatty](https://github.com/Em1tSan/NeuroGPT/wiki/%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D1%8E-API-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B9-ChimeraAI,-PurGPT-%D0%B8-Chatty)
 
 ---
 
-# Способы установки, обновления и запуска
-
+## Windows
 Данный проект поддерживает исколючительно версию языка Python не выше 3.10. То есть, с Python 3.11 и выше он **НЕ СОВМЕСТИМ**. Кроме того, работа на Python 3.9, 3.8 не гарантируется. 
+В данной инструкции рассматриваются только х64-битные версии Windows 10 и 11.
 
-# Windows
-В данной инструкции рассматриваются только х64 битные версии Windows 10 и 11.
-### Прежде чем начать
-Надо предварительно установить зависимости.
 #### 1. Установите Git For Windows
 * [Скачайте](https://git-scm.com/download/win) и начните установку git.
-* ![Screenshot](/.github/img/git-01.png)
+  
+  ![Screenshot](/.github/img/git-01.png)
 * Если вы не знаете что отмечать, то оставьте настройки по умолчанию
-* ![Screenshot](/.github/img/git-02.png)
+ 
+  ![Screenshot](/.github/img/git-02.png)
 * В окне прописывания в PATH - лучше выбрать среднюю опцию, чтобы команды гита можно было вызывать из любого терминала.
-* ![Screenshot](/.github/img/git-03.png)
+
+  ![Screenshot](/.github/img/git-03.png)
 #### 2. Установите Visual Studio Community
 * [Скачайте](https://visualstudio.microsoft.com/ru/downloads/) и установите Visual Studio Community.
 * Ничего сложного, подойдут предлагаемые настройки по умолчанию.
-#### 2. Установите Python 3.10.x Windows
+#### 3. Установите Python 3.10.x Windows
 * [Скачайте](https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe) и начните установку Python [3.10.11](https://www.python.org/downloads/release/python-31011/).
-* ![Screenshot](/.github/img/py-01.png)
+
+  ![Screenshot](/.github/img/py-01.png)
 * Обязательно добавьте в переменные окружения (в PATH).
-* ![Screenshot](/.github/img/py-02.png)
-### Установка и запуск
-* Скачайте репозиторий, для этого откройте Командную строку (Терминал) в папке, где хотите разместить NeuroGPT и напишите команду:
+
+  ![Screenshot](/.github/img/py-02.png)
+
+#### 4. Скачайте репозиторий. Для этого откройте командную строку в папке, где хотите разместить NeuroGPT и напишите команду:
 `git clone https://github.com/Em1tSan/NeuroGPT.git`
-* Откройте папку `NeuroGPT` и запустите файл `start.bat`. Он создаст виртуальную среду, установит зависимости и запустит программу.
+* Откройте папку `NeuroGPT` и запустите файл `start`. Он создаст виртуальную среду, установит зависимости и запустит программу.
   * Проверка обновлений происходит автоматически при каждом запуске.
 ### Запуск Endpoint'а 
-* Откройте папку `NeuroGPT` и запустите файл `start_endpoint.bat`. 
+* Откройте папку `NeuroGPT` и запустите файл `start_endpoint`. 
   * Проверка обновлений происходит автоматически при каждом запуске.
 * Endpoint будет доступен по адресу: `http://127.0.0.1:1337/`
 
 
-# Linux
-wip
+## Linux
 
-### Обновление
-# MacOS [нестабильно]
-## Ручная установка:
+## MacOS
 
-# В проекте использовались:
-[ChuanhuChatGPT](https://github.com/GaiZhenbiao/ChuanhuChatGPT) - как основа для основной части чата
-[gpt4free](https://github.com/xtekky/gpt4free) - для реализации reverse api
-
-`wip
+## Планы:
+* Telegram бот
+* Веб-сайт
+* Добавление англоязычного интерфейса
