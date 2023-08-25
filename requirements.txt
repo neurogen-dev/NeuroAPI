@@ -1,5 +1,5 @@
-gradio
-gradio_client
+gradio==3.36.1
+gradio_client==0.2.7
 psycopg2-binary
 pypinyin
 tiktoken
@@ -8,7 +8,7 @@ tqdm
 colorama
 googlesearch-python
 Pygments
-langchain
+langchain==0.0.173
 markdown
 PyPDF2
 pdfplumber
@@ -56,5 +56,5 @@ pytz
 gunicorn
 huggingface_hub
 free-proxy
+watchdog~=3.0.0
 js2py
-protobuf==3.19.5

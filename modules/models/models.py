@@ -115,8 +115,10 @@ class OpenAIClient(BaseLLMModel):
             url = "https://chimeragpt.adventblocks.cc/api/v1/completions"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
-        else:
+        elif "neuro" in self.model_name:
             url = "https://neurochat-gpt.ru/v1/chat/completions"
+        else:
+            url = "http://127.0.0.1:1337/v1/chat/completions"
         return url
       
     def _get_headers(self):
@@ -158,6 +160,11 @@ class OpenAIClient(BaseLLMModel):
             'chatty-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
             'gpt-3.5-turbo-chatty-api': 'gpt-3.5-turbo',
             'chatty-gpt-4': 'gpt-4',
+            'neuro-gpt-4': 'gpt-4',
+            'neuro-gpt-4-0613': 'gpt-4-0613',
+            'neuro-gpt-4-32k': 'gpt-4-32k',
+            'neuro-gpt-4-32k-0613': 'gpt-4-32k-0613',
+            
 
         }
         model = model_names.get(self.model_name, self.model_name)
