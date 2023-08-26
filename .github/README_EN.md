@@ -95,7 +95,7 @@ Unpack the archive into a folder whose path does not contain Cyrillic. Press `st
 ---
 
 ## Windows
-This project only supports Python language version up to 3.10. That is, it is **NOT COMPATIBLE** with Python 3.11 and above. Moreover, its operation is not guaranteed on Python 3.9 and 3.8".
+This project only supports Python language version up to 3.10. That is, it is **NOT COMPATIBLE** with Python 3.11 and above. Moreover, its operation is not guaranteed on Python 3.9 and 3.8.
 This guide only considers x64-bit versions of Windows 10 and 11.
 
 #### 1. Install Git For Windows
@@ -122,10 +122,10 @@ This guide only considers x64-bit versions of Windows 10 and 11.
 #### 4. Download the repository by opening the command line in the folder where you want to place NeuroGPT and typing the following command:
 `git clone https://github.com/Em1tSan/NeuroGPT.git`
 * Open `NeuroGPT` folder and run `start` file. It will create a virtual environment, install dependencies, and launch the program.
-  * The program automatically checks for updates with each launch
+  * The program automatically checks for updates with each launch.
 ### Running API endpoint
 * Open `NeuroGPT` folder and run `start_endpoint` file. 
-  * The program automatically checks for updates with each launch
+  * The program automatically checks for updates with each launch.
 * API endpoint will be available at: `http://127.0.0.1:1337/`
 
 
