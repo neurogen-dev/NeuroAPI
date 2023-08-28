@@ -19,16 +19,16 @@
 
 <br> Инструкции по установке: <br/>
 
-<a href="https://github.com/Em1tSan/NeuroGPT#windows">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT#linux">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#linux">
   <img src="https://img.shields.io/badge/-Linux-F1502F?logo=linux" alt="linux"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT#macos">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#macos">
   <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
 </a> </p>
-<a href="https://github.com/Em1tSan/NeuroGPT#%D0%BF%D0%BE%D1%80%D1%82%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#%D0%BF%D0%BE%D1%80%D1%82%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F">
   <img src="https://img.shields.io/badge/-Портативная версия-008000?logo=portable" alt="portable"/>
 </a>
 
@@ -77,62 +77,5 @@
 - llama-2-70b-chat
 - claude-2
 - text-davinci-003
-
-# Установка и запуск
-
-### Портативная версия
-
-Запуск и автообновление в один клик. Не требует установки зависимостей.
-Распаковать архив в папку без кириллицы в пути. Нажать `start_portable_webui`
-
-<a href="https://github.com/Em1tSan/NeuroGPT/releases/download/v1.3.0/NeuroGPT-Portable.v1.3.7z">Скачать</a>
-
----
-
-### [Инструкция по получению API ключей ChimeraAI, PurGPT и Chatty](https://github.com/Em1tSan/NeuroGPT/wiki/%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D1%8E-API-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B9-ChimeraAI,-PurGPT-%D0%B8-Chatty)
-
----
-
-## Windows
-Данный проект поддерживает исколючительно версию языка Python не выше 3.10. То есть, с Python 3.11 и выше он **НЕ СОВМЕСТИМ**. Кроме того, работа на Python 3.9, 3.8 не гарантируется. 
-В данной инструкции рассматриваются только х64-битные версии Windows 10 и 11.
-
-#### 1. Установите Git For Windows
-* [Скачайте](https://git-scm.com/download/win) и начните установку git.
   
-  ![Screenshot](/.github/img/git-01.png)
-* Если вы не знаете что отмечать, то оставьте настройки по умолчанию
- 
-  ![Screenshot](/.github/img/git-02.png)
-* В окне прописывания в PATH - лучше выбрать среднюю опцию, чтобы команды гита можно было вызывать из любого терминала.
-
-  ![Screenshot](/.github/img/git-03.png)
-#### 2. Установите Visual Studio Community
-* [Скачайте](https://visualstudio.microsoft.com/ru/downloads/) и установите Visual Studio Community.
-* Ничего сложного, подойдут предлагаемые настройки по умолчанию.
-#### 3. Установите Python 3.10.x Windows
-* [Скачайте](https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe) и начните установку Python [3.10.11](https://www.python.org/downloads/release/python-31011/).
-
-  ![Screenshot](/.github/img/py-01.png)
-* Обязательно добавьте в переменные окружения (в PATH).
-
-  ![Screenshot](/.github/img/py-02.png)
-
-#### 4. Скачайте репозиторий. Для этого откройте командную строку в папке, где хотите разместить NeuroGPT и напишите команду:
-`git clone https://github.com/Em1tSan/NeuroGPT.git`
-* Откройте папку `NeuroGPT` и запустите файл `start`. Он создаст виртуальную среду, установит зависимости и запустит программу.
-  * Проверка обновлений происходит автоматически при каждом запуске.
-### Запуск Endpoint'а 
-* Откройте папку `NeuroGPT` и запустите файл `start_endpoint`. 
-  * Проверка обновлений происходит автоматически при каждом запуске.
-* Endpoint будет доступен по адресу: `http://127.0.0.1:1337/`
-
-
-## Linux
-
-## MacOS
-
-## Планы:
-* Telegram бот
-* Веб-сайт
-* Добавление англоязычного интерфейса
+***
