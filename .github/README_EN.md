@@ -61,7 +61,7 @@ Given that this project doesn't use an official API but relies on reverse-engine
 - Built-in jailbreaks for removing censorship
 - Conversation context
 - API endpoint
-- Fine-tuning a model
+- Setting generation parameters for GPT models
 - Saving and loading dialogue history
 
 <div align="center">
