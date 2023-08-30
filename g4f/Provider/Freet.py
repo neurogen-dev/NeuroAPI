@@ -1,33 +1,38 @@
 import json
+from aiohttp import ClientSession
+from ..typing import Any, CreateResult, AsyncGenerator
+from .base_provider import AsyncGeneratorProvider
 
-import requests
-
-from ..typing import Any, CreateResult
-from .base_provider import BaseProvider
-
-
-class CaffCat(BaseProvider):
-    url = "https://caffcat.com"
+class Freet(AsyncGeneratorProvider):
+    url = "https://biwjo6q8.freet.to"
     supports_stream = True
+
     supports_gpt_35_turbo = True
     supports_gpt_35_turbo_16k = True
+    supports_gpt_35_turbo_16k_0613 = True
+    supports_gpt_4 = True
+    supports_gpt_4_0613 = True
+    supports_gpt_4_32k = True
+    supports_gpt_4_32k_0613 = True
+
     working = True
 
-    @staticmethod
-    def create_completion(
+
+    @classmethod
+    async def create_async_generator(
+        cls,
         model: str,
         messages: list[dict[str, str]],
         stream: bool,
         **kwargs: Any,
-    ) -> CreateResult:
+    ) -> AsyncGenerator:
         active_servers = [
-            "https://coffeecat.ai",
-            "https://caffcat.com",
-            "https://www.jinwangyile.xyz",
+            "https://biwjo6q8.freet.top",
         ]
-        server = active_servers[kwargs.get("active_server", 2)]
+        server = active_servers[kwargs.get("active_server", 0)]
         headers = {
             "authority": f"{server}".replace("https://", ""),
+            "authorization:": "Bearer nk-Tmd-Ni-xiang-Gou=Sb-90807rqHgl8b3jrNkSjEvt90EiMEoCsbKJ2kggV1iHzTKEDWv1tcgazgdsuw0S4pZ1W",
             "accept": "text/event-stream",
             "accept-language": "en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3,fa=0.2",
             "content-type": "application/json",
@@ -56,33 +61,30 @@ class CaffCat(BaseProvider):
             "top_p": kwargs.get("top_p", 1),
         }
 
-        session = requests.Session()
-        # init cookies from server
-        session.get(f"{server}/")
-
-        response = session.post(
-            f"{server}/api/openai/v1/chat/completions",
-            headers=headers,
-            json=json_data,
-            stream=stream,
-        )
-        if response.status_code == 200:
-            if stream == False:
-                json_data = response.json()
-                if "choices" in json_data:
-                    yield json_data["choices"][0]["message"]["content"]
+        async with ClientSession() as session:
+            async with session.post(
+                f"{server}/api/openai/v1/chat/completions",
+                headers=headers,
+                json=json_data,
+            ) as response:
+                response.text
+                if response.status == 200:
+                    if stream == False:
+                        json_data = await response.json()
+                        if "choices" in json_data:
+                            yield json_data["choices"][0]["message"]["content"]
+                        else:
+                            raise Exception("No response from server")
+                    else:
+                        async for chunk in response.content:
+                            if b"content" in chunk:
+                                split_data = chunk.decode().split("data:")
+                                if len(split_data) > 1:
+                                    yield json.loads(split_data[1])["choices"][0]["delta"]["content"]
+                                else:
+                                    continue
                 else:
-                    yield Exception("No response from server")
-            else:
-                
-                for chunk in response.iter_lines():
-                    if b"content" in chunk:
-                        splitData = chunk.decode().split("data: ")
-                        if len(splitData) > 1:
-                            yield json.loads(splitData[1])["choices"][0]["delta"]["content"]
-        else:
-            yield Exception(f"Error {response.status_code} from server")
-      
+                    raise Exception(f"Error {response.status} from server : {response.reason}")
 
     @classmethod
     @property

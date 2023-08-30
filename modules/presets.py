@@ -2,8 +2,9 @@ import os
 from pathlib import Path
 import gradio as gr
 import requests
+import json
 
-VERSION = "v 1.4.0"
+VERSION = "v 1.4.1"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -45,22 +46,37 @@ CHUANHU_TITLE = "NeuroGPT " + VERSION
 
 CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://boosty.to/neurogen) </br>"
 
-#def get_online_models():
-#    url = "https://status.neurochat-gpt.ru/v1/status"
-#    response = requests.get(url).json()
-#    online_models = set()  # Используем множество для хранения уникальных моделей
-#    for provider in response["data"]:
-#        for model_info in provider["model"]:
-#            for model_name, model_status in model_info.items():
-#                if model_status["status"] == "Active":
-#                    online_models.add(model_name)  # Добавляем модель в множество
-#    return list(online_models)  # Преобразуем множество обратно в список
+def get_online_gpt4_models():
+    url = "https://status.neurochat-gpt.ru/v1/status"
+    response = requests.get(url).json()
+        
+    online_models = set()  
+    for provider in response["data"]:
+        model_info = provider["model"]
+        model_status = provider["status"]
+        
+        if model_status == "Active" and model_info.startswith('gpt-4'):
+            online_models.add("neuro-" + model_info)  
+
+    return list(online_models)
+
+def get_online_gpt3_models():
+    with open('status.json', 'r') as f:
+        response = json.load(f)
+        
+    online_models = set()  
+    for provider in response["data"]:
+        model_info = provider["model"]
+        model_status = provider["status"]
+        
+        if model_status == "Active" and model_info.startswith('gpt-3.5'):
+            online_models.add(model_info)  
+
+    return list(online_models)  
 
 
-ONLINE_MODELS = [
-    'gpt-3.5-turbo',
-    'gpt-3.5-turbo-16k'
-]
+
+ONLINE_MODELS = get_online_gpt3_models()
 
 CHIMERA_MODELS = [
     'chimera-gpt-3.5-turbo-16k',
@@ -83,11 +99,7 @@ PURGPT_MODELS = [
     'purgpt-text-davinci-003'
 ]
 
-NEURO_MODELS = [
-    'neuro-gpt-4',
-    'neuro-gpt-4-0613',
-    'neuro-gpt-4-32k'
-]
+NEURO_MODELS = get_online_gpt4_models()
 
 if os.environ.get('HIDE_API_MODELS', 'false') == 'true':
     MODELS = ONLINE_MODELS

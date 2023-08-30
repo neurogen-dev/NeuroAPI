@@ -10,7 +10,6 @@ class Forefront(BaseProvider):
     url = "https://forefront.com"
     supports_stream = True
     supports_gpt_35_turbo = True
-    supports_stream = True
 
     @staticmethod
     def create_completion(

@@ -10,49 +10,68 @@ class Model:
     base_provider: str
     best_provider: type[BaseProvider]
 
+# Config for HuggingChat, OpenAssistant
+# Works for Liaobots, H2o, OpenaiChat, Yqcloud, You
+default = Model(
+    name="",
+    base_provider="huggingface",
+    best_provider=H2o,
+)
 
 # GPT-3.5 / GPT-4
 gpt_35_turbo = Model(
     name="gpt-3.5-turbo",
     base_provider="openai",
-    best_provider=Wewordle
+    best_provider=Yqcloud
 )
 
 gpt_35_turbo_16k = Model(
     name="gpt-3.5-turbo-16k",
     base_provider="openai",
-    best_provider=Acytoo,
+    best_provider=Vercel,
 )
 
 gpt_35_turbo_16k_0613 = Model(
     name="gpt-3.5-turbo-16k-0613",
     base_provider="openai",
-    best_provider=Acytoo,
+    best_provider=Vercel,
 )
 
 
 gpt_4 = Model(
     name="gpt-4",
     base_provider="openai",
-    best_provider=Acytoo,
+    best_provider=Vercel,
+)
+
+gpt_4_0314 = Model(
+    name="gpt-4-0314",
+    base_provider="openai",
+    best_provider=Vercel,
 )
 
 gpt_4_0613 = Model(
     name="gpt-4-0613",
     base_provider="openai",
-    best_provider=Acytoo,
+    best_provider=Vercel,
 )
 
 gpt_4_32k = Model(
     name="gpt-4-32k",
     base_provider="openai",
-    best_provider=Acytoo,
+    best_provider=Vercel,
+)
+
+gpt_4_32k_0314 = Model(
+    name="gpt-4-32k-0314",
+    base_provider="openai",
+    best_provider=Vercel,
 )
 
 gpt_4_32k_0613 = Model(
     name="gpt-4-32k-0613",
     base_provider="openai",
-    best_provider=Liaobots,
+    best_provider=Vercel,
 )
 
 # Bard
@@ -109,6 +128,24 @@ code_davinci_002 = Model(
     best_provider=Vercel,
 )
 
+# gpt_35_turbo_16k = Model(
+    # name="openai:gpt-3.5-turbo-16k",
+    # base_provider="openai",
+    # best_provider=Vercel,
+# )
+
+# gpt_35_turbo_16k_0613 = Model(
+    # name="openai:gpt-3.5-turbo-16k-0613",
+    # base_provider="openai",
+    # best_provider=Equing,
+# )
+
+# gpt_4_0613 = Model(
+    # name="openai:gpt-4-0613",
+    # base_provider="openai",
+    # best_provider=Vercel,
+#)
+
 text_ada_001 = Model(
     name="openai:text-ada-001",
     base_provider="openai",
@@ -143,8 +180,10 @@ class ModelUtils:
         "gpt-3.5-turbo-16k": gpt_35_turbo_16k,
         "gpt-3.5-turbo-16k_0613": gpt_35_turbo_16k_0613,
         "gpt-4": gpt_4,
+        "gpt-4-0314": gpt_4_0314,
         "gpt-4-0613": gpt_4_0613,
         "gpt-4-32k": gpt_4_32k,
+        "gpt-4-32k-0314": gpt_4_32k_0314,
         "gpt-4-32k-0613": gpt_4_32k_0613,
         # Bard
         "palm2": palm,

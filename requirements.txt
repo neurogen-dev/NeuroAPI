@@ -59,3 +59,4 @@ free-proxy
 watchdog~=3.0.0
 js2py
 quickjs
+httpx
