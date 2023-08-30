@@ -34,19 +34,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-cache_ttl_secs = 600
-api_cache = LRUCache(maxseze=1000)
-
 def get_proxy():
     proxy = FreeProxy(rand=True, timeout=1).get()
     return proxy
 
-async def get_data_from_api(url, session):
-    async with async_timeout.timeout(cache_ttl_secs):
-        async with session.get(url) as response:
-            data = await response.json()
-            api_cache[url] = (data, datetime.now())
-            return data
 
 @app.post("/chat/completions")
 @app.post("/v1/chat/completions")
@@ -321,16 +312,6 @@ async def run_check_script():
 
         # Pause for 5 minutes before starting the next cycle
         time.sleep(360)
-
-# Асинхронная функция для обновления кэша данных из API
-async def update_api_cache():
-    while True:
-        try:
-            # Обновление данных каждые 10 минут
-            await asyncio.sleep(360)
-            api_cache.clear()
-        except:
-            pass
 
 # Запуск асинхронных задач
 async def run_tasks():
