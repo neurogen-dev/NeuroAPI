@@ -19,7 +19,7 @@ def process_provider(provider_name, model_name):
         }
 
         # Проверяем только модель 'gpt-3.5-turbo' для провайдеров Wewordle и Qidinam
-        if provider_name in ['Wewordle', 'Qidinam', 'DeepAi', 'ChatgptLogin'] and model_name != 'gpt-3.5-turbo':
+        if provider_name in ['Wewordle', 'Qidinam', 'DeepAi', 'GetGpt', 'Yqcloud'] and model_name != 'gpt-3.5-turbo':
             provider_status['status'] = 'Inactive'
             print(f"{provider_name} with {model_name} skipped")
             return provider_status

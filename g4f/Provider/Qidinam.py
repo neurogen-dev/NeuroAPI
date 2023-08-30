@@ -1,24 +1,23 @@
-import json
+import json, random, string, time
 
-import requests
-
+from aiohttp import ClientSession
 from ..typing import Any, CreateResult
-from .base_provider import BaseProvider
+from .base_provider import AsyncProvider, format_prompt
 
-
-class Qidinam(BaseProvider):
+class Qidinam(AsyncProvider):
     url = "https://ai.qidianym.net/api/chat-process"
     working = True
     supports_gpt_35_turbo = True
     supports_stream = True
 
-    @staticmethod
-    def create_completion(
+    @classmethod
+    async def create_async(
+        cls,
         model: str,
-        messages: list[dict[str, str]],
-        stream: bool,
+        messages: dict[str, str],
         **kwargs: Any,
     ) -> CreateResult:
+        
         base = ""
         for message in messages:
             base += "%s: %s\n" % (message["role"], message["content"])
@@ -35,11 +34,14 @@ class Qidinam(BaseProvider):
             "top_p": kwargs.get("top_p", 1),
         }
         url = "https://ai.qidianym.net/api/chat-process"
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        lines = response.text.strip().split("\n")
-        res = json.loads(lines[-1])
-        yield res["text"]
+
+        # Use aiohttp for asynchronous HTTP requests
+        async with ClientSession() as session:
+            async with session.post(f"{url}gptapi/v1/android/turbo", headers=headers, json=data) as response:
+                response.raise_for_status()
+                lines = response.text.strip().split("\n")
+                res = json.loads(lines[-1])
+                return await res["text"]
 
     @classmethod
     @property

@@ -4,6 +4,8 @@ import json
 import random
 import string
 import asyncio
+import async_timeout
+import aiohttp, aiofiles
 import requests
 import pytz
 import logging
@@ -13,10 +15,15 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 from typing import Any
+import g4f
 from g4f import ChatCompletion, Provider, BaseProvider, models
 from cachetools import LRUCache
-import httpx
-import check
+
+import aiofiles
+import async_timeout
+
+from fp.fp import FreeProxy
+import concurrent.futures
 
 app = FastAPI()
 app.add_middleware(GZipMiddleware)
@@ -27,18 +34,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Кэш для хранения данных из API
-api_cache = LRUCache(maxsize=1000)
+cache_ttl_secs = 600
+api_cache = LRUCache(maxseze=1000)
 
-# Асинхронная функция для получения данных из API
-async def get_data_from_api(url: str) -> Any:
-    if url in api_cache:
-        return api_cache[url]
-    else:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            data = response.json()
-            api_cache[url] = data
+def get_proxy():
+    proxy = FreeProxy(rand=True, timeout=1).get()
+    return proxy
+
+async def get_data_from_api(url, session):
+    async with async_timeout.timeout(cache_ttl_secs):
+        async with session.get(url) as response:
+            data = await response.json()
+            api_cache[url] = (data, datetime.now())
             return data
 
 @app.post("/chat/completions")
@@ -93,7 +100,7 @@ async def chat_completions(request: Request):
             },
         }
 
-    async def streaming():
+    def streaming():
         for chunk in response:
             completion_data = {
                 "id": f"chatcmpl-{completion_id}",
@@ -110,11 +117,11 @@ async def chat_completions(request: Request):
                     }
                 ],
             }
-
+    
             content = json.dumps(completion_data, separators=(",", ":"))
             yield f"data: {content}\n\n"
-            await asyncio.sleep(0.1)
-
+            time.sleep(0.1)
+    
         end_completion_data: dict[str, Any] = {
             "id": f"chatcmpl-{completion_id}",
             "object": "chat.completion.chunk",
@@ -130,7 +137,7 @@ async def chat_completions(request: Request):
         }
         content = json.dumps(end_completion_data, separators=(",", ":"))
         yield f"data: {content}\n\n"
-
+    
     return StreamingResponse(streaming(), media_type='text/event-stream')
 
 @app.get("/v1/dashboard/billing/subscription")
@@ -248,41 +255,94 @@ async def get_providers():
                 pass
     return JSONResponse(providers_data)
 
-def setup_logging():
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
+def process_provider(provider_name, model_name):
+    try:
+        p = getattr(g4f.Provider, provider_name)
+        provider_status = {
+            "provider": provider_name,
+            "model": model_name,
+            "url": p.url,
+            "status": ""
+        }
 
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
+        # Проверяем только модель 'gpt-3.5-turbo' для провайдеров Wewordle и Qidinam
+        if provider_name in ['Wewordle', 'Qidinam', 'DeepAi', 'GetGpt', 'Yqcloud'] and model_name != 'gpt-3.5-turbo':
+            provider_status['status'] = 'Inactive'
+            #print(f"{provider_name} with {model_name} skipped")
+            return provider_status
 
-    root_logger.addHandler(handler)
+        try:
+            response = ChatCompletion.create(model=model_name, provider=p,
+                                                 messages=[{"role": "user", "content": "Say 'Hello World!'"}], stream=False)
+            if any(word in response for word in ['Hello World', 'Hello', 'hello', 'world']):
+                provider_status['status'] = 'Active'
+                #print(f"{provider_name} with {model_name} say: {response}")
+            else:
+                provider_status['status'] = 'Inactive'
+                #print(f"{provider_name} with {model_name} say: Inactive")
+        except Exception as e:
+            provider_status['status'] = 'Inactive'
+           # print(f"{provider_name} with {model_name} say: Error")
+
+        return provider_status
+    except:
+        return None
+
+async def run_check_script():
+    session = aiohttp.ClientSession()
+    while True:
+        models = [model for model in g4f.models.ModelUtils.convert if model.startswith('gpt-') or model.startswith('claude') or model.startswith('text-')]
+        providers = [provider for provider in dir(g4f.Provider) if not provider.startswith('__')]
+
+        status = {'data': []}
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for provider_name in providers:
+                for model_name in models:
+                    future = executor.submit(process_provider, provider_name, model_name)
+                    futures.append(future)
+
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                if result is not None and result['status'] == 'Active':
+                    status['data'].append(result)
+
+        print(status)
+        status['key'] = "test"
+        tz = pytz.timezone('Asia/Shanghai')
+        now = datetime.now(tz)
+        print(now)
+        status['time'] = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        if status['data']:
+            # Здесь мы используем aiofiles для асинхронного записывания в файл
+            async with aiofiles.open('status.json', 'w') as f:
+                await f.write(json.dumps(status))
+
+        # Pause for 5 minutes before starting the next cycle
+        time.sleep(360)
 
 # Асинхронная функция для обновления кэша данных из API
 async def update_api_cache():
     while True:
         try:
             # Обновление данных каждые 10 минут
-            await asyncio.sleep(600)
+            await asyncio.sleep(360)
             api_cache.clear()
         except:
             pass
 
 # Запуск асинхронных задач
 async def run_tasks():
-    tasks = [
-        asyncio.create_task(update_api_cache())
-    ]
-    await asyncio.gather(*tasks)
-
+    while True:
+        await asyncio.gather(run_check_script())
+        await asyncio.sleep(300)
+    
 # Запуск приложения
 def main():
-    setup_logging()
-    tz = pytz.timezone('Asia/Shanghai')
-    now = datetime.now(tz)
-    print(now)
-    asyncio.run(run_tasks())
-    check.main()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run_tasks())
+    loop.close()
 
 if __name__ == "__main__":
     main()

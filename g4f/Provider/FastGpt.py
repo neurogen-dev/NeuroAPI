@@ -6,7 +6,7 @@ from ..typing import Any, CreateResult
 
 class FastGpt(ABC):
     url: str = 'https://chat9.fastgpt.me/'
-    working = False
+    working = True
     needs_auth = False
     supports_stream = True
     supports_gpt_35_turbo = True
