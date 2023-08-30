@@ -7,6 +7,9 @@ from datetime import datetime
 import concurrent.futures
 import asyncio
 from g4f import ChatCompletion
+from fp.fp import FreeProxy
+import threading  
+import socket  
 
 def process_provider(provider_name, model_name):
     try:
@@ -25,8 +28,10 @@ def process_provider(provider_name, model_name):
             return provider_status
 
         try:
+            
             response = ChatCompletion.create(model=model_name, provider=p,
                                                  messages=[{"role": "user", "content": "Say 'Hello World!'"}], stream=False)
+            print(f"Using proxy: {proxy}")
             if any(word in response for word in ['Hello World', 'Hello', 'hello', 'world']):
                 provider_status['status'] = 'Active'
                 print(f"{provider_name} with {model_name} say: {response}")
@@ -72,7 +77,7 @@ def main():
                 json.dump(status, f)
 
         # Pause for 10 minutes before starting the next cycle
-        time.sleep(600)
+        #time.sleep(600)
 
 if __name__ == "__main__":
     main()
