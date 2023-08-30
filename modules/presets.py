@@ -4,7 +4,7 @@ import gradio as gr
 import requests
 import json
 
-VERSION = "v 1.4.1"
+VERSION = "v 1.4.2"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -55,7 +55,7 @@ def get_online_gpt4_models():
         model_info = provider["model"]
         model_status = provider["status"]
         
-        if model_status == "Active" and model_info.startswith('gpt-4'):
+        if model_status == "Active" and model_info.startswith('gpt-4') or model_info.startswith('gpt-3.5-turbo-16k'):
             online_models.add("neuro-" + model_info)  
 
     return list(online_models)
@@ -76,7 +76,9 @@ def get_online_gpt3_models():
 
 
 
-ONLINE_MODELS = get_online_gpt3_models()
+ONLINE_MODELS = [
+    'gpt-3.5-turbo',
+]
 
 CHIMERA_MODELS = [
     'chimera-gpt-3.5-turbo-16k',

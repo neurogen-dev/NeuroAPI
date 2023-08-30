@@ -160,11 +160,15 @@ class OpenAIClient(BaseLLMModel):
             'chatty-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
             'gpt-3.5-turbo-chatty-api': 'gpt-3.5-turbo',
             'chatty-gpt-4': 'gpt-4',
+            'neuro-gpt-3.5-turbo': 'gpt-3.5-turbo',
+            'neuro-gpt-3.5-turbo-0613': 'gpt-3.5-turbo-0613',
+            'neuro-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
+            'neuro-gpt-3.5-turbo-0613': 'gpt-3.5-turbo-0613',
+            'neuro-gpt-3.5-turbo_0613': 'gpt-3.5-turbo_0613',
             'neuro-gpt-4': 'gpt-4',
             'neuro-gpt-4-0613': 'gpt-4-0613',
             'neuro-gpt-4-32k': 'gpt-4-32k',
             'neuro-gpt-4-32k-0613': 'gpt-4-32k-0613',
-            
 
         }
         model = model_names.get(self.model_name, self.model_name)
