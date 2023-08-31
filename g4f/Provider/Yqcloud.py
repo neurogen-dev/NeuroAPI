@@ -5,9 +5,8 @@ from .base_provider import AsyncProvider, format_prompt
 
 class Yqcloud(AsyncProvider):
     url = "https://chat9.yqcloud.top/"
-    working = True
+    working = False
     supports_gpt_35_turbo = True
-    supports_stream = True
 
     @staticmethod
     async def create_async(

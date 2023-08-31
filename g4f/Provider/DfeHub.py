@@ -8,7 +8,6 @@ class DfeHub(BaseProvider):
     url                   = "https://chat.dfehub.com/"
     supports_stream       = True
     supports_gpt_35_turbo = True
-    working = True
 
     @staticmethod
     def create_completion(

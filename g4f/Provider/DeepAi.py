@@ -6,7 +6,7 @@ from .base_provider import BaseProvider
 
 class DeepAi(BaseProvider):
     url: str              = "https://deepai.org"
-    working               = False
+    working               = True
     supports_stream       = True
     supports_gpt_35_turbo = True
 

@@ -10,7 +10,6 @@ class Acytoo(BaseProvider):
     url                   = 'https://chat.acytoo.com/'
     working               = True
     supports_gpt_35_turbo = True
-    supports_stream = True
 
     @classmethod
     def create_completion(
@@ -35,14 +34,14 @@ def _create_header():
     }
 
 
-def _create_payload(messages: list[dict[str, str]], temperature, model):
+def _create_payload(messages: list[dict[str, str]], temperature):
     payload_messages = [
         message | {'createdAt': int(time.time()) * 1000} for message in messages
     ]
     
     return {
         'key'         : '',
-        'model'       : model,
+        'model'       : 'gpt-3.5-turbo',
         'messages'    : payload_messages,
         'temperature' : temperature,
         'password'    : ''
