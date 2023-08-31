@@ -31,10 +31,6 @@ class ChatCompletion:
         if provider.needs_auth:
             kwargs['auth'] = auth
 
-        if not provider.supports_stream and stream:
-            raise Exception(
-                f'ValueError: {provider.__name__} does not support "stream" argument')
-
         if logging:
             print(f'Using {provider.__name__} provider')
 

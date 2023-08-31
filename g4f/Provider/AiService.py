@@ -5,8 +5,8 @@ from .base_provider import BaseProvider
 
 
 class AiService(BaseProvider):
-    url = "https://aiservice.vercel.app/api/chat/answer"
-    working = True
+    url = "https://aiservice.vercel.app/"
+    working = False
     supports_gpt_35_turbo = True
 
     @staticmethod

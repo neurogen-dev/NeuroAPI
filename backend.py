@@ -50,20 +50,7 @@ async def chat_completions(request: Request):
     top_p = req_data.get('top_p', 1.0)
     max_tokens = req_data.get('max_tokens', 4096)
 
-    # Получение данных о провайдерах из API
-    # Загрузка данных о провайдерах из локального файла
-    with open('status.json', 'r') as f:
-        provider_data = json.load(f)
-    
-    active_providers = [data['provider'] for data in provider_data['data'] if data['model'] == model and data['status'] == 'Active']
-    
-    if not active_providers:
-        return JSONResponse({"error": "No active provider found for the model"})
-
-    provider_name = random.choice(active_providers)
-    provider = getattr(Provider, provider_name)
-
-    response = ChatCompletion.create(model=model, stream=stream, messages=messages, provider=provider, temperature=temperature, top_p=top_p, max_tokens=max_tokens, system_prompt="")
+    response = ChatCompletion.create(model=model, stream=stream, messages=messages, temperature=temperature, top_p=top_p, max_tokens=max_tokens, system_prompt="")
 
     completion_id = "".join(random.choices(string.ascii_letters + string.digits, k=28))
     completion_timestamp = int(time.time())
@@ -79,7 +66,7 @@ async def chat_completions(request: Request):
                     "index": 0,
                     "message": {
                         "role": "assistant",
-                        "content": response.encode().decode(),
+                        "content": response,
                     },
                     "finish_reason": "stop",
                 }
@@ -102,7 +89,7 @@ async def chat_completions(request: Request):
                     {
                         "index": 0,
                         "delta": {
-                            "content": chunk.encode().decode(),
+                            "content": chunk,
                         },
                         "finish_reason": None,
                     }

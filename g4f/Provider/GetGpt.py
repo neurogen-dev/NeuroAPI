@@ -1,25 +1,22 @@
-import os
-import uuid
-import json
-from Crypto.Cipher import AES
-from aiohttp import ClientSession
-from ..typing import Any, CreateResult, AsyncGenerator
-from .base_provider import AsyncGeneratorProvider
+import os, json, uuid, requests
 
-class GetGpt(AsyncGeneratorProvider):
-    url = 'https://chat.getgpt.world/'
-    supports_stream = True
-    working = True
+from Crypto.Cipher  import AES
+from ..typing       import Any, CreateResult
+from .base_provider import BaseProvider
+
+
+class GetGpt(BaseProvider):
+    url                   = 'https://chat.getgpt.world/'
+    supports_stream       = True
+    working               = True
     supports_gpt_35_turbo = True
 
-    @classmethod
-    async def create_async_generator(
-        cls,
-        model: str, 
-        messages: list[dict[str, str]], 
-        stream: bool, 
-        **kwargs: Any
-     ) -> AsyncGenerator:
+    @staticmethod
+    def create_completion(
+        model: str,
+        messages: list[dict[str, str]],
+        stream: bool, **kwargs: Any) -> CreateResult:
+        
         headers = {
             'Content-Type'  : 'application/json',
             'Referer'       : 'https://chat.getgpt.world/',
@@ -39,18 +36,15 @@ class GetGpt(AsyncGeneratorProvider):
                 'uuid'              : str(uuid.uuid4())
             }
         )
-        
-        json_data = {'signature': _encrypt(data)}
-        
-        async with ClientSession() as session:
-            async with session.post('https://chat.getgpt.world/api/chat/stream',
-                                    headers=headers, json=json_data) as res:
-                res.raise_for_status()
-                
-                async for line in res.content.iter_any():
-                    if b'content' in line:
-                        line_json = json.loads(line.decode('utf-8').split('data: ')[1])
-                        yield (line_json['choices'][0]['delta']['content'])
+
+        res = requests.post('https://chat.getgpt.world/api/chat/stream',
+            headers=headers, json={'signature': _encrypt(data)}, stream=True)
+
+        res.raise_for_status()
+        for line in res.iter_lines():
+            if b'content' in line:
+                line_json = json.loads(line.decode('utf-8').split('data: ')[1])
+                yield (line_json['choices'][0]['delta']['content'])
 
     @classmethod
     @property
@@ -73,15 +67,16 @@ def _encrypt(e: str):
     t = os.urandom(8).hex().encode('utf-8')
     n = os.urandom(8).hex().encode('utf-8')
     r = e.encode('utf-8')
-
-    cipher = AES.new(t, AES.MODE_CBC, n)
+    
+    cipher     = AES.new(t, AES.MODE_CBC, n)
     ciphertext = cipher.encrypt(_pad_data(r))
-
+    
     return ciphertext.hex() + t.decode('utf-8') + n.decode('utf-8')
 
-def _pad_data(data: bytes) -> bytes:
-    block_size = AES.block_size
-    padding_size = block_size - len(data) % block_size
-    padding = bytes([padding_size] * padding_size)
 
+def _pad_data(data: bytes) -> bytes:
+    block_size   = AES.block_size
+    padding_size = block_size - len(data) % block_size
+    padding      = bytes([padding_size] * padding_size)
+    
     return data + padding

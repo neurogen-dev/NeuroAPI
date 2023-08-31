@@ -312,3 +312,4 @@ def run(generator: AsyncGenerator[Union[Any, str], Any]):
 
         except StopAsyncIteration:
             break
+

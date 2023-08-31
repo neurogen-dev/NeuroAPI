@@ -9,7 +9,7 @@ class HuggingChat(AsyncGeneratorProvider):
     url = "https://huggingface.co/chat/"
     needs_auth = True
     working = True
-    model = "meta-llama/Llama-2-70b-chat-hf"
+    model = "OpenAssistant/oasst-sft-6-llama-30b-xor"
 
     @classmethod
     async def create_async_generator(

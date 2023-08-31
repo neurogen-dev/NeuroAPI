@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/license-GPL_3.0-indigo.svg" alt="license"/>
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
-  <img src="https://img.shields.io/badge/latest-v1.4.0-indigo.svg" alt="latest"/>
+  <img src="https://img.shields.io/badge/latest-v1.4.2-indigo.svg" alt="latest"/>
 </a>
 
 <br> Советуем сразу посетить <a href="https://github.com/Em1tSan/NeuroGPT/wiki#%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-%D1%8F%D0%B7%D1%8B%D0%BA">wiki проекта</a><br/>

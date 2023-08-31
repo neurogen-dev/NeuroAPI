@@ -10,6 +10,7 @@ from g4f import ChatCompletion
 from fp.fp import FreeProxy
 import threading  
 import socket  
+from auto_proxy import get_random_proxy, update_working_proxies
 
 def process_provider(provider_name, model_name):
     try:
@@ -22,16 +23,17 @@ def process_provider(provider_name, model_name):
         }
 
         # Проверяем только модель 'gpt-3.5-turbo' для провайдеров Wewordle и Qidinam
-        if provider_name in ['Wewordle', 'Qidinam', 'DeepAi', 'GetGpt', 'Yqcloud'] and model_name != 'gpt-3.5-turbo':
+        if provider_name in ['Wewordle', 'Qidinam', 'DeepAi', 'GetGpt', 'Yqcloud', 'WewordleApple'] and model_name != 'gpt-3.5-turbo':
             provider_status['status'] = 'Inactive'
             print(f"{provider_name} with {model_name} skipped")
             return provider_status
 
         try:
+            proxy = get_random_proxy().decode("utf-8")
+            formatted_proxy = f'https://{proxy}'
             
             response = ChatCompletion.create(model=model_name, provider=p,
                                                  messages=[{"role": "user", "content": "Say 'Hello World!'"}], stream=False)
-            print(f"Using proxy: {proxy}")
             if any(word in response for word in ['Hello World', 'Hello', 'hello', 'world']):
                 provider_status['status'] = 'Active'
                 print(f"{provider_name} with {model_name} say: {response}")
@@ -77,7 +79,7 @@ def main():
                 json.dump(status, f)
 
         # Pause for 10 minutes before starting the next cycle
-        #time.sleep(600)
+        time.sleep(600)
 
 if __name__ == "__main__":
     main()

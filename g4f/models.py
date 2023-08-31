@@ -165,8 +165,8 @@ text_davinci_003 = Model(
     best_provider=Vercel,
 )
 
-llama13b_v2_chat = Model(
-    name="replicate:a16z-infra/llama13b-v2-chat",
+llama70b_v2_chat = Model(
+    name="replicate:a16z-infra/llama70b-v2-chat",
     base_provider="replicate",
     best_provider=Vercel,
 )
@@ -206,5 +206,5 @@ class ModelUtils:
         "text-ada-001": text_ada_001,
         "text-curie-001": text_curie_001,
         "text-davinci-003": text_davinci_003,
-        "llama13b-v2-chat": llama13b_v2_chat,
+        "llama70b-v2-chat": llama70b_v2_chat,
     }

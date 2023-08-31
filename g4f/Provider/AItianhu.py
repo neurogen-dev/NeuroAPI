@@ -7,17 +7,16 @@ from .base_provider import BaseProvider
 
 
 class AItianhu(BaseProvider):
-    url = "https://ixlc0.aitianhu.site/api/chat-process"
-    working = True
-    supports_gpt_4 = True
+    url = "https://www.aitianhu.com/"
+    working = False
+    supports_gpt_35_turbo = True
 
     @staticmethod
     def create_completion(
         model: str,
         messages: list[dict[str, str]],
-        stream: bool,
-        **kwargs: Any,
-    ) -> CreateResult:
+        stream: bool, **kwargs: Any) -> CreateResult:
+        
         base = ""
         for message in messages:
             base += "%s: %s\n" % (message["role"], message["content"])
@@ -33,7 +32,7 @@ class AItianhu(BaseProvider):
             "temperature": kwargs.get("temperature", 0.8),
             "top_p": kwargs.get("top_p", 1),
         }
-        url = "https://ixlc0.aitianhu.site/api/chat-process"
+        url = "https://www.aitianhu.com/api/chat-process"
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
         lines = response.text.strip().split("\n")
