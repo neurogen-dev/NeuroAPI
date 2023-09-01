@@ -23,9 +23,13 @@ import aiofiles
 import async_timeout
 
 from fp.fp import FreeProxy
+from embedding_processing import embedding_processing 
 import concurrent.futures
 
 app = FastAPI()
+embedding_proc = embedding_processing()
+LOG = logging.getLogger(__name__)
+
 app.add_middleware(GZipMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -117,6 +121,19 @@ async def chat_completions(request: Request):
         yield f"data: {content}\n\n"
     
     return StreamingResponse(streaming(), media_type='text/event-stream')
+
+@app.post('/v1/embeddings')
+async def create_embedding(request: Request):
+    j_input = await request.json()
+    #model = embedding_processing()
+    embedding = embedding_proc.embedding(text_list=j_input['input'])
+    await log_event()
+    return JSONResponse(
+        embedding
+        )
+
+async def log_event():
+    LOG.info('served')
 
 @app.get("/v1/dashboard/billing/subscription")
 @app.get("/dashboard/billing/subscription")

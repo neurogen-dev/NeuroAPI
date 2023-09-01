@@ -59,6 +59,10 @@ python -m pip install --upgrade pip
 python -m pip install -U setuptools 
 python -m pip install whl\quickjs-1.19.2-cp311-cp311-win_amd64.whl
 python -m pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python -m spacy download zh_core_web_sm
+python -m spacy download ru_core_news_sm
+
 
 echo Completed.
 
