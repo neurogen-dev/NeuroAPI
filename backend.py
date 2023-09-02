@@ -16,7 +16,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 from typing import Any
 import g4f
-from g4f import ChatCompletion, Provider, BaseProvider, models
+from g4f import ChatCompletion, Provider, BaseProvider
+from g4f.models import ModelUtils
 from cachetools import LRUCache
 
 import aiofiles
@@ -216,7 +217,7 @@ async def billing_usage():
 @app.get("/models")
 async def get_models():
     models_data = {"data": []}
-    for model_name, model in models.ModelUtils.convert.items():
+    for model_name, model in ModelUtils.convert.items():
         models_data['data'].append({
             "id": model_name,
             "object": "model",

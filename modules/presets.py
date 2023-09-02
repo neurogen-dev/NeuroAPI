@@ -51,12 +51,10 @@ def get_online_gpt4_models():
     response = requests.get(url).json()
         
     online_models = set()  
-    for provider in response["data"]:
-        model_info = provider["model"]
-        model_status = provider["status"]
-        
-        if model_status == "Active" and model_info.startswith('gpt-4') or model_info.startswith('gpt-3.5-turbo-16k'):
-            online_models.add("neuro-" + model_info)  
+
+    for model in response:
+        if model.startswith('gpt-4') or model.startswith('gpt-3.5-turbo-16k'):
+            online_models.add("neuro-" + model)  
 
     return list(online_models)
 
