@@ -77,6 +77,8 @@ class AsyncProvider(BaseProvider):
 
 
 class AsyncGeneratorProvider(AsyncProvider):
+    supports_stream = True
+    
     @classmethod
     def create_completion(
         cls,
