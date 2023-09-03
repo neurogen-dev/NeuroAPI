@@ -18,7 +18,7 @@ class Freet(BaseProvider):
     supports_gpt_4_32k = True
     supports_gpt_4_32k_0613 = True
 
-    working = False
+    working = True
 
 
     @staticmethod
@@ -29,7 +29,7 @@ class Freet(BaseProvider):
         **kwargs: Any,
     ) -> CreateResult:
         active_servers = [
-            "https://chat-gpt-next-web-squallstar.vercel.app",
+            "https://biwjo6q8.freet.to",
         ]
         server = active_servers[kwargs.get("active_server", 0)]
         headers = {

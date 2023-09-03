@@ -37,7 +37,7 @@ class Qidinam(AsyncProvider):
 
         # Use aiohttp for asynchronous HTTP requests
         async with ClientSession() as session:
-            async with session.post(f"{url}gptapi/v1/android/turbo", headers=headers, json=data) as response:
+            async with session.post(url, headers=headers, json=data) as response:
                 response.raise_for_status()
                 lines = response.text.strip().split("\n")
                 res = json.loads(lines[-1])

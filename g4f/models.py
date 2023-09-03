@@ -22,7 +22,7 @@ default = Model(
 gpt_35_turbo = Model(
     name="gpt-3.5-turbo",
     base_provider="openai",
-    best_provider=Wewordle
+    best_provider=Freet
 )
 
 gpt_35_turbo_16k = Model(
