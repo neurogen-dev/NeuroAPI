@@ -48,11 +48,21 @@ CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https
 
 def get_online_gpt4_models():
     url = "https://status.neurochat-gpt.ru/v1/status"
-    response = requests.get(url).json()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # this line will raise an HTTPError if the request returned an unsuccessful status code
+        data = response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except requests.exceptions.RequestException as err:
+        print(f"Error occurred: {err}")
+    except json.JSONDecodeError:
+        print(f"Could not decode the response into json")
+        data = {}
         
     online_models = set()  
 
-    for model in response:
+    for model in data:
         if model.startswith('gpt-4') or model.startswith('gpt-3.5-turbo-16k'):
             online_models.add("neuro-" + model)  
 

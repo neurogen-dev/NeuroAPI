@@ -1,6 +1,7 @@
 from .base_provider import BaseProvider
 from .Acytoo import Acytoo
 from .Aichat import Aichat
+from .Ails import Ails
 from .AiService import AiService
 from .AItianhu import AItianhu
 from .AItianhu2 import AItianhu2
@@ -23,7 +24,9 @@ from .HuggingChat import HuggingChat
 from .I207m import I207m
 from .Liaobots import Liaobots
 from .Lockchat import Lockchat
+from .Opchatgpts import Opchatgpts
 from .OpenaiChat import OpenaiChat
+from .OpenAssistant import OpenAssistant
 from .Qidinam import Qidinam
 from .Raycast import Raycast
 from .Theb import Theb
@@ -31,6 +34,7 @@ from .V50 import V50
 from .Vercel import Vercel
 from .Wewordle import Wewordle
 from .Wuguokai import Wuguokai
+from .You import You
 from .Yqcloud import Yqcloud
 
 
@@ -38,6 +42,7 @@ __all__ = [
     "BaseProvider",
     "Acytoo",
     "Aichat",
+    "Ails",
     "AiService",
     "AItianhu",
     "AItianhu2",
@@ -60,7 +65,9 @@ __all__ = [
     "I207m",
     "Liaobots",
     "Lockchat",
+    "Opchatgpts",
     "OpenaiChat",
+    "OpenAssistant",
     "Qidinam",
     "Raycast",
     "Theb",
@@ -68,5 +75,6 @@ __all__ = [
     "Vercel",
     "Wewordle",
     "Wuguokai",
+    "You",
     "Yqcloud",
 ]
