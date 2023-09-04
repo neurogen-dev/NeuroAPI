@@ -38,6 +38,11 @@ set userprofile=tmp
 set temp=tmp
 set PATH=git\cmd;python;venv\scripts
 
+git init
+git remote add origin https://github.com/Em1tSan/NeuroGPT.git
+git pull
+git checkout portable -f
+git branch --set-upstream-to origin/portable
 
 echo Checking for updates...
 
