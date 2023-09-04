@@ -11,7 +11,7 @@ import g4f
 
 stream = False
 response = g4f.ChatCompletion.create(
-    model="OpenAssistant/oasst-sft-6-llama-30b-xor",
+    model="text-davinci-003",
     messages=[{"role": "user", "content": "hello"}],
     stream=stream,
 )

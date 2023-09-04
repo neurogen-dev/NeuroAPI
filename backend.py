@@ -136,6 +136,41 @@ async def create_embedding(request: Request):
 async def log_event():
     LOG.info('served')
 
+@app.post("/v1/completions")
+async def completions(request: Request):
+    req_data = await request.json()
+    model = req_data.get('model', 'text-davinci-003')
+    prompt = req_data.get('prompt')
+    messages = req_data.get('messages')
+    temperature = req_data.get('temperature', 1.0)
+    top_p = req_data.get('top_p', 1.0)
+    max_tokens = req_data.get('max_tokens', 4096)
+
+    response = g4f.Completion.create(model='text-davinci-003', prompt=prompt, temperature=temperature, top_p=top_p, max_tokens=max_tokens,)
+
+    completion_id = "".join(random.choices(string.ascii_letters + string.digits, k=24))
+    completion_timestamp = int(time.time())
+
+    return {
+      "id": f"cmpl-{completion_id}",
+      "object": "text_completion",
+      "created": completion_timestamp,
+      "model": "text-davinci-003",
+      "choices": [
+        {
+          "text": response,
+          "index": 0,
+          "logprobs": None,
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": None,
+        "completion_tokens": None,
+        "total_tokens": None
+      }
+    }
+
 @app.get("/v1/dashboard/billing/subscription")
 @app.get("/dashboard/billing/subscription")
 async def billing_subscription():
