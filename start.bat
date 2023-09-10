@@ -37,9 +37,24 @@ IF NOT EXIST venv\Lib\site-packages\ru_core_news_sm (
 )
 
 echo Completed.
-echo Running NeuroGPT...
 
-python webui.py
+REM Prompt for language selection
+echo What language do you want to use?
+echo 1 - English
+echo 2 - Russian
+
+set /p language=Enter your choice (1 or 2):
+
+IF "%language%"=="1" (
+    echo Running NeuroGPT with English language...
+    python webui_en.py
+) ELSE IF "%language%"=="2" (
+    echo Running NeuroGPT with Russian language...
+    python webui_ru.py
+) ELSE (
+    echo Invalid choice. Please try again.
+)
+
 pause
 
 :: Упаковано и собрано telegram каналом Neurogen News: https://t.me/neurogen_news
