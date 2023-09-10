@@ -57,6 +57,7 @@
 ## Возможности:
 
 - Веб-поиск
+- [Список моделей](https://status.neurochat-gpt.ru/v1/status)
 - Встроенные шаблоны промптов под разные задачи
 - Встроенные джейлбрейки для снятия цензуры
 - Контекст беседы
@@ -67,16 +68,3 @@
 <div align="center">
   <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
 </div>
-
-## Список моделей:
-
-- gpt-3.5-turbo-16k
-- gpt-3.5-turbo
-- gpt-4
-- gpt-4-32k
-- gpt-4-0613
-- llama-2-70b-chat
-- claude-2
-- text-davinci-003
-  
-***

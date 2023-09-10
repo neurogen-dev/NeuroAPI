@@ -57,6 +57,7 @@ Given that this project doesn't use an official API but relies on reverse-engine
 ## Features:
 
 - Web search
+- [List of models](https://status.neurochat-gpt.ru/v1/status)
 - Built-in prompt templates for various tasks
 - Built-in jailbreaks for removing censorship
 - Conversation context
@@ -67,16 +68,3 @@ Given that this project doesn't use an official API but relies on reverse-engine
 <div align="center">
   <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
 </div>
-
-## List of models:
-
-- gpt-3.5-turbo-16k
-- gpt-3.5-turbo
-- gpt-4
-- gpt-4-32k
-- gpt-4-0613
-- llama-2-70b-chat
-- claude-2
-- text-davinci-003
-
-***
