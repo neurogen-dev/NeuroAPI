@@ -89,6 +89,6 @@ IF NOT EXIST venv\Lib\site-packages\ru_core_news_sm (
 echo Completed.
 
 echo Running NeuroGPT...
-python webui.py
+python webui_ru.py
 
 pause
