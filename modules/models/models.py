@@ -109,10 +109,10 @@ class OpenAIClient(BaseLLMModel):
         return response
 
     def _get_api_url(self):
-        if "chimera-gpt" in self.model_name or "chimera-llama" in self.model_name or "chimera-claude" in self.model_name: 
-            url = "https://chimeragpt.adventblocks.cc/api/v1/chat/completions"
-        elif "chimera-text" in self.model_name:
-            url = "https://chimeragpt.adventblocks.cc/api/v1/completions"
+        if "naga-gpt" in self.model_name or "naga-llama" in self.model_name or "naga-claude" in self.model_name: 
+            url = "https://api.naga.ac/v1/chat/completions"
+        elif "naga-text" in self.model_name:
+            url = "https://api.naga.ac/v1/completions"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
         elif "neuro" in self.model_name:
@@ -151,12 +151,12 @@ class OpenAIClient(BaseLLMModel):
 
     def _get_payload(self, history, stream): 
         model_names = {
-            'chimera-gpt-4': 'gpt-4',
+            'naga-gpt-4': 'gpt-4',
             'chiera-gpt-4-0314': 'gpt-4-0314',
-            'chimera-text-davinci-003': 'text-davinci-003',
-            'chimera-claude-2': 'claude-2',
-            'chimera-llama-2-70b-chat': 'llama-2-70b-chat',
-            'chimera-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
+            'naga-text-davinci-003': 'text-davinci-003',
+            'naga-claude-2': 'claude-2',
+            'naga-llama-2-70b-chat': 'llama-2-70b-chat',
+            'naga-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
             'chatty-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
             'gpt-3.5-turbo-chatty-api': 'gpt-3.5-turbo',
             'chatty-gpt-4': 'gpt-4',
@@ -172,7 +172,7 @@ class OpenAIClient(BaseLLMModel):
 
         }
         model = model_names.get(self.model_name, self.model_name)
-        if "chimera-text" in self.model_name:
+        if "naga-text" in self.model_name:
             last_msg = self.history[-1]
             last_user_input = last_msg["role"] == "user"
             if last_user_input:
@@ -210,7 +210,7 @@ class OpenAIClient(BaseLLMModel):
         else:
             timeout = TIMEOUT_ALL
         try: #Заготовочка для переписания системы отправки запросов
-            if self.model_name == "purgpt" or self.model_name == "chimera" or self.model_name == "chatty":
+            if self.model_name == "purgpt" or self.model_name == "naga" or self.model_name == "chatty":
                 response = requests.post(
                     shared.state.completion_url,
                     headers = headers,
