@@ -39,7 +39,16 @@ IF NOT EXIST venv\Lib\site-packages\ru_core_news_sm (
 echo Completed.
 echo Running NeuroGPT...
 
-python webui.py
+REM Determine the language of the operating system
+python -c "import locale; print(locale.getdefaultlocale()[0])" > lang.txt
+set /p language=<lang.txt
+
+IF "%language%"=="ru_RU" (
+  python webui_ru.py
+) ELSE (
+  python webui_en.py
+)
+
 pause
 
 :: Упаковано и собрано telegram каналом Neurogen News: https://t.me/neurogen_news
