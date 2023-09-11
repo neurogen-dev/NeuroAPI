@@ -152,7 +152,7 @@ class OpenAIClient(BaseLLMModel):
     def _get_payload(self, history, stream): 
         model_names = {
             'naga-gpt-4': 'gpt-4',
-            'chiera-gpt-4-0314': 'gpt-4-0314',
+            'naga-gpt-4-0314': 'gpt-4-0314',
             'naga-text-davinci-003': 'text-davinci-003',
             'naga-claude-2': 'claude-2',
             'naga-llama-2-70b-chat': 'llama-2-70b-chat',
@@ -169,6 +169,8 @@ class OpenAIClient(BaseLLMModel):
             'neuro-gpt-4-0613': 'gpt-4-0613',
             'neuro-gpt-4-32k': 'gpt-4-32k',
             'neuro-gpt-4-32k-0613': 'gpt-4-32k-0613',
+            'neuro-claude-2': 'claude-2',
+            'neuro-text-curie-001': 'text-curie-001'
 
         }
         model = model_names.get(self.model_name, self.model_name)
