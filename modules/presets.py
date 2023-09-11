@@ -63,8 +63,8 @@ def get_online_gpt4_models():
     online_models = set()  
 
     for model in data:
-        if model.startswith('gpt-4') or model.startswith('gpt-3.5-turbo-16k'):
-            online_models.add("neuro-" + model)  
+        #if model.startswith('gpt-4') or model.startswith('gpt-3.5'):
+        online_models.add("neuro-" + model)  
 
     return list(online_models)
 
