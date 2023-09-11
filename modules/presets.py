@@ -4,7 +4,7 @@ import gradio as gr
 import requests
 import json
 
-VERSION = "v 1.4.3"
+VERSION = "v 1.4.4"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -89,11 +89,11 @@ ONLINE_MODELS = [
 ]
 
 CHIMERA_MODELS = [
-    'chimera-gpt-3.5-turbo-16k',
-    'chimera-gpt-4',
-    'chimera-llama-2-70b-chat',
-    'chimera-claude-2'
-    #'chimera-text-davinci-003',
+    'naga-gpt-3.5-turbo-16k',
+    'naga-gpt-4',
+    'naga-llama-2-70b-chat',
+    'naga-claude-2'
+    #'naga-text-davinci-003',
 ]
 
 CHATTY_MODELS = [
@@ -143,15 +143,15 @@ MODEL_TOKEN_LIMIT = {
     'claude-2': 100000,
     "claude-instant-100k": 100000,
     "claude-2-100k": 100000,
-    'chimera-gpt-3.5-turbo-16k': 16384,
-    'chimera-gpt-4': 8192,
-    'chimera-llama-2-70b-chat': 4096,
+    'naga-gpt-3.5-turbo-16k': 16384,
+    'naga-gpt-4': 8192,
+    'naga-llama-2-70b-chat': 4096,
     'chatty-gpt-3.5-turbo-16k': 16384,
     'chatty-gpt-4': 8192,
     'purgpt-gpt-3.5-turbo-16k': 16384,
     'purgpt-gpt-3.5-turbo': 4096,
     'purgpt-text-davinci-003': 4096,
-    'chimera-text-davinci-003': 4096,
+    'naga-text-davinci-003': 4096,
     'text-davinci-003': 4096,
 }
 
