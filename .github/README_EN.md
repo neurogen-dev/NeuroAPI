@@ -17,7 +17,7 @@ We extend our gratitude to the authors.
   <img src="https://img.shields.io/badge/latest-v1.4.4-indigo.svg" alt="latest"/>
 </a>
 
-<br> We recommend visiting <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">our project's wiki</a> right away.<br/>
+<br> Before using NeuroGPT, be sure to check out <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">our project's wiki</a><br/>
 <br> Installation instructions: <br/>
 
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
