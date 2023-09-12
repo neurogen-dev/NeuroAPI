@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/latest-v1.4.4-indigo.svg" alt="latest"/>
 </a>
 
-<br> Советуем сразу посетить <a href="https://github.com/Em1tSan/NeuroGPT/wiki#%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-%D1%8F%D0%B7%D1%8B%D0%BA">wiki проекта</a><br/>
+<br> Перед использованием обязательно ознакомьтесь с <a href="https://github.com/Em1tSan/NeuroGPT/wiki#%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-%D1%8F%D0%B7%D1%8B%D0%BA">wiki проекта</a><br/>
 <br> Инструкции по установке: <br/>
 
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#windows">
