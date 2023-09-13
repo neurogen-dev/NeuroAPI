@@ -5,7 +5,7 @@
 
 <strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_EN.md">English </a></strong>
 
-<p> NeuroGPT позволяет бесплатно пользоваться gpt-3.5, gpt-4 и другими языковыми моделями без VPN и регистрации аккаунта. Работает через API Reverse Engineering.
+<p> NeuroGPT позволяет бесплатно пользоваться gpt-3.5, gpt-4 и другими языковыми моделями без VPN и регистрации аккаунта. Работает через API Reverse Engineering. В стабильном режиме на данный момент функционирует только gpt-3.5-turbo 4096. Постоянный доступ к остальным моделям не гарантируется.
 
 Проект основан на модифицированных версиях <a href="https://github.com/xtekky/gpt4free">gpt4free</a> и <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a></p>
 Благодарность авторам.
