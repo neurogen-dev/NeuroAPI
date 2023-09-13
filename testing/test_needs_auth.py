@@ -10,9 +10,8 @@ from  testing.log_time import log_time, log_time_async, log_time_yield
 
 _providers = [
     g4f.Provider.H2o,
-    g4f.Provider.You,
+    g4f.Provider.Wewordle,
     g4f.Provider.HuggingChat,
-    g4f.Provider.OpenAssistant,
     g4f.Provider.Bing,
     g4f.Provider.Bard
 ]
