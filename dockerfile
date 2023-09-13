@@ -15,4 +15,4 @@ RUN pip install --upgrade pip && \
 EXPOSE 7860
 EXPOSE 1337
 
-CMD ["python", "webui.py"]
+CMD ["python", "webui_ru.py"]

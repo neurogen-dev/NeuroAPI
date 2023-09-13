@@ -1,9 +1,11 @@
+from __future__ import annotations
+
+import asyncio
 from abc import ABC, abstractmethod
 
-from ..typing import Any, CreateResult, AsyncGenerator, Union
-
 import browser_cookie3
-import asyncio
+
+from ..typing import Any, AsyncGenerator, CreateResult, Union
 
 
 class BaseProvider(ABC):
@@ -40,10 +42,11 @@ _cookies = {}
 def get_cookies(cookie_domain: str) -> dict:
     if cookie_domain not in _cookies:
         _cookies[cookie_domain] = {}
-        
-        for cookie in browser_cookie3.load(cookie_domain):
-            _cookies[cookie_domain][cookie.name] = cookie.value
-    
+        try:
+            for cookie in browser_cookie3.load(cookie_domain):
+                _cookies[cookie_domain][cookie.name] = cookie.value
+        except:
+            pass
     return _cookies[cookie_domain]
 
 
@@ -78,7 +81,7 @@ class AsyncProvider(BaseProvider):
 
 class AsyncGeneratorProvider(AsyncProvider):
     supports_stream = True
-    
+
     @classmethod
     def create_completion(
         cls,
