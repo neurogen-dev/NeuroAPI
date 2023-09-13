@@ -29,7 +29,7 @@ from multiprocessing import Process
 import logging
 import uvicorn
 
-logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
 
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess

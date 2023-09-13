@@ -116,7 +116,7 @@ class OpenAIClient(BaseLLMModel):
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
         elif "neuro" in self.model_name:
-            url = "https://neurochat-gpt.ru/v1/chat/completions"
+            url = "https://neuroapi.host/v1/chat/completions"
         else:
             url = "http://127.0.0.1:1337/v1/chat/completions"
         return url

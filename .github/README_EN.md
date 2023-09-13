@@ -57,7 +57,7 @@ Given that this project doesn't use an official API but relies on reverse-engine
 ## Features:
 
 - Web search
-- [List of models](https://status.neurochat-gpt.ru/v1/status)
+- [List of models](https://status.neuroapi.host/v1/status)
 - Built-in prompt templates for various tasks
 - Built-in jailbreaks for removing censorship
 - Conversation context

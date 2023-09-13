@@ -11,8 +11,9 @@ import g4f
 
 stream = False
 response = g4f.ChatCompletion.create(
-    model="text-davinci-003",
+    model="gpt-3.5-turbo-16k",
     messages=[{"role": "user", "content": "hello"}],
+    provider=g4f.Provider.Vercel,
     stream=stream,
 )
 

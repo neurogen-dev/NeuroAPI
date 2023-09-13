@@ -47,7 +47,7 @@ CHUANHU_TITLE = "NeuroGPT " + VERSION
 CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://boosty.to/neurogen) </br>"
 
 def get_online_gpt4_models():
-    url = "https://status.neurochat-gpt.ru/v1/status"
+    url = "https://status.neuroapi.host/v1/status"
     try:
         response = requests.get(url)
         response.raise_for_status()  # this line will raise an HTTPError if the request returned an unsuccessful status code
@@ -86,6 +86,8 @@ def get_online_gpt3_models():
 
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
+    'gpt-3.5-turbo-16k-0613',
 ]
 
 CHIMERA_MODELS = [

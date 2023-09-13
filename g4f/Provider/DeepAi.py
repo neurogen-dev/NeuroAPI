@@ -1,20 +1,25 @@
-import json, js2py, requests
+from __future__ import annotations
 
-from ..typing       import Any, CreateResult
-from .base_provider import BaseProvider
+import json
+import js2py
+from aiohttp import ClientSession
+
+from ..typing       import AsyncGenerator
+from .base_provider import AsyncGeneratorProvider
 
 
-class DeepAi(BaseProvider):
+class DeepAi(AsyncGeneratorProvider):
     url: str              = "https://deepai.org"
     working               = True
-    supports_stream       = True
     supports_gpt_35_turbo = True
 
     @staticmethod
-    def create_completion(
+    async def create_async_generator(
         model: str,
         messages: list[dict[str, str]],
-        stream: bool, **kwargs: Any) -> CreateResult:
+        proxy: str = None,
+        **kwargs
+    ) -> AsyncGenerator:
         
         token_js = """
 var agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
@@ -48,10 +53,11 @@ f = function () {
             "api-key": api_key,
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
         }
-
-        response = requests.post("https://api.deepai.org/make_me_a_pizza", 
-                                 headers=headers, data=payload, stream=True)
-        
-        for chunk in response.iter_content(chunk_size=None):
-            response.raise_for_status()
-            yield chunk.decode()
+        async with ClientSession(
+            headers=headers
+        ) as session:
+            async with session.post("https://api.deepai.org/make_me_a_pizza", proxy=proxy, data=payload) as response:
+                response.raise_for_status()
+                async for stream in response.content.iter_any():
+                    if stream:
+                        yield stream.decode()

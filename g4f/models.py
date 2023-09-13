@@ -25,18 +25,6 @@ gpt_35_turbo = Model(
     best_provider=Wewordle,
 )
 
-gpt_35_turbo_16k = Model(
-    name="gpt-3.5-turbo-16k",
-    base_provider="openai",
-    best_provider=Freet,
-)
-
-gpt_35_turbo_16k_0613 = Model(
-    name="gpt-3.5-turbo-16k-0613",
-    base_provider="openai",
-    best_provider=Vercel,
-)
-
 
 gpt_4 = Model(
     name="gpt-4",
@@ -128,17 +116,17 @@ code_davinci_002 = Model(
     best_provider=Vercel,
 )
 
-# gpt_35_turbo_16k = Model(
-    # name="openai:gpt-3.5-turbo-16k",
-    # base_provider="openai",
-    # best_provider=Vercel,
-# )
+gpt_35_turbo_16k = Model(
+    name="openai:gpt-3.5-turbo-16k",
+    base_provider="openai",
+    best_provider=Vercel,
+)
 
-# gpt_35_turbo_16k_0613 = Model(
-    # name="openai:gpt-3.5-turbo-16k-0613",
-    # base_provider="openai",
-    # best_provider=Equing,
-# )
+gpt_35_turbo_16k_0613 = Model(
+    name="openai:gpt-3.5-turbo-16k-0613",
+    base_provider="openai",
+    best_provider=Vercel,
+)
 
 # gpt_4_0613 = Model(
     # name="openai:gpt-4-0613",
