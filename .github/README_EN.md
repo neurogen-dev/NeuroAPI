@@ -5,7 +5,7 @@
 
 <strong> <a href="https://github.com/Em1tSan/NeuroGPT#readme">Русский</a> | English </strong>
 
-<p> NeuroGPT allows free use of gpt-3.5, gpt-4, and other language models without VPN and account registration. It operates through API Reverse Engineering.
+<p> NeuroGPT allows free use of gpt-3.5, gpt-4, and other language models without VPN and account registration. It operates through API Reverse Engineering. At the moment, only gpt-3.5-turbo 4096 is functioning in stable mode. Continuous access to other models is not guaranteed.
 
 The project is based on modified versions of <a href="https://github.com/xtekky/gpt4free">gpt4free</a> and <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a></p>
 We extend our gratitude to the authors.
