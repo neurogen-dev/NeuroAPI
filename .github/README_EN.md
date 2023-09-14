@@ -67,4 +67,9 @@ Given that this project doesn't use an official API but relies on reverse-engine
 
 <div align="center">
   <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
+
+***
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Em1tSan/NeuroGPT&type=Date)](https://star-history.com/#Em1tSan/NeuroGPT&Date)
+
 </div>
