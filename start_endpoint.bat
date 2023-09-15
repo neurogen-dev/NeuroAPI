@@ -13,14 +13,14 @@ copy /Y config_temp.json config.json
 del config_temp.json
 
 REM Checking for Python version
-python -c "import sys; print(sys.version_info[:2])" > version.txt
+python -c "import sys; print('.'.join(map(str, sys.version_info[:3])))" > version.txt
 set /p version=<version.txt
-IF "%version%" LSS "3.10" (
-    echo Your version of Python is not supported. Please install Python 3.10
+IF "%version%" LSS "3.10.0" (
+    echo Your version of Python %version% is not supported. Please install Python 3.10
     pause
 )
-IF "%version%" GEQ "3.11" (
-    echo Your version of Python is not supported. Please install Python 3.10
+IF "%version%" GEQ "3.10.14" (
+    echo Your version of Python %version% is not supported. Please install Python 3.10
     pause
 )
 
