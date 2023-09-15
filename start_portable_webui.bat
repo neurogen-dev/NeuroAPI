@@ -2,7 +2,7 @@
 echo Opening NeuroGPT...
 
 set HIDE_OTHER_PROVIDERS=false
-set SHOW_ALL_PROVIDERS=true
+set SHOW_ALL_PROVIDERS=false
 
 REM Проверяем наличие папки python
 if not exist python (
