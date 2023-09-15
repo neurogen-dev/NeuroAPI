@@ -90,11 +90,11 @@ ONLINE_MODELS = [
     'gpt-3.5-turbo-16k-0613',
 ]
 
-CHIMERA_MODELS = [
+NAGA_MODELS = [
     'naga-gpt-3.5-turbo-16k',
     'naga-gpt-4',
     'naga-llama-2-70b-chat',
-    'naga-claude-2'
+    #'naga-claude-2'
     #'naga-text-davinci-003',
 ]
 
@@ -113,10 +113,10 @@ PURGPT_MODELS = [
 
 NEURO_MODELS = get_online_gpt4_models()
 
-if os.environ.get('HIDE_API_MODELS', 'false') == 'true':
-    MODELS = ONLINE_MODELS
+if os.environ.get('HIDE_OTHER_PROVIDERS', 'false') == 'true':
+    MODELS = ONLINE_MODELS + NEURO_MODELS
 else:
-    MODELS = ONLINE_MODELS + NEURO_MODELS + CHIMERA_MODELS + PURGPT_MODELS
+    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS + PURGPT_MODELS
 
 DEFAULT_MODEL = 0
 
