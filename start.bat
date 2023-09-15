@@ -15,6 +15,18 @@ REM Восстанавливаем оригинальный файл config.json
 copy /Y config_temp.json config.json
 del config_temp.json
 
+REM Checking for Python version
+python -c "import sys; print(sys.version_info[:2])" > version.txt
+set /p version=<version.txt
+IF "%version%" LSS "3.10" (
+    echo Your version of Python is not supported. Please install Python 3.10
+    exit /b
+)
+IF "%version%" GEQ "3.11" (
+    echo Your version of Python is not supported. Please install Python 3.10
+    exit /b
+)
+
 python -m venv venv
 call venv\Scripts\activate.bat
 python -m pip install --upgrade pip
@@ -52,5 +64,3 @@ IF "%language%"=="ru_RU" (
 )
 
 pause
-
-:: Упаковано и собрано telegram каналом Neurogen News: https://t.me/neurogen_news
