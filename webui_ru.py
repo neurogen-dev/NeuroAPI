@@ -15,6 +15,8 @@ from modules.utils import *
 from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
+import fastwsgi
+from backend import app
 
 
 import threading
@@ -23,11 +25,9 @@ import json
 import random
 import time
 
-import backend
 from multiprocessing import Process
 
 import logging
-import uvicorn
 
 logging.getLogger("httpx").setLevel(logging.DEBUG)
 
@@ -531,7 +531,7 @@ def run_gradio_server():
     )
 
 def run_api_server():
-    uvicorn.run("backend:app", host="0.0.0.0", port=1337)
+    fastwsgi.run(wsgi_app=app, host='0.0.0.0', port=1337)
 
 if __name__ == "__main__":
     api_process = Process(target=run_api_server) 

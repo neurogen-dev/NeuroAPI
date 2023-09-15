@@ -16,6 +16,7 @@ python -m venv venv
 call venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 python -m pip install -U setuptools
+python -m pip install whl\fastwsgi-0.0.9-cp310-cp310-win_amd64.whl
 python -m pip install -r requirements.txt
 
 REM checking for spacy language models and download if not exists

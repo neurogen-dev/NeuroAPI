@@ -15,9 +15,6 @@ import g4f
 from g4f import ChatCompletion, Provider, BaseProvider, models
 from g4f.models import ModelUtils
 
-from auto_proxy import get_random_proxy, update_working_proxies
-
-
 app = Flask(__name__)
 
 CORS(app)
@@ -38,8 +35,6 @@ def chat_completions():
     temperature = request_data.get('temperature', 1.0)
     top_p = request_data.get('top_p', 1.0)
     max_tokens = request_data.get('max_tokens', 1024)
-    proxy = get_random_proxy().decode("utf-8")
-    formatted_proxy = f'http://{proxy}'
 
     response = ChatCompletion.create(model=model, stream=stream, messages=messages, temperature=temperature, top_p=top_p, max_tokens=max_tokens, system_prompt="")
 
