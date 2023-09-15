@@ -20,12 +20,10 @@ python -c "import sys; print(sys.version_info[:2])" > version.txt
 set /p version=<version.txt
 IF "%version%" LSS "3.10" (
     echo Your version of Python is not supported. Please install Python 3.10
-    echo Ваша версия Python не поддерживается. Пожалуйста, установите Python 3.10
     pause
 )
 IF "%version%" GEQ "3.11" (
     echo Your version of Python is not supported. Please install Python 3.10
-    echo Ваша версия Python не поддерживается. Пожалуйста, установите Python 3.10
     pause
 )
 
