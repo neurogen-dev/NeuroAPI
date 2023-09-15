@@ -10,22 +10,21 @@ import requests
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from threading import Thread
+import logging
+from embedding_processing import embedding_processing
 
 import g4f
 from g4f import ChatCompletion, Provider, BaseProvider, models
 from g4f.models import ModelUtils
 
 app = Flask(__name__)
-
 CORS(app)
-
-@app.route('/', methods=['GET'])
-def root():
-    return {'message': 'Subscribe Telegram: https://t.me/neurogen_news'}
-    
+LOG = logging.getLogger(__name__)
+embedding_proc = embedding_processing()
     
 @app.route("/chat/completions", methods=['POST'])
-@app.route("/v1/chat/completions", methods=['POST', 'OPTIONS'])
+@app.route("/v1/chat/completions", methods=['POST'])
+@app.route("/", methods=['POST'])
 def chat_completions():
     request_data = request.get_json()
     model = request_data.get('model', 'gpt-3.5-turbo').replace("neuro-", "")
@@ -96,6 +95,20 @@ def chat_completions():
             time.sleep(0.02)
     print('===Start Streaming===')
     return app.response_class(stream(), mimetype='text/event-stream')
+
+@app.route('/v1/embeddings', methods=['POST'])
+@app.route('/embeddings', methods=['POST'])
+def create_embedding():
+    j_input = request.get_json()
+    #model = embedding_processing()
+    embedding = embedding_proc.embedding(text_list=j_input['input'])
+    log_event()
+    return jsonify(
+        embedding
+        )
+
+def log_event():
+    LOG.info('served')
     
 @app.route("/v1/dashboard/billing/subscription", methods=['GET'])
 @app.route("/dashboard/billing/subscription", methods=['GET'])
@@ -219,3 +232,5 @@ def providers():
           except:
                 pass
   return jsonify(providers_data)
+
+
