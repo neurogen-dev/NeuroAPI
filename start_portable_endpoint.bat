@@ -49,12 +49,17 @@ echo Checking for updates...
 REM Создаем временную копию файла config.json
 copy /Y config.json config_temp.json
 
-git checkout portable
+git init
+git remote add origin https://github.com/Em1tSan/NeuroGPT.git
+git pull
+git checkout portable -f
+git branch --set-upstream-to origin/portable
+
 git fetch --all
 git reset --hard origin/portable
 git pull
 
-REM Восстанавливаем оригинальный файл config.json 
+REM Восстанавливаем оригинальный файл config.json
 copy /Y config_temp.json config.json
 del config_temp.json
 
