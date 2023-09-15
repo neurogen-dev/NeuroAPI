@@ -51,6 +51,7 @@ aiofiles
 aiohttp-wsgi
 flask
 flask-cors
+api-analytics
 gevent
 pytz
 gunicorn
@@ -62,3 +63,5 @@ quickjs
 httpx
 spacy
 zhconv
+fastwsgi
+flask_http_middleware
