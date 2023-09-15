@@ -116,7 +116,12 @@ NEURO_MODELS = get_online_gpt4_models()
 if os.environ.get('HIDE_OTHER_PROVIDERS', 'false') == 'true':
     MODELS = ONLINE_MODELS + NEURO_MODELS
 else:
+    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS
+
+if os.environ.get('SHOW_ALL_PROVIDERS', 'false') == 'true':
     MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS + PURGPT_MODELS
+else:
+    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS
 
 DEFAULT_MODEL = 0
 
