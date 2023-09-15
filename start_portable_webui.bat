@@ -1,7 +1,8 @@
 @echo off
 echo Opening NeuroGPT...
 
-set HIDE_LOCAL_MODELS=true 
+set HIDE_OTHER_PROVIDERS=false
+set SHOW_ALL_PROVIDERS=true
 
 REM Проверяем наличие папки python
 if not exist python (
