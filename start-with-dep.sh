@@ -8,12 +8,12 @@ git checkout main
 git fetch --all
 git reset --hard origin/main
 git pull
-REM Восстанавливаем оригинальный файл config.json
+# Восстанавливаем оригинальный файл config.json
 cp  config_temp.json config.json
 rm config_temp.json
 
 python -m venv venv
-source venv\Scripts\activate.bat
+. venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -U setuptools
 python -m pip install -r requirements.txt
