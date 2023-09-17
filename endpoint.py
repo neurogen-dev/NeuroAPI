@@ -1,6 +1,6 @@
 import fastwsgi
 import socket
-from backend import app
+from backend.backend import app
 from multiprocessing import Process
 
 def run_api_server():
