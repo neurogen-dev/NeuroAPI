@@ -6,17 +6,18 @@ import os
 import urllib3
 import traceback
 import pathlib
+import re
 
 import colorama
 from duckduckgo_search import DDGS
 from itertools import islice
 from enum import Enum
 
-
-from typing import Any, Optional
+from typing import Any, Optional, Tuple, Generator
 
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish
+
 from threading import Condition
 from collections import deque
 
@@ -32,26 +33,26 @@ class CallbackToIterator:
         self.cond = Condition()
         self.finished = False
 
-    def callback(self, result):
+    def callback(self, result: str) -> None:
         with self.cond:
             self.queue.append(result)
-            self.cond.notify()  # Wake up the generator.
+            self.cond.notify()
 
     def __iter__(self):
         return self
 
     def __next__(self):
         with self.cond:
-            while not self.queue and not self.finished:  # Wait for a value to be added to the queue.
+            while not self.queue and not self.finished:
                 self.cond.wait()
-            if not self.queue:
+            if not self.queue: 
                 raise StopIteration()
             return self.queue.popleft()
 
     def finish(self):
         with self.cond:
             self.finished = True
-            self.cond.notify()  # Wake up the generator if it's waiting.
+            self.cond.notify()
 
 def get_action_description(text):
     match = re.search('```(.*?)```', text, re.S)
@@ -69,7 +70,6 @@ def get_action_description(text):
 class ChuanhuCallbackHandler(BaseCallbackHandler):
 
     def __init__(self, callback) -> None:
-        """Initialize callback handler."""
         self.callback = callback
 
     def on_agent_action(
@@ -114,13 +114,7 @@ class ModelType(Enum):
 
     @classmethod
     def get_type(cls, model_name: str):
-        model_type = None
-        model_name_lower = model_name.lower()
-        if "gpt" in model_name_lower:
-            model_type = ModelType.OpenAI
-        else:
-            model_type = ModelType.OpenAI
-        return model_type
+        return ModelType.OpenAI if "gpt" in model_name.lower() else ModelType.Unknown
 
 
 class BaseLLMModel:

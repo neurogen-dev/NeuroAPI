@@ -4,6 +4,7 @@ import sys
 
 import gradio as gr
 import asyncio
+import fastwsgi
 
 import aiohttp
 from aiohttp import web
@@ -15,8 +16,7 @@ from modules.utils import *
 from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
-import fastwsgi
-from backend import app
+from backend.backend import app
 
 
 import threading

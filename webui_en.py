@@ -16,7 +16,7 @@ from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
 import fastwsgi
-from backend import app
+from backend.backend import app
 
 import threading
 import time
@@ -24,7 +24,6 @@ import json
 import random
 import time
 
-import backend
 from multiprocessing import Process
 
 import logging

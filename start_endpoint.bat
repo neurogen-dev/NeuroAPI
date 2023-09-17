@@ -50,5 +50,5 @@ IF NOT EXIST venv\Lib\site-packages\ru_core_news_sm (
 echo Completed.
 echo Running NeuroGPT...
 
-python endpoint.py
+python backend\endpoint.py
 pause
