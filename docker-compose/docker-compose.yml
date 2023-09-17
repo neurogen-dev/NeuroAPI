@@ -6,8 +6,8 @@ services:
       context: ../
       dockerfile: Dockerfile
     ports:
-      - "7860:7860"
-      - "1337:1337"
+      - "7861:7860"
+      - "1338:1337"
     volumes:
       - ../config.json:/app/config.json
     env_file:
