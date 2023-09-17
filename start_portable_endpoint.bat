@@ -92,5 +92,5 @@ echo Completed.
 
 echo Running NeuroGPT...
 
-python portable/endpoint.py
+python backend/endpoint.py
 pause
