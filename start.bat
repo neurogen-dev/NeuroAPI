@@ -58,9 +58,9 @@ python -c "import locale; print(locale.getdefaultlocale()[0])" > lang.txt
 set /p language=<lang.txt
 
 IF "%language%"=="ru_RU" (
-  python webui\webui_ru.py
+  python webui_ru.py
 ) ELSE (
-  python webui\webui_en.py
+  python webui_en.py
 )
 
 pause
