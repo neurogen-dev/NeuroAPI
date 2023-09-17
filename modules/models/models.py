@@ -115,6 +115,8 @@ class OpenAIClient(BaseLLMModel):
             url = "https://api.naga.ac/v1/completions"
         elif "chatty" in self.model_name:
             url = "https://chattyapi.tech/v1/chat/completions"
+        elif "daku" in self.model_name:
+            url = "https://api.daku.tech/v1/chat/completions"
         elif "neuro" in self.model_name:
             url = "https://neuroapi.host/v1/chat/completions"
         else:
@@ -134,6 +136,12 @@ class OpenAIClient(BaseLLMModel):
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {chatty_api_key}",
             }
+        elif "daku" in self.model_name:
+            daku_api_key = self.configuration_json["daku_api_key"]
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {daku_api_key}",
+            }
         else:
             headers = {
                 "Content-Type": "application/json",
@@ -150,30 +158,7 @@ class OpenAIClient(BaseLLMModel):
         return history
 
     def _get_payload(self, history, stream): 
-        model_names = {
-            'naga-gpt-4': 'gpt-4',
-            'naga-gpt-4-0314': 'gpt-4-0314',
-            'naga-text-davinci-003': 'text-davinci-003',
-            'naga-claude-2': 'claude-2',
-            'naga-llama-2-70b-chat': 'llama-2-70b-chat',
-            'naga-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
-            'chatty-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
-            'gpt-3.5-turbo-chatty-api': 'gpt-3.5-turbo',
-            'chatty-gpt-4': 'gpt-4',
-            'neuro-gpt-3.5-turbo': 'gpt-3.5-turbo',
-            'neuro-gpt-3.5-turbo-0613': 'gpt-3.5-turbo-0613',
-            'neuro-gpt-3.5-turbo-16k': 'gpt-3.5-turbo-16k',
-            'neuro-gpt-3.5-turbo-0613': 'gpt-3.5-turbo-0613',
-            'neuro-gpt-3.5-turbo_0613': 'gpt-3.5-turbo_0613',
-            'neuro-gpt-4': 'gpt-4',
-            'neuro-gpt-4-0613': 'gpt-4-0613',
-            'neuro-gpt-4-32k': 'gpt-4-32k',
-            'neuro-gpt-4-32k-0613': 'gpt-4-32k-0613',
-            'neuro-claude-2': 'claude-2',
-            'neuro-text-curie-001': 'text-curie-001'
-
-        }
-        model = model_names.get(self.model_name, self.model_name)
+        model = self.model_name.replace("naga-", "").replace("chatty-", "").replace("neuro-", "").replace("daku-", "")
         if "naga-text" in self.model_name:
             last_msg = self.history[-1]
             last_user_input = last_msg["role"] == "user"
@@ -212,7 +197,7 @@ class OpenAIClient(BaseLLMModel):
         else:
             timeout = TIMEOUT_ALL
         try: #Заготовочка для переписания системы отправки запросов
-            if self.model_name == "purgpt" or self.model_name == "naga" or self.model_name == "chatty":
+            if any(substring in self.model_name for substring in ["purgpt", "naga", "chatty"]):
                 response = requests.post(
                     shared.state.completion_url,
                     headers = headers,

@@ -29,8 +29,6 @@ __all__ = [
     "default_chuanhu_assistant_model"
 ]
 
-# 添加一个统一的config文件，避免文件过多造成的疑惑（优先级最低）
-# 同时，也可以为后续支持自定义功能提供config的帮助
 if os.path.exists("config.json"):
     with open("config.json", "r") as f:
         config = json.load(f)
