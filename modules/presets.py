@@ -4,7 +4,7 @@ import gradio as gr
 import requests
 import json
 
-VERSION = "v 1.4.5"
+VERSION = "v 1.4.6"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -12,6 +12,7 @@ LLAMA_MODEL = None
 LLAMA_INFERENCER = None
 
 # ChatGPT 设置
+
 INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. Respond using markdown."
 API_HOST = "http://127.0.0.0.1:1337"
 COMPLETION_URL = "http://127.0.0.0.1:1337/v1/chat/completions"
@@ -86,8 +87,6 @@ def get_online_gpt3_models():
 
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
-    'gpt-3.5-turbo-16k',
-    'gpt-3.5-turbo-16k-0613',
 ]
 
 NAGA_MODELS = [
@@ -111,17 +110,27 @@ PURGPT_MODELS = [
     'purgpt-text-davinci-003'
 ]
 
+DAKU_MODELS = [
+    'daku-gpt-3.5-turbo-16k',
+    'daku-gpt-4',
+    'daku-gpt-4-32k',
+    'daku-claude-2',
+    'daku-claude-2-100k',
+    'daku-codellama-34b',
+    'daku-llama-2-70b'
+]
+
 NEURO_MODELS = get_online_gpt4_models()
 
 if os.environ.get('HIDE_OTHER_PROVIDERS', 'false') == 'true':
     MODELS = ONLINE_MODELS + NEURO_MODELS
 else:
-    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS
+    MODELS = ONLINE_MODELS + NEURO_MODELS + DAKU_MODELS
 
 if os.environ.get('SHOW_ALL_PROVIDERS', 'false') == 'true':
-    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS + PURGPT_MODELS
+    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS + DAKU_MODELS+ PURGPT_MODELS
 else:
-    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS
+    MODELS = ONLINE_MODELS + NEURO_MODELS + DAKU_MODELS
 
 DEFAULT_MODEL = 0
 
@@ -160,6 +169,12 @@ MODEL_TOKEN_LIMIT = {
     'purgpt-text-davinci-003': 4096,
     'naga-text-davinci-003': 4096,
     'text-davinci-003': 4096,
+    'daku-gpt-4': 8192,
+    'daku-gpt-4-32k': 32768,
+    'daku-claude-2': 100000,
+    'daku-claude-2-100k': 100000,
+    'daku-codellama-34b': 4096,
+    'daku-llama-2-70b': 4096,
 }
 
 TOKEN_OFFSET = 1000 
