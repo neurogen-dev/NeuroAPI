@@ -5,7 +5,7 @@ set HIDE_OTHER_PROVIDERS=false
 set SHOW_ALL_PROVIDERS=false
 
 echo Checking for updates...
-python -c "import json; config = json.load(open('config.json')); config.setdefault('daku_api_key', ''); json.dump(config, open('config.json', 'w'), indent=4)"
+python -c "import json; import collections; config = json.load(open('config.json')); keys = list(config.keys()); keys.insert(2, keys.pop(keys.index('daku_api_key'))); config = collections.OrderedDict([(key, config[key]) for key in keys]); json.dump(config, open('config.json', 'w'), indent=4)"
 REM Создаем временную копию файла config.json
 copy /Y config.json config_temp.json
 git checkout main
