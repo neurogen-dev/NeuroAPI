@@ -29,6 +29,9 @@ IF "%version%" GEQ "3.10.14" (
 
 python -m venv venv
 call venv\Scripts\activate.bat
+
+python -c "import json; config = json.load(open('config.json')); config.setdefault('daku_api_key', ''); json.dump(config, open('config.json', 'w'), indent=4)"
+
 python -m pip install --upgrade pip
 python -m pip install -U setuptools
 python -m pip install whl\fastwsgi-0.0.9-cp310-cp310-win_amd64.whl
