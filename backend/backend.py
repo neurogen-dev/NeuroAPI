@@ -11,7 +11,7 @@ from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from threading import Thread
 import logging
-from .embedding_processing import embedding_processing
+from embedding_processing import embedding_processing
 
 import g4f
 from g4f import ChatCompletion, Provider, BaseProvider, models
