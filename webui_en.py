@@ -72,7 +72,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Column(min_width=225, scale=12):
                     user_input = gr.Textbox(
                         elem_id="user_input_tb",
-                        show_label=False, placeholder="Please type your request here.",
+                        show_label=False, placeholder="Please type your request here",
                         container=False
                     )
                 with gr.Column(min_width=42, scale=1):
@@ -80,11 +80,11 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     cancelBtn = gr.Button(value="", variant="secondary", visible=False, elem_id="cancel_btn")
             with gr.Row():
                 emptyBtn = gr.Button(
-                    "🧹 New conversation", elem_id="empty_btn"
+                    "🧹 New dialog", elem_id="empty_btn"
                 )
                 retryBtn = gr.Button("🔄 Regenerate")
-                delFirstBtn = gr.Button("🗑️ Delete oldest conversation")
-                delLastBtn = gr.Button("🗑️ Delete last conversation")
+                delFirstBtn = gr.Button("🗑️ Delete oldest dialog")
+                delLastBtn = gr.Button("🗑️ Delete last dialog")
                 with gr.Row(visible=False) as like_dislike_area:
                     with gr.Column(min_width=20, scale=1):
                         likeBtn = gr.Button("👍")
@@ -100,12 +100,12 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
                         visible=not HIDE_MY_KEY,
-                        label="ChimeraAPI key",
+                        label="API key",
                     )
                     if multi_api_key:
                         usageTxt = gr.Markdown("Multiplayer mode is enabled, no need to enter a key, you can start a conversation right away", elem_id="usage_display", elem_classes="insert_block")
                     else:
-                        usageTxt = gr.Markdown("**Send a message** или **Send the key** to display credit", elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("**Send message** or **Submit key** to display credit", elem_id="usage_display", elem_classes="insert_block")
                     model_select_dropdown = gr.Dropdown(
                         label="Select model", choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
                     )
@@ -113,7 +113,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         label="Select LoRA model", choices=[], multiselect=False, interactive=True, visible=False
                     )
                     with gr.Row():
-                        single_turn_checkbox = gr.Checkbox(label="Single-turn conversation mode", value=False, elem_classes="switch_checkbox")
+                        single_turn_checkbox = gr.Checkbox(label="Single-turn dialog mode", value=False, elem_classes="switch_checkbox")
                         use_websearch_checkbox = gr.Checkbox(label="Use online search", value=False, elem_classes="switch_checkbox")
 
                     language_select_dropdown = gr.Dropdown(
@@ -122,7 +122,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         multiselect=False,
                         value=REPLY_LANGUAGES[0],
                     )
-                    index_files = gr.Files(label="Load (ChimeraAPI)", type="file", visible=False)
+                    index_files = gr.Files(label="Load", type="file", visible=False)
                     two_column = gr.Checkbox(label="Two-column pdf", value=advance_docs["pdf"].get("two_column", False), visible=False)
                     summarize_btn = gr.Button("Summarize", visible=False)
                     # TODO: OCR formulas
@@ -131,17 +131,17 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Tab(label="Prompt"):
                     systemPromptTxt = gr.Textbox(
                         show_label=True,
-                        placeholder="Type System Prompt here...",
+                        placeholder="Type system prompt here...",
                         label="System prompt",
                         value=INITIAL_SYSTEM_PROMPT,
                         lines=10
                     )
-                    with gr.Accordion(label="Load Prompt Template", open=True):
+                    with gr.Accordion(label="Load prompt template", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     templateFileSelectDropdown = gr.Dropdown(
-                                        label="Select a file with a collection of prompt templates",
+                                        label="Select category",
                                         choices=get_template_names(plain=True),
                                         multiselect=False,
                                         value=get_template_names(plain=True)[0],
@@ -152,7 +152,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                             with gr.Row():
                                 with gr.Column():
                                     templateSelectDropdown = gr.Dropdown(
-                                        label="Load from prompt template",
+                                        label="Select prompt",
                                         choices=load_template(
                                             get_template_names(plain=True)[0], mode=1
                                         ),
@@ -160,13 +160,13 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                         container=False,
                                     )
 
-                with gr.Tab(label="Save/Load"):
-                    with gr.Accordion(label="Save/Load conversation history", open=True):
+                with gr.Tab(label="Dialogs"):
+                    with gr.Accordion(label="Save/load dialog history", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     historyFileSelectDropdown = gr.Dropdown(
-                                        label="Load conversation from history",
+                                        label="Load dialog from list",
                                         choices=get_history_names(plain=True),
                                         multiselect=False,
                                         container=False,
@@ -181,20 +181,20 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                     saveFileName = gr.Textbox(
                                         show_label=True,
                                         placeholder="By default, the file name is set to .json, but you have the option to select .md",
-                                        label="Select a file name to saving",
-                                        value="History of conversation",
+                                        label="Select file name",
+                                        value="Dialog 1",
                                         container=False,
                                     )
                                 with gr.Column(scale=1):
-                                    saveHistoryBtn = gr.Button("💾 Save the conversation")
-                                    exportMarkdownBtn = gr.Button("📝 Export to Markdown")
-                                    gr.Markdown("By default saved in the history folder")
+                                    saveHistoryBtn = gr.Button("💾 Save dialog")
+                                    exportMarkdownBtn = gr.Button("📝 Export as Markdown")
+                                    gr.Markdown("By default saved in history folder")
                             with gr.Row():
                                 with gr.Column():
                                     downloadFile = gr.File(interactive=True)
 
-                with gr.Tab(label="Advanced"):
-                    gr.HTML(get_html("appearance_switcher.html").format(label="Switch light/dark theme"), elem_classes="insert_block")
+                with gr.Tab(label="Settings"):
+                    gr.HTML(get_html("appearance_switcher.html").format(label="Switch to light/dark theme"), elem_classes="insert_block")
                     use_streaming_checkbox = gr.Checkbox(
                             label="Text streaming", value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
                         )
@@ -292,7 +292,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         changeAPIURLBtn = gr.Button("🔄 Change API address")
                         proxyTxt = gr.Textbox(
                             show_label=True,
-                            placeholder="Enter address of proxy here...",
+                            placeholder="Enter proxy address here...",
                             label="Proxy address (e.g: http://127.0.0.1:10809）",
                             value="",
                             lines=2,

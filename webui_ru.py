@@ -100,7 +100,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
                         visible=not HIDE_MY_KEY,
-                        label="Ключ ChimeraAPI",
+                        label="API Ключ",
                     )
                     if multi_api_key:
                         usageTxt = gr.Markdown("Многопользовательский режим включен, не нужно вводить ключ, можно сразу начать диалог", elem_id="usage_display", elem_classes="insert_block")
@@ -122,7 +122,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         multiselect=False,
                         value=REPLY_LANGUAGES[0],
                     )
-                    index_files = gr.Files(label="Загрузить (ChimeraAPI)", type="file", visible=False)
+                    index_files = gr.Files(label="Загрузить", type="file", visible=False)
                     two_column = gr.Checkbox(label="Двухстолбчатый pdf", value=advance_docs["pdf"].get("two_column", False), visible=False)
                     summarize_btn = gr.Button("Резюмировать", visible=False)
                     # TODO: OCR формулы
@@ -131,17 +131,17 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Tab(label="Prompt"):
                     systemPromptTxt = gr.Textbox(
                         show_label=True,
-                        placeholder="Введите здесь System Prompt...",
-                        label="System prompt",
+                        placeholder="Введите ваш промпт...",
+                        label="Системный промпт",
                         value=INITIAL_SYSTEM_PROMPT,
                         lines=10
                     )
-                    with gr.Accordion(label="Загрузить шаблон Prompt", open=True):
+                    with gr.Accordion(label="Загрузить шаблон", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
                                     templateFileSelectDropdown = gr.Dropdown(
-                                        label="Выберите файл с коллекцией шаблонов Prompt",
+                                        label="Выберите категорию",
                                         choices=get_template_names(plain=True),
                                         multiselect=False,
                                         value=get_template_names(plain=True)[0],
@@ -152,7 +152,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                             with gr.Row():
                                 with gr.Column():
                                     templateSelectDropdown = gr.Dropdown(
-                                        label="Загрузить из шаблона Prompt",
+                                        label="Выберите промпт",
                                         choices=load_template(
                                             get_template_names(plain=True)[0], mode=1
                                         ),
@@ -160,8 +160,8 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                         container=False,
                                     )
 
-                with gr.Tab(label="Сохранить/Загрузить"):
-                    with gr.Accordion(label="Сохранить/Загрузить историю диалога", open=True):
+                with gr.Tab(label="Диалоги"):
+                    with gr.Accordion(label="Сохранить/загрузить", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
@@ -181,19 +181,19 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                     saveFileName = gr.Textbox(
                                         show_label=True,
                                         placeholder="Установить имя файла: по умолчанию .json, можно выбрать .md",
-                                        label="Выберите имя файла для сохранения",
-                                        value="История диалога",
+                                        label="Введите название диалога",
+                                        value="Диалог 1",
                                         container=False,
                                     )
                                 with gr.Column(scale=1):
                                     saveHistoryBtn = gr.Button("💾 Сохранить диалог")
                                     exportMarkdownBtn = gr.Button("📝 Экспортировать в Markdown")
-                                    gr.Markdown("По умолчанию сохраняется в папке истории")
+                                    gr.Markdown("По умолчанию сохраняется в папке history")
                             with gr.Row():
                                 with gr.Column():
                                     downloadFile = gr.File(interactive=True)
 
-                with gr.Tab(label="Расширенный"):
+                with gr.Tab(label="Настройки"):
                     gr.HTML(get_html("appearance_switcher.html").format(label="Переключить светлую/темную тему"), elem_classes="insert_block")
                     use_streaming_checkbox = gr.Checkbox(
                             label="Стриминг текста", value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
