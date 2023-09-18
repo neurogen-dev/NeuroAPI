@@ -101,11 +101,12 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         type="password",
                         visible=not HIDE_MY_KEY,
                         label="API Ключ",
+                        visible=False
                     )
                     if multi_api_key:
                         usageTxt = gr.Markdown("Многопользовательский режим включен, не нужно вводить ключ, можно сразу начать диалог", elem_id="usage_display", elem_classes="insert_block")
                     else:
-                        usageTxt = gr.Markdown("**Отправьте сообщение** или **Отправьте ключ** для отображения кредита", elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("**Отправьте сообщение** или **Отправьте ключ** для отображения кредита", elem_id="usage_display", elem_classes="insert_block", visible=False)
                     model_select_dropdown = gr.Dropdown(
                         label="Выберите модель", choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
                     )
