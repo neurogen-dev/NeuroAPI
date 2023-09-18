@@ -99,13 +99,13 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         placeholder="Your API-key...",
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
-                        visible=not HIDE_MY_KEY,
                         label="API key",
+                        visible=False
                     )
                     if multi_api_key:
-                        usageTxt = gr.Markdown("Multiplayer mode is enabled, no need to enter a key, you can start a conversation right away", elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("Multiplayer mode is enabled, no need to enter a key, you can start a conversation right away", elem_id="usage_display", elem_classes="insert_block", visible=False)
                     else:
-                        usageTxt = gr.Markdown("**Send message** or **Submit key** to display credit", elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown("**Send message** or **Submit key** to display credit", elem_id="usage_display", elem_classes="insert_block", visible=False)
                     model_select_dropdown = gr.Dropdown(
                         label="Select model", choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
                     )
