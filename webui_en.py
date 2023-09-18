@@ -93,7 +93,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
 
         with gr.Column():
             with gr.Column(min_width=50, scale=1):
-                with gr.Tab(label="Model"):
+                with gr.Tab(label="Models"):
                     keyTxt = gr.Textbox(
                         show_label=True,
                         placeholder="Your API-key...",
@@ -128,7 +128,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     # TODO: OCR formulas
                     # formula_ocr = gr.Checkbox(label="OCR formulas", value=advance_docs["pdf"].get("formula_ocr", False))
 
-                with gr.Tab(label="Prompt"):
+                with gr.Tab(label="Prompts"):
                     systemPromptTxt = gr.Textbox(
                         show_label=True,
                         placeholder="Type system prompt here...",
@@ -193,7 +193,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                 with gr.Column():
                                     downloadFile = gr.File(interactive=True)
 
-                with gr.Tab(label="Settings"):
+                with gr.Tab(label="Conf"):
                     gr.HTML(get_html("appearance_switcher.html").format(label="Switch to light/dark theme"), elem_classes="insert_block")
                     use_streaming_checkbox = gr.Checkbox(
                             label="Text streaming", value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
