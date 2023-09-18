@@ -161,7 +161,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                                     )
 
                 with gr.Tab(label="Dialog"):
-                    with gr.Accordion(label="Save/load dialog history", open=True):
+                    with gr.Accordion(label="Save/load", open=True):
                         with gr.Column():
                             with gr.Row():
                                 with gr.Column(scale=6):
