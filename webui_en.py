@@ -503,7 +503,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
 
 logging.info(
     colorama.Back.BLUE
-    + "Version" + VERSION
+    + "" + VERSION
     + colorama.Style.RESET_ALL
 )
 
