@@ -93,7 +93,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
 
         with gr.Column():
             with gr.Column(min_width=50, scale=1):
-                with gr.Tab(label="Модель"):
+                with gr.Tab(label="Модели"):
                     keyTxt = gr.Textbox(
                         show_label=True,
                         placeholder="Ваш API-ключ...",
@@ -128,7 +128,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     # TODO: OCR формулы
                     # formula_ocr = gr.Checkbox(label="OCR формулы", value=advance_docs["pdf"].get("formula_ocr", False))
 
-                with gr.Tab(label="Prompt"):
+                with gr.Tab(label="Промпты"):
                     systemPromptTxt = gr.Textbox(
                         show_label=True,
                         placeholder="Введите ваш промпт...",
