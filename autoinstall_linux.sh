@@ -4,7 +4,7 @@
 sudo apt-get update -y
 
 # Установить python3, pip, git и зависимости
-sudo apt-get install -y python3-full python3-venv python3-pip git bbuild-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+sudo apt-get install -y python3-full python3-venv python3-pip python-is-python3 git build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
 
 # Клонировать репозиторий
 git clone https://github.com/Em1tSan/NeuroGPT.git
@@ -19,7 +19,7 @@ git pull
 # Проверка версии Python
 version=$(python3 --version)
 version=${version:7}
-if [[ "$version" < "3.10.0" ]]; then
+if [[ "$version" < "3.9.0" ]]; then
     echo "Your version of Python ${version} is not supported. Please install Python 3.10.X"
     exit 1
 elif [[ "$version" > "3.11.14" ]]; then
@@ -29,7 +29,7 @@ fi
 
 # Создание и активация виртуальной среды
 python3 -m venv venv
-source venv/bin/activate
+. venv/bin/activate
 
 # Установка необходимых пакетов
 python3 -m pip install --upgrade pip
