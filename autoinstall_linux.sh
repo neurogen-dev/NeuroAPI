@@ -2,7 +2,6 @@
 
 # Обновить систему
 sudo apt-get update -y
-sudo apt-get upgrade -y
 
 # Установить python3, pip, git и зависимости
 sudo apt-get install -y python3-full python3-venv python3-pip git bbuild-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
