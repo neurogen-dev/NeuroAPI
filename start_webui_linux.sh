@@ -19,7 +19,7 @@ mv config_temp.json config.json
 
 # Checking for Python version
 version=$(python3 --version | cut -d " " -f 2)
-if [[ "$version" < "3.10.0" ]]; then
+if [[ "$version" < "3.10.1" ]]; then
     echo "Your version of Python ${version} is not supported. Please install Python 3.10.X"
     exit 1
 elif [[ "$version" > "3.11.14" ]]; then
