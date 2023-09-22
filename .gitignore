@@ -104,16 +104,13 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+.env
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
-python/
-git/
-history/
-
 
 # Spyder project settings
 .spyderproject
@@ -144,9 +141,15 @@ api_key.txt
 config.json
 auth.json
 .models/
+models/*
 lora/
 .idea
 templates/*
-code_improver.yaml
-.history
-config.json
+files/
+tmp/
+
+scripts/
+include/
+pyvenv.cfg
+
+create_release.sh

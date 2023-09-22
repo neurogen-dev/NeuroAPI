@@ -71,22 +71,36 @@ def postprocess_chat_messages(
         else:
             raise ValueError(f"Invalid message for Chatbot component: {chat_message}")
 
-with open("./assets/custom.js", "r", encoding="utf-8") as f, \
-    open("./assets/external-scripts.js", "r", encoding="utf-8") as f1:
-    customJS = f.read()
-    externalScripts = f1.read()
 
 
-def reload_javascript():
-    print("Reloading javascript...")
-    js = f'<script>{customJS}</script><script async>{externalScripts}</script>'
-    js += '<script async src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
-    def template_response(*args, **kwargs):
-        res = GradioTemplateResponseOriginal(*args, **kwargs)
-        res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
-        res.init_headers()
-        return res
+def add_classes_to_gradio_component(comp):
+    """
+    this adds gradio-* to the component for css styling (ie gradio-button to gr.Button), as well as some others
+    code from stable-diffusion-webui <AUTOMATIC1111/stable-diffusion-webui>
+    """
 
-    gr.routes.templates.TemplateResponse = template_response
+    comp.elem_classes = [f"gradio-{comp.get_block_name()}", *(comp.elem_classes or [])]
 
-GradioTemplateResponseOriginal = gr.routes.templates.TemplateResponse
+    if getattr(comp, 'multiselect', False):
+        comp.elem_classes.append('multiselect')
+
+
+def IOComponent_init(self, *args, **kwargs):
+    res = original_IOComponent_init(self, *args, **kwargs)
+    add_classes_to_gradio_component(self)
+
+    return res
+
+original_IOComponent_init = gr.components.IOComponent.__init__
+gr.components.IOComponent.__init__ = IOComponent_init
+
+
+def BlockContext_init(self, *args, **kwargs):
+    res = original_BlockContext_init(self, *args, **kwargs)
+    add_classes_to_gradio_component(self)
+
+    return res
+
+original_BlockContext_init = gr.blocks.BlockContext.__init__
+gr.blocks.BlockContext.__init__ = BlockContext_init
+

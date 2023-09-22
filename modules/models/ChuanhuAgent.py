@@ -32,7 +32,7 @@ from collections import deque
 
 from .base_model import BaseLLMModel, CallbackToIterator, ChuanhuCallbackHandler
 from ..config import default_chuanhu_assistant_model
-from ..presets import SUMMARIZE_PROMPT
+from ..presets import SUMMARIZE_PROMPT, i18n
 from ..index_func import construct_index
 
 from langchain.callbacks import get_openai_callback
@@ -63,7 +63,23 @@ class ChuanhuAgent_Client(BaseLLMModel):
         self.index_summary = None
         self.index = None
         if "Pro" in self.model_name:
-            self.tools = load_tools(["serpapi", "google-search-results-json", "llm-math", "arxiv", "wikipedia", "wolfram-alpha"], llm=self.llm)
+            tools_to_enable = ["llm-math", "arxiv", "wikipedia"]
+            # if exists GOOGLE_CSE_ID and GOOGLE_API_KEY, enable google-search-results-json
+            if os.environ.get("GOOGLE_CSE_ID", None) is not None and os.environ.get("GOOGLE_API_KEY", None) is not None:
+                tools_to_enable.append("google-search-results-json")
+            else:
+                logging.warning("GOOGLE_CSE_ID and/or GOOGLE_API_KEY not found, google-search-results-json is disabled.")
+            # if exists WOLFRAM_ALPHA_APPID, enable wolfram-alpha
+            if os.environ.get("WOLFRAM_ALPHA_APPID", None) is not None:
+                tools_to_enable.append("wolfram-alpha")
+            else:
+                logging.warning("WOLFRAM_ALPHA_APPID not found, wolfram-alpha is disabled.")
+            # if exists SERPAPI_API_KEY, enable serpapi
+            if os.environ.get("SERPAPI_API_KEY", None) is not None:
+                tools_to_enable.append("serpapi")
+            else:
+                logging.warning("SERPAPI_API_KEY not found, serpapi is disabled.")
+            self.tools = load_tools(tools_to_enable, llm=self.llm)
         else:
             self.tools = load_tools(["ddg-search", "llm-math", "arxiv", "wikipedia"], llm=self.llm)
             self.tools.append(
@@ -96,7 +112,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
     def google_search_simple(self, query):
         results = []
         with DDGS() as ddgs:
-            ddgs_gen = ddgs.text("notes from a dead house", backend="lite")
+            ddgs_gen = ddgs.text(query, backend="lite")
             for r in islice(ddgs_gen, 10):
                 results.append({
                     "title": r["title"],
@@ -109,12 +125,12 @@ class ChuanhuAgent_Client(BaseLLMModel):
         """if the model accepts multi modal input, implement this function"""
         status = gr.Markdown.update()
         if files:
-            index = construct_index(file_src=files)
-            assert index is not None, "Сбой получения индексации"
+            index = construct_index(self.api_key, file_src=files)
+            assert index is not None, "获取索引失败"
             self.index = index
-            status = "Создание индексации завершено"
+            status = i18n("索引构建完成")
             # Summarize the document
-            logging.info("Генерирация краткого изложения контента……")
+            logging.info(i18n("生成内容总结中……"))
             with get_openai_callback() as cb:
                 os.environ["OPENAI_API_KEY"] = self.api_key
                 from langchain.chains.summarize import load_summarize_chain
@@ -148,7 +164,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Извлеките весь текст
+        # 提取所有的文本
         text = ''.join(s.getText() for s in soup.find_all('p'))
         logging.info(f"Extracted text from {url}")
         return text
@@ -175,13 +191,13 @@ class ChuanhuAgent_Client(BaseLLMModel):
         db = FAISS.from_documents(texts, embeddings)
         retriever = db.as_retriever()
         qa = RetrievalQA.from_chain_type(llm=self.cheap_llm, chain_type="stuff", retriever=retriever)
-        return qa.run(f"{question} Reply in Русский")
+        return qa.run(f"{question} Reply in 中文")
 
     def get_answer_at_once(self):
         question = self.history[-1]["content"]
         # llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
         agent = initialize_agent(self.tools, self.llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
-        reply = agent.run(input=f"{question} Reply in Русский")
+        reply = agent.run(input=f"{question} Reply in 简体中文")
         return reply, -1
 
     def get_answer_stream_iter(self):
@@ -201,7 +217,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
                 )
             agent = initialize_agent(self.tools, self.llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True, callback_manager=manager)
             try:
-                reply = agent.run(input=f"{question} Reply in Русский")
+                reply = agent.run(input=f"{question} Reply in 简体中文")
             except Exception as e:
                 import traceback
                 traceback.print_exc()

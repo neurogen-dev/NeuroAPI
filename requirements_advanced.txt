@@ -1,6 +1,8 @@
 transformers
 huggingface_hub
 torch
+cpm-kernels
 sentence_transformers
 accelerate
 sentencepiece
+llama-cpp-python

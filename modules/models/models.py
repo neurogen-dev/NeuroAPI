@@ -1,274 +1,18 @@
 from __future__ import annotations
 
 import logging
-import json
-import commentjson as cjson
-import requests
+import os
 
 import colorama
+import commentjson as cjson
 
-
-from ..presets import *
-from ..index_func import *
-from ..utils import *
-from .. import shared
-from ..config import retrieve_proxy, usage_limit
 from modules import config
+
+from ..index_func import *
+from ..presets import *
+from ..utils import *
 from .base_model import BaseLLMModel, ModelType
 
-
-class OpenAIClient(BaseLLMModel):
-    def __init__(
-        self,
-        model_name,
-        api_key,
-        system_prompt=INITIAL_SYSTEM_PROMPT,
-        temperature=1.0,
-        top_p=1.0,
-        user_name=""
-    ) -> None:
-        super().__init__(
-            model_name=model_name,
-            temperature=temperature,
-            top_p=top_p,
-            system_prompt=system_prompt,
-            user=user_name
-        )
-        with open("config.json", "r") as f:
-            self.configuration_json = cjson.load(f)
-        self.api_key = api_key
-        self.need_api_key = True
-        self._refresh_header()
-
-    def get_answer_stream_iter(self):
-        response = self._get_response(stream=True)
-        if response is not None:
-            iter = self._decode_chat_response(response)
-            partial_text = ""
-            for i in iter:
-                partial_text += i
-                yield partial_text
-        else:
-            yield STANDARD_ERROR_MSG + GENERAL_ERROR_MSG
-
-
-    def get_answer_at_once(self):
-        response = self._get_response()
-        response = json.loads(response.text)
-        content = response["choices"][0]["message"]["content"]
-        total_token_count = response["usage"]["total_tokens"]
-        return content, total_token_count
-
-    def count_token(self, user_input):
-        input_token_count = count_token(construct_user(user_input))
-        if self.system_prompt is not None and len(self.all_token_counts) == 0:
-            system_prompt_token_count = count_token(
-                construct_system(self.system_prompt)
-            )
-            return input_token_count + system_prompt_token_count
-        return input_token_count
-
-    def billing_info(self):
-        try:
-            curr_time = datetime.datetime.now()
-            last_day_of_month = get_last_day_of_month(
-                curr_time).strftime("%Y-%m-%d")
-            first_day_of_month = curr_time.replace(day=1).strftime("%Y-%m-%d")
-            usage_url = f"{shared.state.usage_api_url}?start_date={first_day_of_month}&end_date={last_day_of_month}"
-            try:
-                usage_data = self._get_billing_data(usage_url)
-            except Exception as e:
-                None
-            rounded_usage = round(usage_data["total_usage"] / 100, 5)
-            usage_percent = round(usage_data["total_usage"] / usage_limit, 2)
-            return get_html("billing_info.html").format(
-                    label = "Ежемесячное использование",
-                    usage_percent = usage_percent,
-                    rounded_usage = rounded_usage,
-                    usage_limit = usage_limit
-                )
-        except requests.exceptions.ConnectTimeout:
-            None
-        except requests.exceptions.ReadTimeout:
-            None
-        except Exception as e:
-            None
-
-    def set_token_upper_limit(self, new_upper_limit):
-        pass
-
-    @shared.state.switching_api_key  # 在不开启多账号模式的时候，这个装饰器不会起作用
-    def _get_response(self, stream=False):
-        headers = self._get_headers()
-        history = self._get_history()
-        payload = self._get_payload(history, stream)
-        shared.state.completion_url = self._get_api_url()
-        logging.info(f"Используется API URL: {shared.state.completion_url}")
-        with retrieve_proxy():
-            response = self._make_request(headers, payload, stream)
-        return response
-
-    def _get_api_url(self):
-        if "naga-gpt" in self.model_name or "naga-llama" in self.model_name or "naga-claude" in self.model_name: 
-            url = "https://api.naga.ac/v1/chat/completions"
-        elif "naga-text" in self.model_name:
-            url = "https://api.naga.ac/v1/completions"
-        elif "chatty" in self.model_name:
-            url = "https://chattyapi.tech/v1/chat/completions"
-        elif "daku" in self.model_name:
-            url = "https://api.daku.tech/v1/chat/completions"
-        elif "neuro" in self.model_name:
-            url = "https://neuroapi.host/v1/chat/completions"
-        else:
-            url = "http://127.0.0.1:1337/v1/chat/completions"
-        return url
-      
-    def _get_headers(self):
-        if self.model_name == "purgpt":
-            purgpt_api_key = self.configuration_json["purgpt_api_key"]
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {purgpt_api_key}',
-            }
-        elif "chatty" in self.model_name:
-            chatty_api_key = self.configuration_json["chatty_api_key"]
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {chatty_api_key}",
-            }
-        elif "daku" in self.model_name:
-            daku_api_key = self.configuration_json["daku_api_key"]
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {daku_api_key}",
-            }
-        else:
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}",
-            }
-        return headers
-         
-    def _get_history(self):
-        system_prompt = self.system_prompt
-        history = self.history
-        logging.debug(colorama.Fore.YELLOW + f"{history}" + colorama.Fore.RESET)
-        if system_prompt is not None:
-            history = [construct_system(system_prompt), *history]
-        return history
-
-    def _get_payload(self, history, stream): 
-        model = self.model_name.replace("naga-", "").replace("chatty-", "").replace("neuro-", "").replace("daku-", "")
-        if "naga-text" in self.model_name:
-            last_msg = self.history[-1]
-            last_user_input = last_msg["role"] == "user"
-            if last_user_input:
-                last_text = last_msg["content"]
-            payload = {
-                "model": model,
-                "prompt": last_text,
-                "stream": stream,
-            }
-            return payload
-        else:
-            payload = {
-                "model": model,
-                "messages": history,
-                "temperature": self.temperature,
-                "top_p": self.top_p,
-                "n": self.n_choices,
-                "stream": stream,
-                "presence_penalty": self.presence_penalty,
-                "frequency_penalty": self.frequency_penalty,
-            }
-            if self.max_generation_token is not None:
-                payload["max_tokens"] = self.max_generation_token
-            if self.stop_sequence is not None:
-                payload["stop"] = self.stop_sequence
-            if self.logit_bias is not None:
-                payload["logit_bias"] = self.logit_bias
-            if self.user_identifier:
-                payload["user"] = self.user_identifier
-            return payload
-
-    def _make_request(self, headers, payload, stream):
-        if stream:
-            timeout = TIMEOUT_STREAMING
-        else:
-            timeout = TIMEOUT_ALL
-        try: #Заготовочка для переписания системы отправки запросов
-            if any(substring in self.model_name for substring in ["purgpt", "naga", "chatty"]):
-                response = requests.post(
-                    shared.state.completion_url,
-                    headers = headers,
-                    json=payload,
-                    stream=stream,
-                )
-            else:
-                response = requests.post(
-                    shared.state.completion_url,
-                    headers=headers,
-                    json=payload,
-                    stream=stream,
-                    timeout=timeout,
-                )
-        except:
-            return None
-        return response
-
-    def _refresh_header(self):
-        self.headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}",
-        }
-
-    def _get_billing_data(self, billing_url):
-        with retrieve_proxy():
-            response = requests.get(
-                billing_url,
-                headers=self.headers,
-                timeout=TIMEOUT_ALL,
-            )
-        if response.status_code == 200:
-            data = response.json()
-            return data
-        else:
-            raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
-
-    def _decode_chat_response(self, response):
-        error_msg = ""
-        for chunk in response.iter_lines():
-            if chunk:
-                chunk = chunk.decode()
-                chunk_length = len(chunk)
-                try:
-                    chunk = json.loads(chunk[6:])
-                except json.JSONDecodeError:
-                    error_msg += chunk
-                    continue
-                if chunk_length > 6 and "delta" in chunk["choices"][0]:
-                    if chunk["choices"][0]["finish_reason"] == "stop":
-                        break
-                    try:
-                        yield chunk["choices"][0]["delta"]["content"]
-                    except Exception as e:
-                        continue
-        if error_msg: 
-            if "Not authenticated" in error_msg:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Ключ ChimeraAPI не обнаружен. Убедитесь что ввели его.'
-            elif "Invalid API key" in error_msg:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Неверный ключ ChimeraAPI. Возможно вы ввели его неправильно либо он деактивирован. Вы можете сгенерировать его заново в Discord: https://discord.gg/chimeragpt'
-            elif "Reverse engineered site does not respond" in error_msg:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой: На данный момент, все сайты-провайдеры недоступны. Попробуйте позже.'
-            elif "one_api_error" in error_msg:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Сервер Chatty API недоступен. Попробуйте позднее.'
-            else:
-                yield '<span style="color: red;">Ошибка:</span> ' + error_msg
-
-    def set_key(self, new_access_key):
-        ret = super().set_key(new_access_key)
-        self._refresh_header()
-        return ret
 
 def get_model(
     model_name,
@@ -277,31 +21,24 @@ def get_model(
     temperature=None,
     top_p=None,
     system_prompt=None,
-    user_name=""
+    user_name="",
+    original_model = None
 ) -> BaseLLMModel:
-    msg = "Модель установлена на: " + f" {model_name}"
+    msg = i18n("模型设置为了：") + f" {model_name}"
     model_type = ModelType.get_type(model_name)
     lora_selector_visibility = False
-    lora_choices = []
+    lora_choices = ["No LoRA"]
     dont_change_lora_selector = False
     if model_type != ModelType.OpenAI:
         config.local_embedding = True
     # del current_model.model
-    model = None
+    model = original_model
     chatbot = gr.Chatbot.update(label=model_name)
     try:
         if model_type == ModelType.OpenAI:
-            logging.info(f"Загрузка модели OpenAI: {model_name}")
-            model = OpenAIClient(
-                model_name=model_name,
-                api_key=access_key,
-                system_prompt=system_prompt,
-                temperature=temperature,
-                top_p=top_p,
-                user_name=user_name,
-            )
-        elif model_type == ModelType.Unknown:
             logging.info(f"正在加载OpenAI模型: {model_name}")
+            from .OpenAI import OpenAIClient
+            access_key = os.environ.get("OPENAI_API_KEY", access_key)
             model = OpenAIClient(
                 model_name=model_name,
                 api_key=access_key,
@@ -310,19 +47,88 @@ def get_model(
                 top_p=top_p,
                 user_name=user_name,
             )
+        elif model_type == ModelType.ChatGLM:
+            logging.info(f"正在加载ChatGLM模型: {model_name}")
+            from .ChatGLM import ChatGLM_Client
+            model = ChatGLM_Client(model_name, user_name=user_name)
+        elif model_type == ModelType.LLaMA and lora_model_path == "":
+            msg = f"现在请为 {model_name} 选择LoRA模型"
+            logging.info(msg)
+            lora_selector_visibility = True
+            if os.path.isdir("lora"):
+                lora_choices = ["No LoRA"] + get_file_names_by_pinyin("lora", filetypes=[""])
+        elif model_type == ModelType.LLaMA and lora_model_path != "":
+            logging.info(f"正在加载LLaMA模型: {model_name} + {lora_model_path}")
+            from .LLaMA import LLaMA_Client
+            dont_change_lora_selector = True
+            if lora_model_path == "No LoRA":
+                lora_model_path = None
+                msg += " + No LoRA"
+            else:
+                msg += f" + {lora_model_path}"
+            model = LLaMA_Client(
+                model_name, lora_model_path, user_name=user_name)
+        elif model_type == ModelType.XMChat:
+            from .XMChat import XMChat
+            if os.environ.get("XMCHAT_API_KEY") != "":
+                access_key = os.environ.get("XMCHAT_API_KEY")
+            model = XMChat(api_key=access_key, user_name=user_name)
+        elif model_type == ModelType.StableLM:
+            from .StableLM import StableLM_Client
+            model = StableLM_Client(model_name, user_name=user_name)
+        elif model_type == ModelType.MOSS:
+            from .MOSS import MOSS_Client
+            model = MOSS_Client(model_name, user_name=user_name)
+        elif model_type == ModelType.YuanAI:
+            from .inspurai import Yuan_Client
+            model = Yuan_Client(model_name, api_key=access_key,
+                                user_name=user_name, system_prompt=system_prompt)
+        elif model_type == ModelType.Minimax:
+            from .minimax import MiniMax_Client
+            if os.environ.get("MINIMAX_API_KEY") != "":
+                access_key = os.environ.get("MINIMAX_API_KEY")
+            model = MiniMax_Client(
+                model_name, api_key=access_key, user_name=user_name, system_prompt=system_prompt)
+        elif model_type == ModelType.ChuanhuAgent:
+            from .ChuanhuAgent import ChuanhuAgent_Client
+            model = ChuanhuAgent_Client(model_name, access_key, user_name=user_name)
+            msg = i18n("启用的工具：") + ", ".join([i.name for i in model.tools])
+        elif model_type == ModelType.GooglePaLM:
+            from .GooglePaLM import Google_PaLM_Client
+            access_key = os.environ.get("GOOGLE_PALM_API_KEY", access_key)
+            model = Google_PaLM_Client(
+                model_name, access_key, user_name=user_name)
+        elif model_type == ModelType.LangchainChat:
+            from .Azure import Azure_OpenAI_Client
+            model = Azure_OpenAI_Client(model_name, user_name=user_name)
+        elif model_type == ModelType.Midjourney:
+            from .midjourney import Midjourney_Client
+            mj_proxy_api_secret = os.getenv("MIDJOURNEY_PROXY_API_SECRET")
+            model = Midjourney_Client(
+                model_name, mj_proxy_api_secret, user_name=user_name)
+        elif model_type == ModelType.Spark:
+            from .spark import Spark_Client
+            model = Spark_Client(model_name, os.getenv("SPARK_APPID"), os.getenv(
+                "SPARK_API_KEY"), os.getenv("SPARK_API_SECRET"), user_name=user_name)
+        elif model_type == ModelType.Unknown:
+            raise ValueError(f"未知模型: {model_name}")
         logging.info(msg)
     except Exception as e:
         import traceback
         traceback.print_exc()
         msg = f"{STANDARD_ERROR_MSG}: {e}"
+    presudo_key = hide_middle_chars(access_key)
+    if original_model is not None and model is not None:
+        model.history = original_model.history
+        model.history_file_path = original_model.history_file_path
     if dont_change_lora_selector:
-        return model, msg, chatbot
+        return model, msg, chatbot, gr.update(), access_key, presudo_key
     else:
-        return model, msg, chatbot, gr.Dropdown.update(choices=lora_choices, visible=lora_selector_visibility)
+        return model, msg, chatbot, gr.Dropdown.update(choices=lora_choices, visible=lora_selector_visibility), access_key, presudo_key
 
 
 if __name__ == "__main__":
-    with open("config.json", "r") as f:
+    with open("config.json", "r", encoding="utf-8") as f:
         openai_api_key = cjson.load(f)["openai_api_key"]
     # set logging level to debug
     logging.basicConfig(level=logging.DEBUG)

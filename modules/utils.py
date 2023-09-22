@@ -1,17 +1,15 @@
+# -*- coding:utf-8 -*-
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Type
 import logging
-import json
+import commentjson as json
 import os
 import datetime
-from datetime import timezone 
-import hashlib
 import csv
 import requests
 import re
 import html
-import sys
-import subprocess
+import hashlib
 
 import gradio as gr
 from pypinyin import lazy_pinyin
@@ -70,8 +68,11 @@ def delete_last_conversation(current_model, *args):
 def set_system_prompt(current_model, *args):
     return current_model.set_system_prompt(*args)
 
-def save_chat_history(current_model, *args):
-    return current_model.save_chat_history(*args)
+def rename_chat_history(current_model, *args):
+    return current_model.rename_chat_history(*args)
+
+def auto_name_chat_history(current_model, *args):
+    return current_model.auto_name_chat_history(*args)
 
 def export_markdown(current_model, *args):
     return current_model.export_markdown(*args)
@@ -128,9 +129,10 @@ def dislike(current_model, *args):
     return current_model.dislike(*args)
 
 
-def count_token(message):
+def count_token(input_str):
     encoding = tiktoken.get_encoding("cl100k_base")
-    input_str = f"role: {message['role']}, content: {message['content']}"
+    if type(input_str) == dict:
+        input_str = f"role: {input_str['role']}, content: {input_str['content']}"
     length = len(encoding.encode(input_str))
     return length
 
@@ -205,6 +207,28 @@ def convert_mdtext(md_text): # deprecated
     output += ALREADY_CONVERTED_MARK
     return output
 
+
+def clip_rawtext(chat_message, need_escape=True):
+    # first, clip hr line
+    hr_pattern = r'\n\n<hr class="append-display no-in-raw" />(.*?)'
+    hr_match = re.search(hr_pattern, chat_message, re.DOTALL)
+    message_clipped = chat_message[:hr_match.start()] if hr_match else chat_message
+    # second, avoid agent-prefix being escaped
+    agent_prefix_pattern = r'<!-- S O PREFIX --><p class="agent-prefix">(.*?)<\/p><!-- E O PREFIX -->'
+    agent_matches = re.findall(agent_prefix_pattern, message_clipped)
+    final_message = ""
+    if agent_matches:
+        agent_parts = re.split(agent_prefix_pattern, message_clipped)
+        for i, part in enumerate(agent_parts):
+            if i % 2 == 0:
+                final_message += escape_markdown(part) if need_escape else part
+            else:
+                final_message += f'<!-- S O PREFIX --><p class="agent-prefix">{part}</p><!-- E O PREFIX -->'
+    else:
+        final_message = escape_markdown(message_clipped) if need_escape else message_clipped
+    return final_message
+
+
 def convert_bot_before_marked(chat_message):
     """
     注意不能给输出加缩进, 否则会被marked解析成代码块
@@ -212,15 +236,13 @@ def convert_bot_before_marked(chat_message):
     if '<div class="md-message">' in chat_message:
         return chat_message
     else:
+        raw = f'<div class="raw-message hideM"><pre>{clip_rawtext(chat_message)}</pre></div>'
+        # really_raw = f'{START_OF_OUTPUT_MARK}<div class="really-raw hideM">{clip_rawtext(chat_message, need_escape=False)}\n</div>{END_OF_OUTPUT_MARK}'
+
         code_block_pattern = re.compile(r"```(.*?)(?:```|$)", re.DOTALL)
         code_blocks = code_block_pattern.findall(chat_message)
         non_code_parts = code_block_pattern.split(chat_message)[::2]
         result = []
-
-        hr_pattern = r'\n\n<hr class="append-display no-in-raw" />(.*?)'
-        hr_match = re.search(hr_pattern, chat_message, re.DOTALL)
-        clip_hr = chat_message[:hr_match.start()] if hr_match else chat_message
-        raw = f'<div class="raw-message hideM">{escape_markdown(clip_hr)}</div>'
         for non_code, code in zip(non_code_parts, code_blocks + [""]):
             if non_code.strip():
                 result.append(non_code)
@@ -228,7 +250,7 @@ def convert_bot_before_marked(chat_message):
                 code = f"\n```{code}\n```"
                 result.append(code)
         result = "".join(result)
-        md = f'<div class="md-message">{result}\n</div>'
+        md = f'<div class="md-message">\n\n{result}\n</div>'
         return raw + md
 
 def convert_user_before_marked(chat_message):
@@ -242,7 +264,7 @@ def escape_markdown(text):
     Escape Markdown special characters to HTML-safe equivalents.
     """
     escape_chars = {
-        ' ': '&nbsp;',
+        # ' ': '&nbsp;',
         '_': '&#95;',
         '*': '&#42;',
         '[': '&#91;',
@@ -262,7 +284,9 @@ def escape_markdown(text):
         '|': '&#124;',
         '$': '&#36;',
         ':': '&#58;',
+        '\n': '<br>',
     }
+    text = text.replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;')
     return ''.join(escape_chars.get(c, c) for c in text)
 
 
@@ -308,59 +332,100 @@ def construct_system(text):
 def construct_assistant(text):
     return construct_text("assistant", text)
 
+
 def save_file(filename, system, history, chatbot, user_name):
-    logging.debug(f"{user_name} Сохранение истории диалога...")
     os.makedirs(os.path.join(HISTORY_DIR, user_name), exist_ok=True)
-    if filename.endswith(".json"):
-        json_s = {"system": system, "history": history, "chatbot": chatbot}
-        if "/" in filename or "\\" in filename:
-            history_file_path = filename
-        else:
-            history_file_path = os.path.join(HISTORY_DIR, user_name, filename)
-        with open(history_file_path, "w", encoding='utf-8') as f:
-            json.dump(json_s, f, ensure_ascii=False)
-    elif filename.endswith(".md"):
-        md_s = f"system: \n- {system} \n"
-        for data in history:
-            md_s += f"\n{data['role']}: \n- {data['content']} \n"
-        with open(os.path.join(HISTORY_DIR, user_name, filename), "w", encoding="utf8") as f:
-            f.write(md_s)
-    logging.debug(f"{user_name} История диалога сохранена")
+    if filename.endswith(".md"):
+        filename = filename[:-3]
+    if not filename.endswith(".json") and not filename.endswith(".md"):
+        filename += ".json"
+    if filename == ".json":
+        raise Exception("文件名不能为空")
+
+    json_s = {"system": system, "history": history, "chatbot": chatbot}
+    repeat_file_index = 2
+    if not filename == os.path.basename(filename):
+        history_file_path = filename
+    else:
+        history_file_path = os.path.join(HISTORY_DIR, user_name, filename)
+
+    with open(history_file_path, "w", encoding='utf-8') as f:
+        json.dump(json_s, f, ensure_ascii=False)
+
+    filename = os.path.basename(filename)
+    filename_md = filename[:-5] + ".md"
+    md_s = f"system: \n- {system} \n"
+    for data in history:
+        md_s += f"\n{data['role']}: \n- {data['content']} \n"
+    with open(os.path.join(HISTORY_DIR, user_name, filename_md), "w", encoding="utf8") as f:
+        f.write(md_s)
     return os.path.join(HISTORY_DIR, user_name, filename)
 
 
 def sorted_by_pinyin(list):
     return sorted(list, key=lambda char: lazy_pinyin(char)[0][0])
 
+def sorted_by_last_modified_time(list, dir):
+    return sorted(list, key=lambda char: os.path.getctime(os.path.join(dir, char)), reverse=True)
 
-def get_file_names(dir, plain=False, filetypes=[".json"]):
-    logging.debug(f"Получение списка имен файлов, директория: {dir}, типы файлов: {filetypes}, простой список: {plain}")
+def get_file_names_by_type(dir, filetypes=[".json"]):
+    logging.debug(f"获取文件名列表，目录为{dir}，文件类型为{filetypes}")
     files = []
-    try:
-        for type in filetypes:
-            files += [f for f in os.listdir(dir) if f.endswith(type)]
-    except FileNotFoundError:
-        files = []
-    files = sorted_by_pinyin(files)
-    if files == []:
-        files = [""]
-    logging.debug(f"Файлы: {files}")
-    if plain:
-        return files
-    else:
-        return gr.Dropdown.update(choices=files)
+    for type in filetypes:
+        files += [f for f in os.listdir(dir) if f.endswith(type)]
+    logging.debug(f"files are:{files}")
+    return files
+
+def get_file_names_by_pinyin(dir, filetypes=[".json"]):
+    files = get_file_names_by_type(dir, filetypes)
+    if files != [""]:
+        files = sorted_by_pinyin(files)
+    logging.debug(f"files are:{files}")
+    return files
+
+def get_file_names_dropdown_by_pinyin(dir, filetypes=[".json"]):
+    files = get_file_names_by_pinyin(dir, filetypes)
+    return gr.Dropdown.update(choices=files)
+
+def get_file_names_by_last_modified_time(dir, filetypes=[".json"]):
+    files = get_file_names_by_type(dir, filetypes)
+    if files != [""]:
+        files = sorted_by_last_modified_time(files, dir)
+    logging.debug(f"files are:{files}")
+    return files
 
 
-def get_history_names(plain=False, user_name=""):
-    logging.debug(f"Получение списка имен файлов истории из пользователя {user_name}")
+def get_history_names(user_name=""):
+    logging.debug(f"从用户 {user_name} 中获取历史记录文件名列表")
     if user_name == "" and hide_history_when_not_logged_in:
-        return ""
+        return []
     else:
-        return get_file_names(os.path.join(HISTORY_DIR, user_name), plain)
+        history_files = get_file_names_by_last_modified_time(os.path.join(HISTORY_DIR, user_name))
+        history_files = [f[:f.rfind(".")] for f in history_files]
+        return history_files
 
+def get_first_history_name(user_name=""):
+    history_names = get_history_names(user_name)
+    return history_names[0] if history_names else None
+
+def get_history_list(user_name=""):
+    history_names = get_history_names(user_name)
+    return gr.Radio.update(choices=history_names)
+
+def init_history_list(user_name=""):
+    history_names = get_history_names(user_name)
+    return gr.Radio.update(choices=history_names, value=history_names[0] if history_names else "")
+
+def filter_history(user_name, keyword):
+    history_names = get_history_names(user_name)
+    try:
+        history_names = [name for name in history_names if re.search(keyword, name)]
+        return gr.update(choices=history_names)
+    except:
+        return gr.update(choices=history_names)
 
 def load_template(filename, mode=0):
-    logging.debug(f"Загрузка шаблонного файла {filename}, режим: {mode} (0 - возвращение словаря и выпадающего списка, 1 - возвращение выпадающего списка, 2 - возвращение словаря)")
+    logging.debug(f"加载模板文件{filename}，模式为{mode}（0为返回字典和下拉菜单，1为返回下拉菜单，2为返回字典）")
     lines = []
     if filename.endswith(".json"):
         with open(os.path.join(TEMPLATES_DIR, filename), "r", encoding="utf8") as f:
@@ -384,13 +449,18 @@ def load_template(filename, mode=0):
         )
 
 
-def get_template_names(plain=False):
-    logging.debug("Получение списка имен файлов шаблонов")
-    return get_file_names(TEMPLATES_DIR, plain, filetypes=[".csv", "json"])
+def get_template_names():
+    logging.debug("获取模板文件名列表")
+    return get_file_names_by_pinyin(TEMPLATES_DIR, filetypes=[".csv", "json"])
+
+def get_template_dropdown():
+    logging.debug("获取模板下拉菜单")
+    template_names = get_template_names()
+    return gr.Dropdown.update(choices=template_names)
 
 
 def get_template_content(templates, selection, original_system_prompt):
-    logging.debug(f"Применение шаблона, выбор: {selection}, оригинальный системный запрос: {original_system_prompt}")
+    logging.debug(f"应用模板中，选择为{selection}，原始系统提示为{original_system_prompt}")
     try:
         return templates[selection]
     except:
@@ -398,19 +468,19 @@ def get_template_content(templates, selection, original_system_prompt):
 
 
 def reset_textbox():
-    logging.debug("Сброс текстового поля")
+    logging.debug("重置文本框")
     return gr.update(value="")
 
 
 def reset_default():
     default_host = shared.state.reset_api_host()
     retrieve_proxy("")
-    return gr.update(value=default_host), gr.update(value=""), "API-Host и прокси сброшены"
+    return gr.update(value=default_host), gr.update(value=""), "API-Host 和代理已重置"
 
 
 def change_api_host(host):
     shared.state.set_api_host(host)
-    msg = f"API-Host изменен на {host}"
+    msg = f"API-Host更改为了{host}"
     logging.info(msg)
     return msg
 
@@ -418,7 +488,7 @@ def change_api_host(host):
 def change_proxy(proxy):
     retrieve_proxy(proxy)
     os.environ["HTTPS_PROXY"] = proxy
-    msg = f"Прокси изменен на {proxy}"
+    msg = f"代理更改为了{proxy}"
     logging.info(msg)
     return msg
 
@@ -437,7 +507,7 @@ def hide_middle_chars(s):
 
 def submit_key(key):
     key = key.strip()
-    msg = f"API-ключ изменен на {hide_middle_chars(key)}"
+    msg = f"API密钥更改为了{hide_middle_chars(key)}"
     logging.info(msg)
     return key, msg
 
@@ -453,21 +523,21 @@ def get_geoip():
             response = requests.get("https://ipapi.co/json/", timeout=5)
         data = response.json()
     except:
-        data = {"error": True, "reason": "Не удалось подключиться к ipapi"}
+        data = {"error": True, "reason": "连接ipapi失败"}
     if "error" in data.keys():
-        logging.warning(f"Не удалось получить информацию об IP-адресе.\n{data}")
+        logging.warning(f"无法获取IP地址信息。\n{data}")
         if data["reason"] == "RateLimited":
             return (
-                "Ваша IP-зона: неизвестна."
+                i18n("您的IP区域：未知。")
             )
         else:
-            return "Не удалось получить географическое положение IP-адреса. Причина: " + f"{data['reason']}" + ". Вы все равно можете использовать функцию чата."
+            return i18n("获取IP地理位置失败。原因：") + f"{data['reason']}" + i18n("。你仍然可以使用聊天功能。")
     else:
         country = data["country_name"]
         if country == "China":
-            text = "**Ваша IP-зона: Китай. Пожалуйста, проверьте настройки прокси, использование API в неподдерживаемых регионах может привести к блокировке учетной записи.**"
+            text = "**您的IP区域：中国。请立即检查代理设置，在不受支持的地区使用API可能导致账号被封禁。**"
         else:
-            text = "Ваша IP-зона: " + f"{country}."
+            text = i18n("您的IP区域：") + f"{country}。"
         logging.info(text)
         return text
 
@@ -487,7 +557,7 @@ def find_n(lst, max_num):
 
 
 def start_outputing():
-    logging.debug("Показать кнопку отмены, скрыть кнопку отправки")
+    logging.debug("显示取消按钮，隐藏发送按钮")
     return gr.Button.update(visible=False), gr.Button.update(visible=True)
 
 
@@ -499,12 +569,12 @@ def end_outputing():
 
 
 def cancel_outputing():
-    logging.info("Прерывание вывода...")
+    logging.info("中止输出……")
     shared.state.interrupt()
 
 
 def transfer_input(inputs):
-    # Возвращаем все сразу, чтобы снизить задержку
+    # 一次性返回，降低延迟
     textbox = reset_textbox()
     outputing = start_outputing()
     return (
@@ -515,84 +585,19 @@ def transfer_input(inputs):
     )
 
 
-def run(command, desc=None, errdesc=None, custom_env=None, live=False):
-    if desc is not None:
-        print(desc)
-    if live:
-        result = subprocess.run(command, shell=True, env=os.environ if custom_env is None else custom_env)
-        if result.returncode != 0:
-            raise RuntimeError(f"""{errdesc or 'Ошибка при выполнении команды'}.
-                Команда: {command}
-                Код ошибки: {result.returncode}""")
+def update_chuanhu():
+    from .repo import background_update
 
-        return ""
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, env=os.environ if custom_env is None else custom_env)
-    if result.returncode != 0:
-        message = f"""{errdesc or 'Ошибка при выполнении команды'}.
-            Команда: {command}
-            Код ошибки: {result.returncode}
-            stdout: {result.stdout.decode(encoding="utf8", errors="ignore") if len(result.stdout)>0 else '<пусто>'}
-            stderr: {result.stderr.decode(encoding="utf8", errors="ignore") if len(result.stderr)>0 else '<пусто>'}
-            """
-        raise RuntimeError(message)
-    return result.stdout.decode(encoding="utf8", errors="ignore")
-
-
-def commit_html():
-    git = os.environ.get('GIT', "git")
-    try:
-        commit_hash = run(f"{git} rev-parse HEAD").strip()
-    except Exception:
-        commit_hash = "<неизвестно>"
-    if commit_hash != "<неизвестно>":
-        short_commit = commit_hash[0:7]
-        commit_info = f'<a style="text-decoration:none;color:inherit" href="https://github.com/GaiZhenbiao/ChuanhuChatGPT/commit/{short_commit}">{short_commit}</a>'
+    print("[Updater] Trying to update...")
+    update_status = background_update()
+    if update_status == "success":
+        logging.info("Successfully updated, restart needed")
+        status = '<span id="update-status" class="hideK">success</span>'
+        return gr.Markdown.update(value=i18n("更新成功，请重启本程序")+status)
     else:
-        commit_info = "неизвестно \U0001F615"
-    return commit_info
+        status = '<span id="update-status" class="hideK">failure</span>'
+        return gr.Markdown.update(value=i18n("更新失败，请尝试[手动更新](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/使用教程#手动更新)")+status)
 
-def tag_html():
-    git = os.environ.get('GIT', "git")
-    try:
-        tag = run(f"{git} describe --tags --exact-match").strip()
-    except Exception:
-        tag = "<none>"
-    if tag != "<none>":
-        tag_info = f'<a style="text-decoration:none;color:inherit" href="https://github.com/GaiZhenbiao/ChuanhuChatGPT/releases/tag/{tag}">{tag}</a>'
-    else:
-        tag_info = "unknown \U0001F615"
-    return tag_info
-
-def repo_html():
-    commit_version = commit_html()
-    tag_version = tag_html()
-    return tag_version if tag_version != "unknown \U0001F615" else commit_version
-
-def versions_html():
-    python_version = ".".join([str(x) for x in sys.version_info[0:3]])
-    repo_version = repo_html()
-    return f"""
-        Python: <span title="{sys.version}">{python_version}</span>
-         • 
-        Gradio: {gr.__version__}
-         • 
-        <a style="text-decoration:none;color:inherit" href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChat</a>: {repo_version}
-        """
-
-def version_time():
-    git = os.environ.get('GIT', "git")
-    try:
-        commit_time = run(f"TZ=UTC {git} log -1 --format=%cd --date='format-local:%Y-%m-%dT%H:%M:%SZ'").strip()
-    except Exception:
-        commit_time = "unknown"
-    return commit_time
-
-def get_html(filename):
-    path = os.path.join(shared.chuanhu_path, "assets", "html", filename)
-    if os.path.exists(path):
-        with open(path, encoding="utf8") as file:
-            return file.read()
-    return ""
 
 def add_source_numbers(lst, source_name = "Source", use_source = True):
     if use_source:
@@ -657,36 +662,66 @@ def toggle_like_btn_visibility(selected_model_name):
     else:
         return gr.update(visible=False)
 
-def new_auto_history_filename(dirname):
-    latest_file = get_latest_filepath(dirname)
+def new_auto_history_filename(username):
+    latest_file = get_first_history_name(username)
     if latest_file:
-        with open(os.path.join(dirname, latest_file), 'r', encoding="utf-8") as f:
+        with open(os.path.join(HISTORY_DIR, username, latest_file + ".json"), 'r', encoding="utf-8") as f:
             if len(f.read()) == 0:
                 return latest_file
-    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    now = i18n("新对话 ") + datetime.datetime.now().strftime('%m-%d %H-%M')
     return f'{now}.json'
-
-def get_latest_filepath(dirname):
-    pattern = re.compile(r'\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}')
-    latest_time = None
-    latest_file = None
-    for filename in os.listdir(dirname):
-        if os.path.isfile(os.path.join(dirname, filename)):
-            match = pattern.search(filename)
-            if match and match.group(0) == filename[:19]:
-                time_str = filename[:19]
-                filetime = datetime.datetime.strptime(time_str, '%Y-%m-%d_%H-%M-%S')
-                if not latest_time or filetime > latest_time:
-                    latest_time = filetime
-                    latest_file = filename
-    return latest_file
 
 def get_history_filepath(username):
     dirname = os.path.join(HISTORY_DIR, username)
     os.makedirs(dirname, exist_ok=True)
-    latest_file = get_latest_filepath(dirname)
+    latest_file = get_first_history_name(username)
     if not latest_file:
-        latest_file = new_auto_history_filename(dirname)
+        latest_file = new_auto_history_filename(username)
 
     latest_file = os.path.join(dirname, latest_file)
     return latest_file
+
+def beautify_err_msg(err_msg):
+    if "insufficient_quota" in  err_msg:
+        return i18n("剩余配额不足，[进一步了解](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98#you-exceeded-your-current-quota-please-check-your-plan-and-billing-details)")
+    if "The model: gpt-4 does not exist" in err_msg:
+        return i18n("你没有权限访问 GPT4，[进一步了解](https://github.com/GaiZhenbiao/ChuanhuChatGPT/issues/843)")
+    if "Resource not found" in err_msg:
+        return i18n("请查看 config_example.json，配置 Azure OpenAI")
+    return err_msg
+
+def auth_from_conf(username, password):
+    try:
+        with open("config.json", encoding="utf-8") as f:
+            conf = json.load(f)
+        usernames, passwords = [i[0] for i in conf["users"]], [i[1] for i in conf["users"]]
+        if username in usernames:
+            if passwords[usernames.index(username)] == password:
+                return True
+        return False
+    except:
+        return False
+
+def get_file_hash(file_src=None, file_paths=None):
+    if file_src:
+        file_paths = [x.name for x in file_src]
+    file_paths.sort(key=lambda x: os.path.basename(x))
+
+    md5_hash = hashlib.md5()
+    for file_path in file_paths:
+        with open(file_path, "rb") as f:
+            while chunk := f.read(8192):
+                md5_hash.update(chunk)
+
+    return md5_hash.hexdigest()
+
+def myprint(**args):
+    print(args)
+
+def replace_special_symbols(string, replace_string=" "):
+    # 定义正则表达式，匹配所有特殊符号
+    pattern = r'[!@#$%^&*()<>?/\|}{~:]'
+
+    new_string = re.sub(pattern, replace_string, string)
+
+    return new_string

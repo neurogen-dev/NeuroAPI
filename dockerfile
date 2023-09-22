@@ -1,28 +1,18 @@
-# Stage 1: Build
-
-FROM python:3.10-slim-buster as builder
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential git
+FROM python:3.9-slim-buster as builder
+RUN apt-get update \
+    && apt-get install -y build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+COPY requirements_advanced.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+# RUN pip install --user --no-cache-dir -r requirements_advanced.txt
 
-FROM python:3.10-slim-buster
-
-WORKDIR /app
-
+FROM python:3.9-slim-buster
+LABEL maintainer="iskoldt"
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
-COPY . .
-RUN python -m spacy download ru_core_news_sm && \
-    python -m spacy download en_core_web_sm && \
-    python -m spacy download zh_core_web_sm
-RUN chmod +x entrypoint.sh
-
-EXPOSE 7860
-EXPOSE 1337
-
-ENV LANG=ru
-
-CMD ["./entrypoint.sh"]
+COPY . /app
+WORKDIR /app
+ENV dockerrun=yes
+CMD ["python3", "-u", "ChuanhuChatbot.py","2>&1", "|", "tee", "/var/log/application.log"]
