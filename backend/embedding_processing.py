@@ -49,7 +49,7 @@ class embedding_processing:
         response_embedding = self.transform_embedding_to_dict(embeddings_list,text_list)
         return response_embedding
 
-    def transform_embedding_to_dict(self, embedding_list, text_list, model_name="text-embedding-elmo-002"):
+    def transform_embedding_to_dict(self, embedding_list, text_list, model_name="text-embedding-ada-002"):
         prompt_tokens = sum(len(text) for text in text_list)
         total_tokens = sum(len(embedding) for embedding in embedding_list)
 

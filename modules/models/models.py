@@ -300,6 +300,10 @@ def get_model(
                 top_p=top_p,
                 user_name=user_name,
             )
+        elif model_type == ModelType.ChuanhuAgent:
+            from .ChuanhuAgent import ChuanhuAgent_Client
+            model = ChuanhuAgent_Client(model_name, access_key, user_name=user_name)
+            msg = "Доступные инструменты：" + ", ".join([i.name for i in model.tools])
         elif model_type == ModelType.Unknown:
             logging.info(f"正在加载OpenAI模型: {model_name}")
             model = OpenAIClient(

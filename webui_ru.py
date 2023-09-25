@@ -1,14 +1,8 @@
-import os
 import logging
-import sys
 
 import gradio as gr
 import asyncio
 import fastwsgi
-
-import aiohttp
-from aiohttp import web
-import aiofiles
 
 from modules import config
 from modules.config import *
@@ -17,13 +11,6 @@ from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
 from backend.backend import app
-
-
-import threading
-import time
-import json
-import random
-import time
 
 from multiprocessing import Process
 
@@ -113,7 +100,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         label="Выберите модель LoRA", choices=[], multiselect=False, interactive=True, visible=False
                     )
                     with gr.Row():
-                        single_turn_checkbox = gr.Checkbox(label="Single-turn режим диалога", value=False, elem_classes="switch_checkbox")
+                        single_turn_checkbox = gr.Checkbox(label="Вести диалог без контекста", value=False, elem_classes="switch_checkbox")
                         use_websearch_checkbox = gr.Checkbox(label="Использовать онлайн-поиск", value=False, elem_classes="switch_checkbox")
 
                     language_select_dropdown = gr.Dropdown(
@@ -123,7 +110,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         value=REPLY_LANGUAGES[0],
                     )
                     index_files = gr.Files(label="Загрузить", type="file", visible=False)
-                    two_column = gr.Checkbox(label="Двухстолбчатый pdf", value=advance_docs["pdf"].get("two_column", False), visible=False)
+                    two_column = gr.Checkbox(label="Двухстолбчатый pdf", value=advance_docs["pdf"].get("two_column", True), visible=False)
                     summarize_btn = gr.Button("Резюмировать", visible=False)
                     # TODO: OCR формулы
                     # formula_ocr = gr.Checkbox(label="OCR формулы", value=advance_docs["pdf"].get("formula_ocr", False))

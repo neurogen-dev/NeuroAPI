@@ -10,6 +10,7 @@ class Wewordle(AsyncProvider):
     url                    = "https://wewordle.org"
     working                = True
     supports_gpt_35_turbo  = True
+    supports_stream       = True
 
     @classmethod
     async def create_async(

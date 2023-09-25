@@ -19,6 +19,7 @@ from g4f.models import ModelUtils
 
 app = Flask(__name__)
 CORS(app)
+
 LOG = logging.getLogger(__name__)
 embedding_proc = embedding_processing()
     

@@ -1,358 +1,373 @@
 from __future__ import annotations
-import os
-import asyncio
 
-import base64, json, uuid, quickjs, random
-from curl_cffi.requests import AsyncSession
+import json, base64, requests, execjs, random, uuid
 
-from ..typing       import Any, TypedDict
-from .base_provider import AsyncProvider
+from ..typing       import Any, TypedDict, CreateResult
+from .base_provider import BaseProvider
+from abc            import abstractmethod
 
 
-class Vercel(AsyncProvider):
-    url                   = "https://sdk.vercel.ai"
+class Vercel(BaseProvider):
+    url = 'https://sdk.vercel.ai'
     working               = True
     supports_gpt_35_turbo = True
-    model                 = "replicate:replicate/llama-2-70b-chat"
+    supports_stream       = True
 
-    @classmethod
-    async def create_async(
-        cls,
+    @staticmethod
+    @abstractmethod
+    def create_completion(
         model: str,
         messages: list[dict[str, str]],
-        proxy: str = None,
-        **kwargs
-    ) -> str:
-        if model in ["gpt-3.5-turbo", "gpt-4"]:
-            model = "openai:" + model
-        model = model if model else cls.model
-        proxies = None
-        if proxy:
-            if "://" not in proxy:
-                proxy = "http://" + proxy
-            proxies = {"http": proxy, "https": proxy}
-        if os.name == 'nt':
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()) 
+        stream: bool, **kwargs ) -> CreateResult:
 
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.{rand1}.{rand2} Safari/537.36".format(
-                rand1=random.randint(0,9999),
-                rand2=random.randint(0,9999)
-            ),
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "en-US,en;q=0.5",
-            "TE": "trailers",
+            'authority'         : 'sdk.vercel.ai',
+            'accept'            : '*/*',
+            'accept-language'   : 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
+            'cache-control'     : 'no-cache',
+            'content-type'      : 'application/json',
+            'custom-encoding'   : AntiBotToken(),
+            'origin'            : 'https://sdk.vercel.ai',
+            'pragma'            : 'no-cache',
+            'referer'           : 'https://sdk.vercel.ai/',
+            'sec-ch-ua'         : '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
+            'sec-ch-ua-mobile'  : '?0',
+            'sec-ch-ua-platform': '"macOS"',
+            'sec-fetch-dest'    : 'empty',
+            'sec-fetch-mode'    : 'cors',
+            'sec-fetch-site'    : 'same-origin',
+            'user-agent'        :  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.%s.%s Safari/537.36' % (
+                random.randint(99, 999),
+                random.randint(99, 999)
+            )
         }
-        async with AsyncSession(headers=headers, proxies=proxies, impersonate="chrome107") as session:
-            response = await session.get(cls.url + "/openai.jpeg")
-            response.raise_for_status()
-            custom_encoding = _get_custom_encoding(response.text)
-            headers = {
-                "Content-Type": "application/json",
-                "Custom-Encoding": custom_encoding,
-            }
-            data = _create_payload(model, messages)
-            response = await session.post(cls.url + "/api/generate", json=data, headers=headers)
-            response.raise_for_status()
-            return response.text
 
+        json_data = {
+            'model'       : model_info[model]['id'],
+            'messages'    : messages,
+            'playgroundId': str(uuid.uuid4()),
+            'chatIndex'   : 0} | model_info[model]['default_params']
 
-def _create_payload(model: str, messages: list[dict[str, str]]) -> dict[str, Any]:
-    if model not in model_info:
-        raise ValueError(f'Model are not supported: {model}')
-    default_params = model_info[model]["default_params"]
-    return {
-        "messages": messages,
-        "playgroundId": str(uuid.uuid4()),
-        "chatIndex": 0,
-        "model": model
-    } | default_params
+        server_error = True
+        retries      = 0
+        max_retries  = kwargs.get('max_retries', 20)
+        
+        while server_error and not retries > max_retries:
+            response = requests.post('https://sdk.vercel.ai/api/generate', 
+                                    headers=headers, json=json_data, stream=True)
 
-# based on https://github.com/ading2210/vercel-llm-api
-def _get_custom_encoding(text: str) -> str:
-    data = json.loads(base64.b64decode(text, validate=True))
-    script = """
-      String.prototype.fontcolor = function() {{
-        return `<font>${{this}}</font>`
-      }}
-      var globalThis = {{marker: "mark"}};
-      ({script})({key})
-    """.format(
-        script=data["c"], key=data["a"]
-    )
-    context = quickjs.Context()  # type: ignore
-    token_data = json.loads(context.eval(script).json())  # type: ignore
-    token_data[2] = "mark"
-    token = {"r": token_data, "t": data["t"]}
-    token_str = json.dumps(token, separators=(",", ":")).encode("utf-16le")
-    return base64.b64encode(token_str).decode()
+            for token in response.iter_content(chunk_size=2046):
+                if token != b'Internal Server Error':
+                    server_error = False
+                    yield (token.decode())
+                    
+            retries += 1
 
+def AntiBotToken() -> str:
+    headers = {
+        'authority'         : 'sdk.vercel.ai',
+        'accept'            : '*/*',
+        'accept-language'   : 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
+        'cache-control'     : 'no-cache',
+        'pragma'            : 'no-cache',
+        'referer'           : 'https://sdk.vercel.ai/',
+        'sec-ch-ua'         : '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
+        'sec-ch-ua-mobile'  : '?0',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-fetch-dest'    : 'empty',
+        'sec-fetch-mode'    : 'cors',
+        'sec-fetch-site'    : 'same-origin',
+        'user-agent'        : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.%s.%s Safari/537.36' % (
+            random.randint(99, 999), 
+            random.randint(99, 999)
+        )
+    }
+
+    response = requests.get('https://sdk.vercel.ai/openai.jpeg', 
+                            headers=headers).text
+
+    raw_data = json.loads(base64.b64decode(response, 
+                                    validate=True))
+
+    js_script = '''const globalThis={marker:"mark"};String.prototype.fontcolor=function(){return `<font>${this}</font>`};
+        return (%s)(%s)''' % (raw_data['c'], raw_data['a'])
+
+    raw_token = json.dumps({'r': execjs.compile(js_script).call(''), 't': raw_data['t']}, 
+                        separators = (",", ":"))
+
+    return base64.b64encode(raw_token.encode('utf-16le')).decode()
 
 class ModelInfo(TypedDict):
     id: str
     default_params: dict[str, Any]
 
-
 model_info: dict[str, ModelInfo] = {
-    "anthropic:claude-instant-v1": {
-        "id": "anthropic:claude-instant-v1",
-        "default_params": {
-            "temperature": 1,
-            "maxTokens": 200,
-            "topP": 1,
-            "topK": 1,
-            "presencePenalty": 1,
-            "frequencyPenalty": 1,
-            "stopSequences": ["\n\nHuman:"],
+    'claude-instant-v1': {
+        'id': 'anthropic:claude-instant-v1',
+        'default_params': {
+            'temperature': 1,
+            'maximumLength': 1024,
+            'topP': 1,
+            'topK': 1,
+            'presencePenalty': 1,
+            'frequencyPenalty': 1,
+            'stopSequences': ['\n\nHuman:'],
         },
     },
-    "anthropic:claude-v1": {
-        "id": "anthropic:claude-v1",
-        "default_params": {
-            "temperature": 1,
-            "maxTokens": 200,
-            "topP": 1,
-            "topK": 1,
-            "presencePenalty": 1,
-            "frequencyPenalty": 1,
-            "stopSequences": ["\n\nHuman:"],
+    'claude-v1': {
+        'id': 'anthropic:claude-v1',
+        'default_params': {
+            'temperature': 1,
+            'maximumLength': 1024,
+            'topP': 1,
+            'topK': 1,
+            'presencePenalty': 1,
+            'frequencyPenalty': 1,
+            'stopSequences': ['\n\nHuman:'],
         },
     },
-    "anthropic:claude-v2": {
-        "id": "anthropic:claude-v2",
-        "default_params": {
-            "temperature": 1,
-            "maxTokens": 200,
-            "topP": 1,
-            "topK": 1,
-            "presencePenalty": 1,
-            "frequencyPenalty": 1,
-            "stopSequences": ["\n\nHuman:"],
+    'claude-v2': {
+        'id': 'anthropic:claude-v2',
+        'default_params': {
+            'temperature': 1,
+            'maximumLength': 1024,
+            'topP': 1,
+            'topK': 1,
+            'presencePenalty': 1,
+            'frequencyPenalty': 1,
+            'stopSequences': ['\n\nHuman:'],
         },
     },
-    "replicate:a16z-infra/llama7b-v2-chat": {
-        "id": "replicate:a16z-infra/llama7b-v2-chat",
-        "default_params": {
-            "temperature": 0.75,
-            "maxTokens": 500,
-            "topP": 1,
-            "repetitionPenalty": 1,
+    'a16z-infra/llama7b-v2-chat': {
+        'id': 'replicate:a16z-infra/llama7b-v2-chat',
+        'default_params': {
+            'temperature': 0.75,
+            'maximumLength': 3000,
+            'topP': 1,
+            'repetitionPenalty': 1,
         },
     },
-    "replicate:a16z-infra/llama13b-v2-chat": {
-        "id": "replicate:a16z-infra/llama13b-v2-chat",
-        "default_params": {
-            "temperature": 0.75,
-            "maxTokens": 500,
-            "topP": 1,
-            "repetitionPenalty": 1,
+    'a16z-infra/llama13b-v2-chat': {
+        'id': 'replicate:a16z-infra/llama13b-v2-chat',
+        'default_params': {
+            'temperature': 0.75,
+            'maximumLength': 3000,
+            'topP': 1,
+            'repetitionPenalty': 1,
         },
     },
-    "replicate:replicate/llama-2-70b-chat": {
-        "id": "replicate:replicate/llama-2-70b-chat",
-        "default_params": {
-            "temperature": 0.75,
-            "maxTokens": 1000,
-            "topP": 1,
-            "repetitionPenalty": 1,
+    'replicate/llama-2-70b-chat': {
+        'id': 'replicate:replicate/llama-2-70b-chat',
+        'default_params': {
+            'temperature': 0.75,
+            'maximumLength': 3000,
+            'topP': 1,
+            'repetitionPenalty': 1,
         },
     },
-    "huggingface:bigscience/bloom": {
-        "id": "huggingface:bigscience/bloom",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 0.95,
-            "topK": 4,
-            "repetitionPenalty": 1.03,
+    'bigscience/bloom': {
+        'id': 'huggingface:bigscience/bloom',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 0.95,
+            'topK': 4,
+            'repetitionPenalty': 1.03,
         },
     },
-    "huggingface:google/flan-t5-xxl": {
-        "id": "huggingface:google/flan-t5-xxl",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 0.95,
-            "topK": 4,
-            "repetitionPenalty": 1.03,
+    'google/flan-t5-xxl': {
+        'id': 'huggingface:google/flan-t5-xxl',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 0.95,
+            'topK': 4,
+            'repetitionPenalty': 1.03,
         },
     },
-    "huggingface:EleutherAI/gpt-neox-20b": {
-        "id": "huggingface:EleutherAI/gpt-neox-20b",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 0.95,
-            "topK": 4,
-            "repetitionPenalty": 1.03,
-            "stopSequences": [],
+    'EleutherAI/gpt-neox-20b': {
+        'id': 'huggingface:EleutherAI/gpt-neox-20b',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 0.95,
+            'topK': 4,
+            'repetitionPenalty': 1.03,
+            'stopSequences': [],
         },
     },
-    "huggingface:OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5": {
-        "id": "huggingface:OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
-        "default_params": {"maxTokens": 200, "typicalP": 0.2, "repetitionPenalty": 1},
-    },
-    "huggingface:OpenAssistant/oasst-sft-1-pythia-12b": {
-        "id": "huggingface:OpenAssistant/oasst-sft-1-pythia-12b",
-        "default_params": {"maxTokens": 200, "typicalP": 0.2, "repetitionPenalty": 1},
-    },
-    "huggingface:bigcode/santacoder": {
-        "id": "huggingface:bigcode/santacoder",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 0.95,
-            "topK": 4,
-            "repetitionPenalty": 1.03,
+    'OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5': {
+        'id': 'huggingface:OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5',
+        'default_params': {
+            'maximumLength': 1024,
+            'typicalP': 0.2,
+            'repetitionPenalty': 1,
         },
     },
-    "cohere:command-light-nightly": {
-        "id": "cohere:command-light-nightly",
-        "default_params": {
-            "temperature": 0.9,
-            "maxTokens": 200,
-            "topP": 1,
-            "topK": 0,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'OpenAssistant/oasst-sft-1-pythia-12b': {
+        'id': 'huggingface:OpenAssistant/oasst-sft-1-pythia-12b',
+        'default_params': {
+            'maximumLength': 1024,
+            'typicalP': 0.2,
+            'repetitionPenalty': 1,
         },
     },
-    "cohere:command-nightly": {
-        "id": "cohere:command-nightly",
-        "default_params": {
-            "temperature": 0.9,
-            "maxTokens": 200,
-            "topP": 1,
-            "topK": 0,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'bigcode/santacoder': {
+        'id': 'huggingface:bigcode/santacoder',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 0.95,
+            'topK': 4,
+            'repetitionPenalty': 1.03,
         },
     },
-    "openai:gpt-4": {
-        "id": "openai:gpt-4",
-        "default_params": {
-            "temperature": 0.7,
-            "maxTokens": 500,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'command-light-nightly': {
+        'id': 'cohere:command-light-nightly',
+        'default_params': {
+            'temperature': 0.9,
+            'maximumLength': 1024,
+            'topP': 1,
+            'topK': 0,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
-    "openai:gpt-4-0613": {
-        "id": "openai:gpt-4-0613",
-        "default_params": {
-            "temperature": 0.7,
-            "maxTokens": 500,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'command-nightly': {
+        'id': 'cohere:command-nightly',
+        'default_params': {
+            'temperature': 0.9,
+            'maximumLength': 1024,
+            'topP': 1,
+            'topK': 0,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
-    "openai:code-davinci-002": {
-        "id": "openai:code-davinci-002",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'gpt-4': {
+        'id': 'openai:gpt-4',
+        'default_params': {
+            'temperature': 0.7,
+            'maximumLength': 8192,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
-    "openai:gpt-3.5-turbo": {
-        "id": "openai:gpt-3.5-turbo",
-        "default_params": {
-            "temperature": 0.7,
-            "maxTokens": 500,
-            "topP": 1,
-            "topK": 1,
-            "presencePenalty": 1,
-            "frequencyPenalty": 1,
-            "stopSequences": [],
+    'gpt-4-0613': {
+        'id': 'openai:gpt-4-0613',
+        'default_params': {
+            'temperature': 0.7,
+            'maximumLength': 8192,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
-    "openai:gpt-3.5-turbo-16k": {
-        "id": "openai:gpt-3.5-turbo-16k",
-        "default_params": {
-            "temperature": 0.7,
-            "maxTokens": 500,
-            "topP": 1,
-            "topK": 1,
-            "presencePenalty": 1,
-            "frequencyPenalty": 1,
-            "stopSequences": [],
+    'code-davinci-002': {
+        'id': 'openai:code-davinci-002',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
-    "openai:gpt-3.5-turbo-16k-0613": {
-        "id": "openai:gpt-3.5-turbo-16k-0613",
-        "default_params": {
-            "temperature": 0.7,
-            "maxTokens": 500,
-            "topP": 1,
-            "topK": 1,
-            "presencePenalty": 1,
-            "frequencyPenalty": 1,
-            "stopSequences": [],
+    'gpt-3.5-turbo': {
+        'id': 'openai:gpt-3.5-turbo',
+        'default_params': {
+            'temperature': 0.7,
+            'maximumLength': 4096,
+            'topP': 1,
+            'topK': 1,
+            'presencePenalty': 1,
+            'frequencyPenalty': 1,
+            'stopSequences': [],
         },
     },
-    "openai:text-ada-001": {
-        "id": "openai:text-ada-001",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'gpt-3.5-turbo-16k': {
+        'id': 'openai:gpt-3.5-turbo-16k',
+        'default_params': {
+            'temperature': 0.7,
+            'maximumLength': 16280,
+            'topP': 1,
+            'topK': 1,
+            'presencePenalty': 1,
+            'frequencyPenalty': 1,
+            'stopSequences': [],
         },
     },
-    "openai:text-babbage-001": {
-        "id": "openai:text-babbage-001",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'gpt-3.5-turbo-16k-0613': {
+        'id': 'openai:gpt-3.5-turbo-16k-0613',
+        'default_params': {
+            'temperature': 0.7,
+            'maximumLength': 16280,
+            'topP': 1,
+            'topK': 1,
+            'presencePenalty': 1,
+            'frequencyPenalty': 1,
+            'stopSequences': [],
         },
     },
-    "openai:text-curie-001": {
-        "id": "openai:text-curie-001",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'text-ada-001': {
+        'id': 'openai:text-ada-001',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
-    "openai:text-davinci-002": {
-        "id": "openai:text-davinci-002",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'text-babbage-001': {
+        'id': 'openai:text-babbage-001',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
-    "openai:text-davinci-003": {
-        "id": "openai:text-davinci-003",
-        "default_params": {
-            "temperature": 0.5,
-            "maxTokens": 200,
-            "topP": 1,
-            "presencePenalty": 0,
-            "frequencyPenalty": 0,
-            "stopSequences": [],
+    'text-curie-001': {
+        'id': 'openai:text-curie-001',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
+        },
+    },
+    'text-davinci-002': {
+        'id': 'openai:text-davinci-002',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 1024,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
+        },
+    },
+    'text-davinci-003': {
+        'id': 'openai:text-davinci-003',
+        'default_params': {
+            'temperature': 0.5,
+            'maximumLength': 4097,
+            'topP': 1,
+            'presencePenalty': 0,
+            'frequencyPenalty': 0,
+            'stopSequences': [],
         },
     },
 }
