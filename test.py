@@ -12,7 +12,7 @@ stream = False
 response = g4f.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[{"role": "user", "content": "hello"}],
-    provider=g4f.Provider.NeuroGPT,
+    provider=g4f.Provider.Ylokh,
     stream=stream,
 )
 

@@ -2,23 +2,7 @@ from __future__  import annotations
 from dataclasses import dataclass
 from .typing     import Union
 from .Provider   import BaseProvider, RetryProvider
-from .Provider   import (
-    ChatgptLogin,
-    ChatgptAi, 
-    ChatBase, 
-    Vercel, 
-    DeepAi, 
-    Aivvm, 
-    Bard, 
-    H2o,
-    GptGo,
-    Bing,
-    PerplexityAi,
-    Wewordle,
-    Yqcloud,
-    AItianhu,
-    Aichat,
-)
+from .Provider   import *
 
 @dataclass(unsafe_hash=True)
 class Model:
@@ -32,9 +16,9 @@ default = Model(
     name          = "",
     base_provider = "",
     best_provider = RetryProvider([
-        Wewordle, # Adds references to sources
+        GetGpt, # Adds references to sources
         Wewordle,     # Responds with markdown
-        ChatgptLogin, ChatgptAi, AItianhu, Aichat,
+        ChatgptLogin, ChatgptAi, AItianhu, Aichat, NeuroGPT
     ])
 )
 
@@ -42,7 +26,12 @@ default = Model(
 gpt_35_turbo = Model(
     name          = 'gpt-3.5-turbo',
     base_provider = 'openai',
-    best_provider = Wewordle)
+    best_provider = RetryProvider([
+        GetGpt, # Adds references to sources
+        Wewordle,     # Responds with markdown
+        ChatgptLogin, ChatgptAi, AItianhu, Aichat, NeuroGPT
+    ])
+)
 
 gpt_4 = Model(
     name          = 'gpt-4',
