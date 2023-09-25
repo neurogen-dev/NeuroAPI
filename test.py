@@ -10,9 +10,9 @@ import g4f
 
 stream = False
 response = g4f.ChatCompletion.create(
-    model="gpt-3.5-turbo-16k-0613",
+    model="gpt-3.5-turbo",
     messages=[{"role": "user", "content": "hello"}],
-    provider=g4f.Provider.Vercel,
+    provider=g4f.Provider.NeuroGPT,
     stream=stream,
 )
 

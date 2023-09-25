@@ -55,9 +55,9 @@ class ChuanhuAgent_Client(BaseLLMModel):
     def __init__(self, model_name, openai_api_key, user_name="") -> None:
         super().__init__(model_name=model_name, user=user_name)
         self.text_splitter = TokenTextSplitter(chunk_size=500, chunk_overlap=30)
-        self.api_key = openai_api_key
-        self.llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=0, model_name=default_chuanhu_assistant_model, openai_api_base=os.environ.get("OPENAI_API_BASE", None))
-        self.cheap_llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=0, model_name="gpt-3.5-turbo", openai_api_base=os.environ.get("OPENAI_API_BASE", None))
+        self.api_key = 'sk-lVyIGFN0e4Il91M6VmIVEZbxEpuKoMMfUfRzT8IiKn8XzpMH'
+        self.llm = ChatOpenAI(openai_api_key='sk-lVyIGFN0e4Il91M6VmIVEZbxEpuKoMMfUfRzT8IiKn8XzpMH', temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_base=os.environ.get("OPENAI_API_BASE", "https://neuroapi.host"))
+        self.cheap_llm = ChatOpenAI(openai_api_key='sk-lVyIGFN0e4Il91M6VmIVEZbxEpuKoMMfUfRzT8IiKn8XzpMH', temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_base=os.environ.get("OPENAI_API_BASE", "https://neuroapi.host"))
         PROMPT = PromptTemplate(template=SUMMARIZE_PROMPT, input_variables=["text"])
         self.summarize_chain = load_summarize_chain(self.cheap_llm, chain_type="map_reduce", return_intermediate_steps=True, map_prompt=PROMPT, combine_prompt=PROMPT)
         self.index_summary = None
@@ -130,6 +130,25 @@ class ChuanhuAgent_Client(BaseLLMModel):
                 chatbot.append((f"Uploaded {len(files)} files", summary))
             logging.info(cb)
         return gr.Files.update(), chatbot, status
+    
+    # ChuanhuAgent.py
+
+    def handle_message(self, message):
+        words = message.split()
+    
+        if words[0].lower() == '!search':
+            keywords = ' '.join(words[1:])
+            return self.google_search_simple({ 'keywords': keywords })
+    
+        elif words[0].lower() == '!summarize':
+            url = words[1]
+            return self.summary_url({ 'url': url })
+    
+        elif words[0].lower() == '!ask':
+            url, question = words[1], ' '.join(words[2:])
+            return self.ask_url({ 'url': url, 'question': question })
+    
+        return f'Unknown command: {words[0]}'
 
     def query_index(self, query):
         if self.index is not None:

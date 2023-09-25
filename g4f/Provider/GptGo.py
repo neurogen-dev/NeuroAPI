@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import json
 from aiohttp import ClientSession
+import json
 
-from .base_provider import AsyncGeneratorProvider
-from ..typing import AsyncGenerator
+from ..typing       import AsyncGenerator
+from .base_provider import AsyncGeneratorProvider, format_prompt
 
-class Vitalentum(AsyncGeneratorProvider):
-    url                   = "https://app.vitalentum.io"
-    working               = True
+
+class GptGo(AsyncGeneratorProvider):
+    url                   = "https://gptgo.ai"
     supports_gpt_35_turbo = True
-
+    working               = True
 
     @classmethod
     async def create_async_generator(
@@ -22,34 +22,44 @@ class Vitalentum(AsyncGeneratorProvider):
     ) -> AsyncGenerator:
         headers = {
             "User-Agent"         : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-            "Accept"             : "text/event-stream",
-            "Accept-language"    : "de,en-US;q=0.7,en;q=0.3",
+            "Accept"             : "*/*",
+            "Accept-language"    : "en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3",
             "Origin"             : cls.url,
             "Referer"            : cls.url + "/",
             "Sec-Fetch-Dest"     : "empty",
             "Sec-Fetch-Mode"     : "cors",
             "Sec-Fetch-Site"     : "same-origin",
         }
-        conversation = json.dumps({"history": [{
-            "speaker": "human" if message["role"] == "user" else "bot",
-            "text": message["content"],
-        } for message in messages]})
-        data = {
-            "conversation": conversation,
-            "temperature": 0.7,
-            **kwargs
-        }
         async with ClientSession(
             headers=headers
         ) as session:
-            async with session.post(cls.url + "/api/converse-edge", json=data, proxy=proxy) as response:
+            async with session.get(
+                "https://gptgo.ai/action_get_token.php",
+                params={
+                    "q": format_prompt(messages),
+                    "hlgpt": "default",
+                    "hl": "en"
+                },
+                proxy=proxy
+            ) as response:
                 response.raise_for_status()
+                token = (await response.json(content_type=None))["token"]
+
+            async with session.get(
+                "https://gptgo.ai/action_ai_gpt.php",
+                params={
+                    "token": token,
+                },
+                proxy=proxy
+            ) as response:
+                response.raise_for_status()
+                start = "data: "
                 async for line in response.content:
                     line = line.decode()
                     if line.startswith("data: "):
                         if line.startswith("data: [DONE]"):
                             break
-                        line = json.loads(line[6:-1])
+                        line = json.loads(line[len(start):-1])
                         content = line["choices"][0]["delta"].get("content")
                         if content:
                             yield content

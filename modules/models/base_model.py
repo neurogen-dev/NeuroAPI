@@ -111,10 +111,19 @@ class ChuanhuCallbackHandler(BaseCallbackHandler):
 class ModelType(Enum):
     Unknown = -1
     OpenAI = 0
+    ChuanhuAgent = 1
 
     @classmethod
     def get_type(cls, model_name: str):
-        return ModelType.OpenAI if "gpt" in model_name.lower() else ModelType.Unknown
+        model_type = None
+        model_name_lower = model_name.lower()
+        if "gpt" in model_name_lower:
+            model_type = ModelType.OpenAI
+        elif "agent" in model_name_lower:
+            model_type = ModelType.ChuanhuAgent
+        else:
+            model_type = ModelType.Unknown
+        return model_type
 
 
 class BaseLLMModel:
@@ -334,7 +343,12 @@ class BaseLLMModel:
         files=None,
         reply_language="Русский",
         should_check_token_count=True,
-    ):  # repetition_penalty, top_k
+    ): 
+    
+        if inputs.strip().startswith("!"):
+            response_text = self.handle_message(inputs)
+            chatbot.append((inputs, response_text))
+            return chatbot, "Command handled"
 
         status_text = "Отправка запроса ..."
         logging.info(

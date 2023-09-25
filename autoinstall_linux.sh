@@ -1,25 +1,25 @@
 #!/bin/bash
-echo "Opening NeuroGPT..."
 
-export HIDE_OTHER_PROVIDERS=false
-export SHOW_ALL_PROVIDERS=false
+# Обновить систему
+sudo apt-get update -y
 
-echo "Checking for updates..."
-python -c "import json; import collections; config = json.load(open('config.json')); keys = list(config.keys()); keys.insert(2, keys.pop(keys.index('daku_api_key'))); config = collections.OrderedDict([(key, config[key]) for key in keys]); json.dump(config, open('config.json', 'w'), indent=4)"
+# Установить python3, pip, git и зависимости
+sudo apt-get install -y python3-full python3-venv python3-pip python-is-python3 git build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
 
-# Создаем временную копию файла config.json
-cp config.json config_temp.json
+# Клонировать репозиторий
+git clone https://github.com/Em1tSan/NeuroGPT.git
+cd NeuroGPT
+
+# Обновить репозиторий
 git checkout main
 git fetch --all
 git reset --hard origin/main
 git pull
 
-# Восстанавливаем оригинальный файл config.json
-mv config_temp.json config.json
-
-# Checking for Python version
-version=$(python3 --version | cut -d " " -f 2)
-if [[ "$version" < "3.10.1" ]]; then
+# Проверка версии Python
+version=$(python3 --version)
+version=${version:7}
+if [[ "$version" < "3.9.0" ]]; then
     echo "Your version of Python ${version} is not supported. Please install Python 3.10.X"
     exit 1
 elif [[ "$version" > "3.11.14" ]]; then
@@ -27,13 +27,16 @@ elif [[ "$version" > "3.11.14" ]]; then
     exit 1
 fi
 
+# Создание и активация виртуальной среды
 python3 -m venv venv
 . venv/bin/activate
+
+# Установка необходимых пакетов
 python3 -m pip install --upgrade pip
 python3 -m pip install -U setuptools
 python3 -m pip install -r requirements.txt
 
-# Checking for spacy language models and download if not exists
+# Проверка и загрузка моделей Spacy при необходимости
 if [ ! -d "venv/lib/python3.10/site-packages/en_core_web_sm" ]; then
     echo "English language model not found, downloading..."
     python3 -m spacy download en_core_web_sm
@@ -50,11 +53,9 @@ if [ ! -d "venv/lib/python3.10/site-packages/ru_core_news_sm" ]; then
 fi
 
 echo "Completed."
-echo "Running NeuroGPT..."
 
-# Determine the language of the operating system
+# Определение языка операционной системы и запуск соответствующего скрипта
 language=$(locale | grep LANG= | cut -d "=" -f2 | cut -d "_" -f1)
-
 if [ "$language" = "ru" ]; then
   python3 webui_ru.py
 else
