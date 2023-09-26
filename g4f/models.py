@@ -17,7 +17,6 @@ default = Model(
     base_provider = "",
     best_provider = RetryProvider([
         GetGpt, # Adds references to sources
-        Wewordle,     # Responds with markdown
         ChatgptLogin, ChatgptAi, AItianhu, Aichat, NeuroGPT
     ])
 )
@@ -28,7 +27,6 @@ gpt_35_turbo = Model(
     base_provider = 'openai',
     best_provider = RetryProvider([
         GetGpt, # Adds references to sources
-        Wewordle,     # Responds with markdown
         ChatgptLogin, ChatgptAi, AItianhu, Aichat, NeuroGPT
     ])
 )
