@@ -60,7 +60,8 @@ Given that this project doesn't use an official API but relies on reverse-engine
 - [List of models](https://status.neuroapi.host/v1/status)
 - Built-in prompt templates for various tasks
 - Built-in jailbreaks for removing censorship
-- Conversation context
+- Dialog context
+- No-logs
 - API endpoint
 - Setting generation parameters for GPT models
 - Saving and loading dialogue history
