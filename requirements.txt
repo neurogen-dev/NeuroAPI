@@ -1,4 +1,4 @@
-gradio
+gradio==3.44.4
 gradio_client
 psycopg2-binary
 pypinyin
