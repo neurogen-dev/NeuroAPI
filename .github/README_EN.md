@@ -4,21 +4,16 @@
 </a>
 
 <strong> <a href="https://github.com/Em1tSan/NeuroGPT#readme">Русский</a> | English </strong>
+  
+<p> NeuroGPT offers free API access to GPT-3.5, GPT-4, and other language models on various platforms. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a web interface. We extend our gratitude to the authors.</p>
 
-<p> NeuroGPT allows average users to gain free access to gpt-3.5, gpt-4, and other language models without requiring VPN or account registration. Currently, only gpt-3.5-turbo 4097 is operational in stable mode. Continuous access to other models is not guaranteed.
-
-The project is based on modified versions of <a href="https://github.com/xtekky/gpt4free">gpt4free</a> and <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a></p>
-We extend our gratitude to the authors.
-
+<p>
 <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/LICENSE">
   <img src="https://img.shields.io/badge/license-GPL_3.0-indigo.svg" alt="license"/>
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
   <img src="https://img.shields.io/badge/latest-v1.5.0-indigo.svg" alt="latest"/>
-</a>
-
-<br> Before using NeuroGPT, be sure to check out <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">our project's wiki</a><br/>
-<br> Installation instructions: <br/>
+</a></p>
 
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
@@ -28,9 +23,9 @@ We extend our gratitude to the authors.
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#macos">
   <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
-</a> </p>
+</a>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#portable-version">
-  <img src="https://img.shields.io/badge/-Portable version-008000?logo=portable" alt="portable"/>
+  <img src="https://img.shields.io/badge/-Portable version-f2f2f2?logo=portable" alt="portable"/>
 </a>
 
 <br> News and feedback: <br/>
@@ -58,13 +53,12 @@ Given that this project doesn't use an official API but relies on reverse-engine
 
 - Web search
 - [List of models](https://status.neuroapi.host/v1/status)
-- Built-in prompt templates for various tasks
-- Built-in jailbreaks for removing censorship
 - Dialog context
 - No-logs
 - API endpoint
+- Dialog history
 - Setting generation parameters for GPT models
-- Saving and loading dialogue history
+- Built-in prompt templates and jailbreaks for various tasks
 
 <div align="center">
   <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
