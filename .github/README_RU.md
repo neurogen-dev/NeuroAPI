@@ -3,7 +3,7 @@
   <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+Neurogen+AI" alt="NeuroGPT" />
 </a>
 
-<strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_EN.md">English </a></strong>
+<strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT#readme">English </a></strong>
 
 <p> Бесплатный API-сервис, предоставляющий доступ к GPT-3.5, GPT-4 и другим языковым моделям. Перед использованием, пожалуйста, убедитесь, что ознакомились с нашей <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. В проекте используется модифицированная версия <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, а также <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> в качестве веб-интерфейса. Выражаем благодарность авторам. </p>
 
