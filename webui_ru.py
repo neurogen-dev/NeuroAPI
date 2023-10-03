@@ -2,7 +2,6 @@ import logging
 
 import gradio as gr
 import asyncio
-import fastwsgi
 
 from modules import config
 from modules.config import *
@@ -10,8 +9,10 @@ from modules.utils import *
 from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
-from backend.backend import app
 
+import socket
+from backend.backend import app
+from gevent import pywsgi
 from multiprocessing import Process
 
 import logging
@@ -54,13 +55,14 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     with gr.Row(equal_height=True):
         with gr.Column(scale=5):
             with gr.Row():
-                chatbot = gr.Chatbot(label="Chuanhu Chat", elem_id="chuanhu_chatbot", latex_delimiters=latex_delimiters_set, height=700)
+                chatbot = gr.Chatbot(label="Chuanhu Chat", elem_id="chuanhu_chatbot", latex_delimiters=latex_delimiters_set, height=600)
             with gr.Row():
                 with gr.Column(min_width=225, scale=12):
                     user_input = gr.Textbox(
                         elem_id="user_input_tb",
                         show_label=False, placeholder="Введите ваш запрос здесь",
-                        container=False
+                        container=False,
+                        max_lines=40
                     )
                 with gr.Column(min_width=42, scale=1):
                     submitBtn = gr.Button(value="", variant="primary", elem_id="submit_btn")
@@ -516,11 +518,26 @@ def run_gradio_server():
       favicon_path="./assets/favicon.ico",
       inbrowser=not dockerflag,
     )
+site_config = {
+        'host': '0.0.0.0',
+        'port': 1337,
+        'debug': False
+         }
 
 def run_api_server():
-    fastwsgi.run(wsgi_app=app, host='0.0.0.0', port=1337)
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+
+    print(f"Running on http://127.0.0.1:{site_config['port']}")
+    print(f"Running on http://{ip_address}:{site_config['port']}")
+
+    server = pywsgi.WSGIServer(('0.0.0.0', site_config['port']), app)
+    server.serve_forever()
+
+
 
 if __name__ == "__main__":
+
     api_process = Process(target=run_api_server) 
     api_process.start()
 
