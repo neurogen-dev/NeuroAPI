@@ -3,9 +3,9 @@
   <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+Neurogen+AI" alt="NeuroGPT" />
 </a>
 
-<strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_EN.md">English </a></strong>
-
-<p> Бесплатный API-сервис, предоставляющий доступ к GPT-3.5, GPT-4 и другим языковым моделям. Перед использованием, пожалуйста, убедитесь, что ознакомились с нашей <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. В проекте используется модифицированная версия <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, а также <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> в качестве веб-интерфейса. Выражаем благодарность авторам. </p>
+<strong> <a href="https://github.com/Em1tSan/NeuroGPT#readme">Русский</a> | English </strong>
+  
+<p> Free API service providing access to GPT-3.5, GPT-4, and other language models. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a web interface. We extend our gratitude to the authors.</p>
 
 <p>
 <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/LICENSE">
@@ -25,19 +25,19 @@
   <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#portable-version">
-  <img src="https://img.shields.io/badge/-Портативная версия-8080ff?logo=portable" alt="portable"/>
+  <img src="https://img.shields.io/badge/-Portable version-8080ff?logo=portable" alt="portable"/>
 </a>
 
-<br> Новости и обратная связь: <br/>
+<br> News and feedback: <br/>
 
 <a href="https://t.me/neurogen_news">
-  <img src="https://img.shields.io/badge/-Telegram канал-0088CC?logo=telegram" alt="telegram"/>
+  <img src="https://img.shields.io/badge/-Telegram channel-0088CC?logo=telegram" alt="telegram"/>
 </a>
 <a href="https://t.me/neurogen_chat">
-  <img src="https://img.shields.io/badge/-Telegram чат-0088CC?logo=telegram" alt="telegram_chat"/>
+  <img src="https://img.shields.io/badge/-Telegram chat-0088CC?logo=telegram" alt="telegram_chat"/>
 </a>
 
-<br> Поддержать проект: <br/>
+<br> Support the project: <br/>
 
 <a href="https://boosty.to/neurogen">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Boosty_logo.svg/512px-Boosty_logo.svg.png?20230209172145" alt="neurogen_boosty" width="20%">
@@ -45,16 +45,16 @@
 
 </div>
 
-## Возможности
+## Features
 
-- Веб-поиск
-- [Список моделей](https://status.neuroapi.host/v1/status)
-- Контекст беседы
-- Отсутствие логов
-- История диалога
-- Режим endpoint для работы с API
-- Изменение параметров генерации для GPT-моделей
-- Встроенные джейлбрейки и шаблоны промптов под разные задачи
+- Web search
+- [Model list](https://status.neuroapi.host/v1/status)
+- Dialog context
+- No-logs
+- API endpoint
+- Dialog history
+- Setting generation parameters for GPT models
+- Built-in prompt templates and jailbreaks for various tasks
 
 <div align="center">
   <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
