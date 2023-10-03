@@ -1,36 +1,31 @@
 <div align="center">
 <a href="https://t.me/neurogen_news">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Inconsolata&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+Neurogen...;Opening..." alt="NeuroGPT" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&vCenter=true&width=435&lines=NeuroGPT+by+Neurogen+AI" alt="NeuroGPT" />
 </a>
 
 <strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_EN.md">English </a></strong>
 
-<p> NeuroGPT позволяет обычному пользователю получить бесплатный доступ к gpt-3.5, gpt-4 и другим языковым моделям без VPN и регистрации аккаунта. В стабильном режиме на данный момент функционирует только gpt-3.5-turbo 4097. Постоянный доступ к остальным моделям не гарантируется.
+<p> Бесплатный API-сервис, предоставляющий доступ к GPT-3.5, GPT-4 и другим языковым моделям. Перед использованием, пожалуйста, убедитесь, что ознакомились с нашей <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. В проекте используется модифицированная версия <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, а также <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> в качестве веб-интерфейса. Выражаем благодарность авторам. </p>
 
-Проект основан на модифицированных версиях <a href="https://github.com/xtekky/gpt4free">gpt4free</a> и <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a></p>
-Благодарность авторам.
-
+<p>
 <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/LICENSE">
-  <img src="https://img.shields.io/badge/license-GPL_3.0-indigo.svg" alt="license"/>
+  <img src="https://img.shields.io/badge/license-GPL_3.0-darkgreen.svg" alt="license"/>
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
-  <img src="https://img.shields.io/badge/latest-v1.5.0-indigo.svg" alt="latest"/>
-</a>
+  <img src="https://img.shields.io/badge/latest-v1.5.0-darkgreen.svg" alt="latest"/>
+</a></p>
 
-<br> Перед использованием обязательно ознакомьтесь с <a href="https://github.com/Em1tSan/NeuroGPT/wiki#%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-%D1%8F%D0%B7%D1%8B%D0%BA">wiki проекта</a><br/>
-<br> Инструкции по установке: <br/>
-
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#windows">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#linux">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#linux">
   <img src="https://img.shields.io/badge/-Linux-F1502F?logo=linux" alt="linux"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#macos">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#macos">
   <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
-</a> </p>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA#%D0%BF%D0%BE%D1%80%D1%82%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F">
-  <img src="https://img.shields.io/badge/-Портативная версия-008000?logo=portable" alt="portable"/>
+</a>
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#portable-version">
+  <img src="https://img.shields.io/badge/-Портативная версия-8080ff?logo=portable" alt="portable"/>
 </a>
 
 <br> Новости и обратная связь: <br/>
@@ -50,21 +45,16 @@
 
 </div>
 
-## Дисклеймер:
-
-Поскольку данный проект функционирует не через официальное API, а благодаря доступу, полученному путем обратной инженерии, то API провайдеры могут падать, а различные модели отключаться. Пожалуйста, учтите это. Если вам необходима высокая стабильность для работы, то стоит обойти этот проект стороной. Также важно помнить, что поддержка осуществляется на чистом энтузиазме.
-
-## Возможности:
+## Возможности
 
 - Веб-поиск
 - [Список моделей](https://status.neuroapi.host/v1/status)
-- Встроенные шаблоны промптов под разные задачи
-- Встроенные джейлбрейки для снятия цензуры
 - Контекст беседы
 - Отсутствие логов
+- История диалога
 - Режим endpoint для работы с API
-- Изменение параметров генерации для gpt-моделей
-- Сохранение и загрузка истории диалогов
+- Изменение параметров генерации для GPT-моделей
+- Встроенные джейлбрейки и шаблоны промптов под разные задачи
 
 <div align="center">
   <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
