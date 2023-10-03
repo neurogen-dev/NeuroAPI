@@ -47,11 +47,12 @@ f = function () {
 "tryit-" + h + "-" + f(agent + f(agent + f(agent + h + "x")));
 """
 
-        payload = {"chas_style": "chat", "chatHistory": json.dumps(messages)}
+        payload = {"chat_style": "chat", "chatHistory": json.dumps(messages)}
         api_key = js2py.eval_js(token_js)
         headers = {
             "api-key": api_key,
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+            **kwargs.get("headers", {})
         }
         async with ClientSession(
             headers=headers

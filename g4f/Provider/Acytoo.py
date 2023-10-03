@@ -41,10 +41,10 @@ def _create_header():
     }
 
 
-def _create_payload(messages: list[dict[str, str]], model: str, temperature: float = 0.5, **kwargs):
+def _create_payload(messages: list[dict[str, str]], temperature: float = 0.5, **kwargs):
     return {
         'key'         : '',
-        'model'       : model,
+        'model'       : 'gpt-3.5-turbo',
         'messages'    : messages,
         'temperature' : temperature,
         'password'    : ''

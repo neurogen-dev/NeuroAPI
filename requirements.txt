@@ -1,4 +1,4 @@
-gradio==3.44.4
+gradio==3.34.0
 gradio_client
 psycopg2-binary
 pypinyin
@@ -8,7 +8,7 @@ tqdm
 colorama
 googlesearch-python
 Pygments
-langchain==0.0.173
+langchain
 markdown
 PyPDF2
 pdfplumber
@@ -54,14 +54,11 @@ flask-cors
 api-analytics
 gevent
 pytz
-gunicorn
 huggingface_hub
-free-proxy
 watchdog~=3.0.0
 js2py
 quickjs
 httpx
 spacy
 zhconv
-fastwsgi
 flask_http_middleware

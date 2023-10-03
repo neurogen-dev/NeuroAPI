@@ -1,22 +1,20 @@
-import fastwsgi
 import socket
 from backend.backend import app
+from gevent import pywsgi
 from multiprocessing import Process
 
-def run_api_server():
-    fastwsgi.run(wsgi_app=app, host='0.0.0.0', port=1337)
-
-
-if __name__ == "__main__":
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-    site_config = {
+site_config = {
         'host': '0.0.0.0',
         'port': 1337,
         'debug': False
          }
+
+if __name__ == "__main__":
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+
     print(f"Running on http://127.0.0.1:{site_config['port']}")
     print(f"Running on http://{ip_address}:{site_config['port']}")
 
-    api_process = Process(target=run_api_server) 
-    api_process.start()
+    server = pywsgi.WSGIServer(('0.0.0.0', site_config['port']), app)
+    server.serve_forever()

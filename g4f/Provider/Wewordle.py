@@ -8,9 +8,8 @@ from .base_provider import AsyncProvider
 
 class Wewordle(AsyncProvider):
     url                    = "https://wewordle.org"
-    working                = True
+    working                = False
     supports_gpt_35_turbo  = True
-    supports_stream       = True
 
     @classmethod
     async def create_async(
