@@ -2,9 +2,23 @@ from __future__ import annotations
 from g4f        import models
 from .Provider  import BaseProvider, AsyncProvider
 from .typing    import Any, CreateResult, Union
-import random
+from requests   import get
 
 logging = True
+version = '0.1.4.5'
+
+def check_pypi_version():
+    try:
+        response = get(f"https://pypi.org/pypi/g4f/json").json()
+        latest_version = response["info"]["version"]
+        
+        if version != latest_version:
+            print(f' ')
+    
+    except Exception as e:
+        print(f'Failed to check g4f pypi version: {e}')
+
+check_pypi_version()
 
 def get_model_and_provider(model: Union[models.Model, str], provider: type[BaseProvider], stream: bool):
     if isinstance(model, str):
@@ -61,12 +75,7 @@ class ChatCompletion:
         provider : Union[type[BaseProvider], None] = None,
         **kwargs
     ) -> str:
-        
         model, provider = get_model_and_provider(model, provider, False)
-
-        provider_type = provider if isinstance(provider, type) else type(provider)
-        if not issubclass(provider_type, AsyncProvider):
-            raise Exception(f"Provider: {provider.__name__} doesn't support create_async")
 
         return await provider.create_async(model.name, messages, **kwargs)
 

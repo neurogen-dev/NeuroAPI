@@ -6,10 +6,10 @@ import string
 import socket
 
 import requests
+from typing       import Any
 
-from flask import Flask, request, jsonify, Response, stream_with_context
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
-from threading import Thread
 import logging
 from .embedding_processing import embedding_processing
 
@@ -68,35 +68,48 @@ def chat_completions():
             },
         }
 
-    def stream():
-        nonlocal response
-        for token in response:
-            completion_timestamp = int(time.time())
-            completion_id = ''.join(random.choices(
-                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
-
+    def streaming():
+        for chunk in response:
             completion_data = {
                 'id': f'chatcmpl-{completion_id}',
                 'object': 'chat.completion.chunk',
                 'created': completion_timestamp,
+                'model': model,
                 'choices': [
                     {
-                        'delta': {
-                            'content': token
-                        },
                         'index': 0,
-                        'finish_reason': None
+                        'delta': {
+                            'content': chunk,
+                        },
+                        'finish_reason': None,
                     }
-                ]
+                ],
             }
-            #print(token)
-            #print(completion_data)
-            #print('data: %s\n\n' % json.dumps(completion_data, separators=(',' ':')))
-            yield 'data: %s\n\n' % json.dumps(completion_data, separators=(',' ':'))
-            time.sleep(0.02)
-    print('===Start Streaming===')
-    return app.response_class(stream(), mimetype='text/event-stream')
 
+            content = json.dumps(completion_data, separators=(',', ':'))
+            yield f'data: {content}\n\n'
+            time.sleep(0.05)
+
+        end_completion_data: dict[str, Any] = {
+            'id': f'chatcmpl-{completion_id}',
+            'object': 'chat.completion.chunk',
+            'created': completion_timestamp,
+            'model': model,
+            'choices': [
+                {
+                    'index': 0,
+                    'delta': {},
+                    'finish_reason': 'stop',
+                }
+            ],
+        }
+        content = json.dumps(end_completion_data, separators=(',', ':'))
+        yield f'data: {content}\n\n'
+
+    return app.response_class(streaming(), mimetype='text/event-stream')
+
+@app.route("/engines/text-embedding-ada-002/embeddings", methods=["POST"])
+@app.route("/engines/text-similarity-davinci-001/embeddings", methods=["POST"])
 @app.route('/v1/embeddings', methods=['POST'])
 @app.route('/embeddings', methods=['POST'])
 def create_embedding():
