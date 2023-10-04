@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/license-GPL_3.0-darkgreen.svg" alt="license"/>
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
-  <img src="https://img.shields.io/badge/latest-v1.5.0-darkgreen.svg" alt="latest"/>
+  <img src="https://img.shields.io/badge/latest-v1.5.1-darkgreen.svg" alt="latest"/>
 </a></p>
 
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
