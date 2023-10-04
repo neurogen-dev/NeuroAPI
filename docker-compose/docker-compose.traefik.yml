@@ -39,6 +39,8 @@ services:
       dockerfile: Dockerfile
     container_name: neurogengpt
     hostname: neurogengpt
+    environment:
+      - SUBF=/sub
     env_file:
       - .env
     networks:
