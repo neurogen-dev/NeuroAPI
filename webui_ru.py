@@ -89,7 +89,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
                         label="API Ключ",
-                        visible=False
+                        visible=True
                     )
                     if multi_api_key:
                         usageTxt = gr.Markdown("Многопользовательский режим включен, не нужно вводить ключ, можно сразу начать диалог", elem_id="usage_display", elem_classes="insert_block", visible=False)

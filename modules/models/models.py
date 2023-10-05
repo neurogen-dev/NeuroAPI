@@ -128,19 +128,19 @@ class OpenAIClient(BaseLLMModel):
             purgpt_api_key = self.configuration_json["purgpt_api_key"]
             headers = {
                 'Content-Type': 'application/json',
-                'Authorization': f'Bearer {purgpt_api_key}',
+                'Authorization': f'Bearer {purgpt_api_key or self.api_key}',
             }
         elif "chatty" in self.model_name:
             chatty_api_key = self.configuration_json["chatty_api_key"]
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {chatty_api_key}",
+                "Authorization": f"Bearer {chatty_api_key or self.api_key}",
             }
         elif "daku" in self.model_name:
             daku_api_key = self.configuration_json["daku_api_key"]
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {daku_api_key}",
+                "Authorization": f"Bearer {daku_api_key or self.api_key}",
             }
         else:
             headers = {
