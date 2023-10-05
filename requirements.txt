@@ -62,3 +62,4 @@ httpx
 spacy
 zhconv
 flask_http_middleware
+nest_asyncio
