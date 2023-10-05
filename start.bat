@@ -32,6 +32,7 @@ python -m venv venv
 call venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 python -m pip install -U setuptools
+python -m pip install -U gradio==3.36.1
 python -m pip install -r requirements.txt
 
 REM checking for spacy language models and download if not exists
