@@ -4,6 +4,7 @@ import json
 import random
 import string
 import socket
+import nest_asyncio
 
 import requests
 from typing       import Any
@@ -16,6 +17,8 @@ from .embedding_processing import embedding_processing
 import g4f
 from g4f import ChatCompletion, Provider, BaseProvider, models
 from g4f.models import ModelUtils
+
+nest_asyncio.apply()
 
 app = Flask(__name__)
 CORS(app)

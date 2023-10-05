@@ -1,7 +1,10 @@
 import socket
+import nest_asyncio
 from backend.backend import app
 from gevent import pywsgi
 from multiprocessing import Process
+
+nest_asyncio.apply()
 
 site_config = {
         'host': '0.0.0.0',
