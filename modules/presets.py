@@ -47,46 +47,11 @@ CHUANHU_TITLE = "NeuroGPT " + VERSION
 
 CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://boosty.to/neurogen) </br>"
 
-def get_online_gpt4_models():
-    url = "https://status.neuroapi.host/v1/status"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # this line will raise an HTTPError if the request returned an unsuccessful status code
-        data = response.json()
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except requests.exceptions.RequestException as err:
-        print(f"Error occurred: {err}")
-    except json.JSONDecodeError:
-        print(f"Could not decode the response into json")
-        data = {}
-        
-    online_models = set()  
-
-    for model in data:
-        #if model.startswith('gpt-4') or model.startswith('gpt-3.5'):
-        online_models.add("neuro-" + model)  
-
-    return list(online_models)
-
-def get_online_gpt3_models():
-    with open('status.json', 'r') as f:
-        response = json.load(f)
-        
-    online_models = set()  
-    for provider in response["data"]:
-        model_info = provider["model"]
-        model_status = provider["status"]
-        
-        if model_status == "Active" and model_info.startswith('gpt-3.5'):
-            online_models.add(model_info)  
-
-    return list(online_models)  
-
-
-
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
+    'gpt-4',
+    'gpt-4-0613'
     'chat-agent'
 ]
 
@@ -121,17 +86,15 @@ DAKU_MODELS = [
     'daku-llama-2-70b'
 ]
 
-NEURO_MODELS = get_online_gpt4_models()
-
 if os.environ.get('HIDE_OTHER_PROVIDERS', 'false') == 'true':
-    MODELS = ONLINE_MODELS + NEURO_MODELS
+    MODELS = ONLINE_MODELS 
 else:
-    MODELS = ONLINE_MODELS + NEURO_MODELS + DAKU_MODELS
+    MODELS = ONLINE_MODELS  + DAKU_MODELS
 
 if os.environ.get('SHOW_ALL_PROVIDERS', 'false') == 'true':
-    MODELS = ONLINE_MODELS + NEURO_MODELS + NAGA_MODELS + DAKU_MODELS+ PURGPT_MODELS
+    MODELS = ONLINE_MODELS + NAGA_MODELS + DAKU_MODELS+ PURGPT_MODELS
 else:
-    MODELS = ONLINE_MODELS + NEURO_MODELS + DAKU_MODELS
+    MODELS = ONLINE_MODELS + DAKU_MODELS
 
 DEFAULT_MODEL = 0
 
