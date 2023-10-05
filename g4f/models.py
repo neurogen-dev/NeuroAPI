@@ -32,18 +32,12 @@ gpt_35_turbo = Model(
 gpt_35_turbo_0613 = Model(
     name          = 'gpt-3.5-turbo-0613',
     base_provider = 'openai',
-    best_provider = RetryProvider([
-         NeuroGPT, Ylokh
-    ])
-)
+    best_provider = NeuroGPT)
 
 gpt_4 = Model(
     name          = 'gpt-4',
     base_provider = 'openai',
-    best_provider = RetryProvider([
-            Aivvm, Myshell, NeuroGPT
-    ])
-)
+    best_provider = NeuroGPT)
 
 # Bard
 palm = Model(
@@ -141,8 +135,7 @@ gpt_35_turbo_16k_0613 = Model(
 gpt_35_turbo_0613 = Model(
     name          = 'gpt-3.5-turbo-0613',
     base_provider = 'openai',
-    best_provider = [
-        Aivvm, ChatgptLogin])
+    best_provider = NeuroGPT)
 
 gpt_4_0613 = Model(
     name          = 'gpt-4-0613',
