@@ -29,6 +29,14 @@ gpt_35_turbo = Model(
     ])
 )
 
+gpt_35_turbo_0613 = Model(
+    name          = 'gpt-3.5-turbo-0613',
+    base_provider = 'openai',
+    best_provider = RetryProvider([
+         NeuroGPT, Ylokh
+    ])
+)
+
 gpt_4 = Model(
     name          = 'gpt-4',
     base_provider = 'openai',
@@ -181,6 +189,7 @@ class ModelUtils:
     convert: dict[str, Model] = {
         # gpt-3.5 / gpt-4
         'gpt-3.5-turbo'          : gpt_35_turbo,
+        'gpt-3.5-turbo-0613'          : gpt_35_turbo_0613,
         'gpt-3.5-turbo-16k'      : gpt_35_turbo_16k,
         'gpt-4'                  : gpt_4,
         'gpt-4-0613'             : gpt_4_0613,
