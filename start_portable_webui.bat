@@ -63,7 +63,7 @@ python -c "import json; import collections; config = json.load(open('config.json
 python -m pip install --upgrade pip
 python -m pip install -U setuptools 
 python -m pip install whl\quickjs-1.19.2-cp311-cp311-win_amd64.whl
-python -m pip install whl\fastwsgi-0.0.9-cp311-cp311-win_amd64.whl
+pip install -U gradio==3.36.1
 python -m pip install -r requirements.txt
 IF NOT EXIST venv\Lib\site-packages\torch (
     echo Torch not found, downloading...
