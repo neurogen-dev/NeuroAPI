@@ -4,7 +4,7 @@ import gradio as gr
 import requests
 import json
 
-VERSION = "v 1.5.1"
+VERSION = "v 1.5.2"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
