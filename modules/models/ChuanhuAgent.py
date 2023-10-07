@@ -23,6 +23,9 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.input import print_text
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 
+from langchain.llms.base import LLM
+from langchain_g4f import G4FLLM
+
 from pydantic import BaseModel, Field
 
 import requests
@@ -40,6 +43,8 @@ import os
 import gradio as gr
 import logging
 
+from g4f import Provider, models
+
 class GoogleSearchInput(BaseModel):
     keywords: str = Field(description="keywords to search")
 
@@ -56,8 +61,8 @@ class ChuanhuAgent_Client(BaseLLMModel):
         super().__init__(model_name=model_name, user=user_name)
         self.text_splitter = TokenTextSplitter(chunk_size=500, chunk_overlap=30)
         self.api_key = 'sk-lVyIGFN0e4Il91M6VmIVEZbxEpuKoMMfUfRzT8IiKn8XzpMH'
-        self.llm = ChatOpenAI(openai_api_key='sk-lVyIGFN0e4Il91M6VmIVEZbxEpuKoMMfUfRzT8IiKn8XzpMH', temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_base=os.environ.get("OPENAI_API_BASE", "https://neuroapi.host"))
-        self.cheap_llm = ChatOpenAI(openai_api_key='sk-lVyIGFN0e4Il91M6VmIVEZbxEpuKoMMfUfRzT8IiKn8XzpMH', temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_base=os.environ.get("OPENAI_API_BASE", "https://neuroapi.host"))
+        self.llm: LLM = G4FLLM(temperature=0, model=models.gpt_35_turbo, provider=Provider.NeuroGPT)
+        self.cheap_llm: LLM = G4FLLM(temperature=0, model=models.gpt_35_turbo, provider=Provider.NeuroGPT)
         PROMPT = PromptTemplate(template=SUMMARIZE_PROMPT, input_variables=["text"])
         self.summarize_chain = load_summarize_chain(self.cheap_llm, chain_type="map_reduce", return_intermediate_steps=True, map_prompt=PROMPT, combine_prompt=PROMPT)
         self.index_summary = None
@@ -96,7 +101,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
     def google_search_simple(self, query):
         results = []
         with DDGS() as ddgs:
-            ddgs_gen = ddgs.text("notes from a dead house", backend="lite")
+            ddgs_gen = ddgs.text("notes from a dead house", backend="api")
             for r in islice(ddgs_gen, 10):
                 results.append({
                     "title": r["title"],
@@ -122,7 +127,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
                 from langchain.chat_models import ChatOpenAI
                 prompt_template = "Write a concise summary of the following:\n\n{text}\n\nCONCISE SUMMARY IN " + language + ":"
                 PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-                llm = ChatOpenAI()
+                llm = G4FLLM(temperature=0, model=models.gpt_35_turbo, provider=Provider.NeuroGPT)
                 chain = load_summarize_chain(llm, chain_type="map_reduce", return_intermediate_steps=True, map_prompt=PROMPT, combine_prompt=PROMPT)
                 summary = chain({"input_documents": list(index.docstore.__dict__["_dict"].values())}, return_only_outputs=True)["output_text"]
                 logging.info(f"Summary: {summary}")
