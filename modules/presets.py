@@ -91,7 +91,7 @@ DAKU_MODELS = [
 if os.environ.get('HIDE_OTHER_PROVIDERS', 'false') == 'true':
     MODELS = ONLINE_MODELS 
 else:
-    MODELS = ONLINE_MODELS  + DAKU_MODELS
+    MODELS = ONLINE_MODELS
 
 if os.environ.get('SHOW_ALL_PROVIDERS', 'false') == 'true':
     MODELS = ONLINE_MODELS + NAGA_MODELS + DAKU_MODELS+ PURGPT_MODELS

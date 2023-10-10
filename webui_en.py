@@ -1,13 +1,7 @@
-import os
 import logging
-import sys
 
 import gradio as gr
 import asyncio
-
-import aiohttp
-from aiohttp import web
-import aiofiles
 
 from modules import config
 from modules.config import *
@@ -15,19 +9,13 @@ from modules.utils import *
 from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
-import fastwsgi
+
+import socket
 from backend.backend import app
-
-import threading
-import time
-import json
-import random
-import time
-
+from gevent import pywsgi
 from multiprocessing import Process
 
 import logging
-import uvicorn
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -530,8 +518,21 @@ def run_gradio_server():
       inbrowser=not dockerflag,
     )
 
+site_config = {
+        'host': '0.0.0.0',
+        'port': 1337,
+        'debug': False
+         }
+
 def run_api_server():
-    fastwsgi.run(wsgi_app=app, host='0.0.0.0', port=1337)
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+
+    print(f"Running on http://127.0.0.1:{site_config['port']}")
+    print(f"Running on http://{ip_address}:{site_config['port']}")
+
+    server = pywsgi.WSGIServer(('0.0.0.0', site_config['port']), app)
+    server.serve_forever()
 
 if __name__ == "__main__":
     api_process = Process(target=run_api_server) 

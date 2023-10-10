@@ -88,7 +88,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         placeholder="Ваш API-ключ...",
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
-                        label="API Ключ",
+                        label="API Ключ (при использовании альтернативного API провайдера)",
                         visible=True
                     )
                     if multi_api_key:
@@ -518,6 +518,7 @@ def run_gradio_server():
       favicon_path="./assets/favicon.ico",
       inbrowser=not dockerflag,
     )
+    
 site_config = {
         'host': '0.0.0.0',
         'port': 1337,
