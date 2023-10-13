@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from ..typing import Messages
 from curl_cffi.requests import AsyncSession
 from .base_provider import AsyncProvider, format_prompt
 
@@ -13,10 +14,16 @@ class ChatgptDuo(AsyncProvider):
     async def create_async(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
+        proxy: str = None,
+        timeout: int = 120,
         **kwargs
     ) -> str:
-        async with AsyncSession(impersonate="chrome107") as session:
+        async with AsyncSession(
+            impersonate="chrome107",
+            proxies={"https": proxy},
+            timeout=timeout
+        ) as session:
             prompt = format_prompt(messages),
             data = {
                 "prompt": prompt,

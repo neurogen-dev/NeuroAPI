@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from aiohttp import ClientSession
 
-from ..typing import AsyncGenerator
+from ..typing import AsyncResult, Messages
 from .base_provider import AsyncGeneratorProvider
 
 
@@ -15,16 +15,15 @@ class Acytoo(AsyncGeneratorProvider):
     async def create_async_generator(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         proxy: str = None,
         **kwargs
-    ) -> AsyncGenerator:
-
+    ) -> AsyncResult:
         async with ClientSession(
             headers=_create_header()
         ) as session:
             async with session.post(
-                cls.url + '/api/completions',
+                f'{cls.url}/api/completions',
                 proxy=proxy,
                 json=_create_payload(messages, **kwargs)
             ) as response:
@@ -41,7 +40,7 @@ def _create_header():
     }
 
 
-def _create_payload(messages: list[dict[str, str]], temperature: float = 0.5, **kwargs):
+def _create_payload(messages: Messages, temperature: float = 0.5, **kwargs):
     return {
         'key'         : '',
         'model'       : 'gpt-3.5-turbo',

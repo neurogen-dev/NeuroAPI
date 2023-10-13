@@ -10,13 +10,23 @@ class Model:
     base_provider: str
     best_provider: Union[type[BaseProvider], RetryProvider] = None
 
-# Config for HuggingChat, OpenAssistant
-# Works for Liaobots, H2o, OpenaiChat, Yqcloud, You
 default = Model(
     name          = "",
     base_provider = "",
     best_provider = RetryProvider([
-        ChatgptLogin, ChatgptAi, AItianhuSpace, AItianhu, Aichat, GetGpt, GptGo, NeuroGPT, Ylokh
+        ChatgptDuo,   # Include search results
+        Aibn, Aichat, ChatgptAi, ChatgptLogin, FreeGpt, GptGo, Myshell, Ylokh,
+    ])
+)
+
+# GPT-3.5 too, but all providers supports long responses and a custom timeouts
+gpt_35_long = Model(
+    name          = 'gpt-3.5-turbo',
+    base_provider = 'openai',
+    best_provider = RetryProvider([
+        AiAsk, Aibn, Aichat, ChatgptAi, ChatgptDemo, ChatgptDuo,
+        FreeGpt, GptGo, Liaobots, Myshell, Vitalentum, Ylokh, You, Yqcloud,
+        GPTalk, GptGod
     ])
 )
 
@@ -25,10 +35,9 @@ gpt_35_turbo = Model(
     name          = 'gpt-3.5-turbo',
     base_provider = 'openai',
     best_provider = RetryProvider([
-        ChatgptLogin, ChatgptAi, AItianhuSpace, AItianhu, Aichat, GetGpt, GptGo, NeuroGPT, Ylokh
+        ChatgptLogin, ChatgptAi, GptGo, AItianhu, Aichat, AItianhuSpace, Myshell, Aibn, FreeGpt, Ylokh
     ])
 )
-
 gpt_35_turbo_0613 = Model(
     name          = 'gpt-3.5-turbo-0613',
     base_provider = 'openai',
