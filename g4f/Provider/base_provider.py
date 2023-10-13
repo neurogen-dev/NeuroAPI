@@ -5,22 +5,22 @@ from concurrent.futures import ThreadPoolExecutor
 from abc import ABC, abstractmethod
 
 from .helper import get_event_loop, get_cookies, format_prompt
-from ..typing import AsyncGenerator, CreateResult
+from ..typing import CreateResult, AsyncResult, Messages
 
 
 class BaseProvider(ABC):
     url: str
-    working               = False
-    needs_auth            = False
-    supports_stream       = False
-    supports_gpt_35_turbo = False
-    supports_gpt_4        = False
+    working: bool = False
+    needs_auth: bool = False
+    supports_stream: bool = False
+    supports_gpt_35_turbo: bool = False
+    supports_gpt_4: bool = False
 
     @staticmethod
     @abstractmethod
     def create_completion(
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         stream: bool,
         **kwargs
     ) -> CreateResult:
@@ -30,7 +30,7 @@ class BaseProvider(ABC):
     async def create_async(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         *,
         loop: AbstractEventLoop = None,
         executor: ThreadPoolExecutor = None,
@@ -38,13 +38,15 @@ class BaseProvider(ABC):
     ) -> str:
         if not loop:
             loop = get_event_loop()
-        def create_func():
+
+        def create_func() -> str:
             return "".join(cls.create_completion(
                 model,
                 messages,
                 False,
                 **kwargs
             ))
+
         return await loop.run_in_executor(
             executor,
             create_func
@@ -52,7 +54,7 @@ class BaseProvider(ABC):
 
     @classmethod
     @property
-    def params(cls):
+    def params(cls) -> str:
         params = [
             ("model", "str"),
             ("messages", "list[dict[str, str]]"),
@@ -67,7 +69,7 @@ class AsyncProvider(BaseProvider):
     def create_completion(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         stream: bool = False,
         **kwargs
     ) -> CreateResult:
@@ -79,7 +81,7 @@ class AsyncProvider(BaseProvider):
     @abstractmethod
     async def create_async(
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         **kwargs
     ) -> str:
         raise NotImplementedError()
@@ -92,7 +94,7 @@ class AsyncGeneratorProvider(AsyncProvider):
     def create_completion(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         stream: bool = True,
         **kwargs
     ) -> CreateResult:
@@ -103,7 +105,7 @@ class AsyncGeneratorProvider(AsyncProvider):
             stream=stream,
             **kwargs
         )
-        gen  = generator.__aiter__()
+        gen = generator.__aiter__()
         while True:
             try:
                 yield loop.run_until_complete(gen.__anext__())
@@ -114,7 +116,7 @@ class AsyncGeneratorProvider(AsyncProvider):
     async def create_async(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         **kwargs
     ) -> str:
         return "".join([
@@ -125,12 +127,12 @@ class AsyncGeneratorProvider(AsyncProvider):
                 **kwargs
             )
         ])
-        
+
     @staticmethod
     @abstractmethod
     def create_async_generator(
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         **kwargs
-    ) -> AsyncGenerator:
+    ) -> AsyncResult:
         raise NotImplementedError()

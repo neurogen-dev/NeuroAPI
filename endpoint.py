@@ -1,8 +1,7 @@
 import socket
 import nest_asyncio
 from backend.backend import app
-from gevent import pywsgi
-from multiprocessing import Process
+from waitress import serve
 
 nest_asyncio.apply()
 
@@ -19,5 +18,4 @@ if __name__ == "__main__":
     print(f"Running on http://127.0.0.1:{site_config['port']}")
     print(f"Running on http://{ip_address}:{site_config['port']}")
 
-    server = pywsgi.WSGIServer(('0.0.0.0', site_config['port']), app)
-    server.serve_forever()
+    serve(app, host='0.0.0.0', port=site_config['port'],threads=4)

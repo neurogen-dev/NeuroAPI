@@ -6,7 +6,7 @@ from aiohttp import ClientSession
 from aiohttp.http import WSMsgType
 import asyncio
 
-from ..typing import AsyncGenerator
+from ..typing import AsyncResult, Messages
 from .base_provider import AsyncGeneratorProvider, format_prompt
 
 
@@ -27,9 +27,11 @@ class Myshell(AsyncGeneratorProvider):
     async def create_async_generator(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
+        proxy: str = None,
+        timeout: int = 90,
         **kwargs
-    ) -> AsyncGenerator:
+    ) -> AsyncResult:
         if not model:
             bot_id = models["samantha"]
         elif model in models:
@@ -46,7 +48,8 @@ class Myshell(AsyncGeneratorProvider):
             async with session.ws_connect(
                 "wss://api.myshell.ai/ws/?EIO=4&transport=websocket",
                 autoping=False,
-                timeout=90
+                timeout=timeout,
+                proxy=proxy
             ) as wss:
                 # Send and receive hello message
                 await wss.receive_str()

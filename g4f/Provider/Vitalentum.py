@@ -4,7 +4,7 @@ import json
 from aiohttp import ClientSession
 
 from .base_provider import AsyncGeneratorProvider
-from ..typing import AsyncGenerator
+from ..typing import AsyncResult, Messages
 
 class Vitalentum(AsyncGeneratorProvider):
     url                   = "https://app.vitalentum.io"
@@ -16,10 +16,10 @@ class Vitalentum(AsyncGeneratorProvider):
     async def create_async_generator(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         proxy: str = None,
         **kwargs
-    ) -> AsyncGenerator:
+    ) -> AsyncResult:
         headers = {
             "User-Agent"         : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
             "Accept"             : "text/event-stream",
@@ -42,7 +42,7 @@ class Vitalentum(AsyncGeneratorProvider):
         async with ClientSession(
             headers=headers
         ) as session:
-            async with session.post(cls.url + "/api/converse-edge", json=data, proxy=proxy) as response:
+            async with session.post(f"{cls.url}/api/converse-edge", json=data, proxy=proxy) as response:
                 response.raise_for_status()
                 async for line in response.content:
                     line = line.decode()
@@ -62,6 +62,7 @@ class Vitalentum(AsyncGeneratorProvider):
             ("model", "str"),
             ("messages", "list[dict[str, str]]"),
             ("stream", "bool"),
+            ("proxy", "str"),
             ("temperature", "float"),
         ]
         param = ", ".join([": ".join(p) for p in params])

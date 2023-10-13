@@ -5,23 +5,23 @@ import uuid
 
 from aiohttp import ClientSession
 
-from ..typing import AsyncGenerator
+from ..typing import AsyncResult, Messages
 from .base_provider import AsyncGeneratorProvider, format_prompt
 
 
 class H2o(AsyncGeneratorProvider):
     url = "https://gpt-gm.h2o.ai"
-    working = True
+    working = False
     model = "h2oai/h2ogpt-gm-oasst1-en-2048-falcon-40b-v1"
 
     @classmethod
     async def create_async_generator(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         proxy: str = None,
         **kwargs
-    ) -> AsyncGenerator:
+    ) -> AsyncResult:
         model = model if model else cls.model
         headers = {"Referer": cls.url + "/"}
 
