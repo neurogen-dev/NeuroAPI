@@ -12,18 +12,6 @@ REM Восстанавливаем оригинальный файл config.json
 copy /Y config_temp.json config.json
 del config_temp.json
 
-REM Checking for Python version
-python -c "import sys; print('.'.join(map(str, sys.version_info[:3])))" > version.txt
-set /p version=<version.txt
-IF "%version%" LSS "3.10.0" (
-    echo Your version of Python %version% is not supported. Please install Python 3.10
-    pause
-)
-IF "%version%" GEQ "3.10.14" (
-    echo Your version of Python %version% is not supported. Please install Python 3.10
-    pause
-)
-
 python -m venv venv
 call venv\Scripts\activate.bat
 python -m pip install --upgrade pip

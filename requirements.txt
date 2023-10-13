@@ -56,7 +56,6 @@ pytz
 huggingface_hub
 watchdog~=3.0.0
 js2py
-quickjs
 httpx
 spacy
 zhconv

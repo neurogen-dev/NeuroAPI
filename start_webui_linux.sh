@@ -17,16 +17,6 @@ git pull
 # Восстанавливаем оригинальный файл config.json
 mv config_temp.json config.json
 
-# Checking for Python version
-version=$(python3 --version | cut -d " " -f 2)
-if [[ "$version" < "3.10.1" ]]; then
-    echo "Your version of Python ${version} is not supported. Please install Python 3.10.X"
-    exit 1
-elif [[ "$version" > "3.11.14" ]]; then
-    echo "Your version of Python ${version} is not supported. Please install Python 3.10.X"
-    exit 1
-fi
-
 python3 -m venv venv
 . venv/bin/activate
 python3 -m pip install --upgrade pip
