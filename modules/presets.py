@@ -49,11 +49,12 @@ CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https
 
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
-    'gpt-3.5-turbo-0613',
-    'gpt-3.5-turbo-16k',
-    'gpt-3.5-turbo-16k-0613',
-    'gpt-4',
-    'gpt-4-0613',
+    'neuro-gpt-3.5-turbo',
+    'neuro-gpt-3.5-turbo-0613',
+    'neuro-gpt-3.5-turbo-16k',
+    'neuro-gpt-3.5-turbo-16k-0613',
+    'neuro-gpt-4',
+    'neuro-gpt-4-0613',
     'chat-agent',
 ]
 
@@ -78,25 +79,15 @@ PURGPT_MODELS = [
     'purgpt-text-davinci-003'
 ]
 
-DAKU_MODELS = [
-    'daku-gpt-3.5-turbo-16k',
-    'daku-gpt-4',
-    'daku-gpt-4-32k',
-    'daku-claude-2',
-    'daku-claude-2-100k',
-    'daku-codellama-34b',
-    'daku-llama-2-70b'
-]
-
 if os.environ.get('HIDE_OTHER_PROVIDERS', 'false') == 'true':
     MODELS = ONLINE_MODELS 
 else:
     MODELS = ONLINE_MODELS
 
 if os.environ.get('SHOW_ALL_PROVIDERS', 'false') == 'true':
-    MODELS = ONLINE_MODELS + NAGA_MODELS + DAKU_MODELS+ PURGPT_MODELS
+    MODELS = ONLINE_MODELS + NAGA_MODELS + PURGPT_MODELS
 else:
-    MODELS = ONLINE_MODELS + DAKU_MODELS
+    MODELS = ONLINE_MODELS
 
 DEFAULT_MODEL = 0
 

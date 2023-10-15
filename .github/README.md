@@ -1,6 +1,6 @@
 <div align="center">
 <a href="https://t.me/neurogen_news">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+Neurogen+AI" alt="NeuroGPT" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+NeurogenAI" alt="NeuroGPT" />
 </a>
 
 <strong> <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md">Русский</a> | English </strong>
@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/license-GPL_3.0-darkgreen.svg" alt="license"/>
 </a>
 <a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
-  <img src="https://img.shields.io/badge/latest-v1.5.2-darkgreen.svg" alt="latest"/>
+  <img src="https://img.shields.io/badge/latest-v1.5.3-darkgreen.svg" alt="latest"/>
 </a></p>
 
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
