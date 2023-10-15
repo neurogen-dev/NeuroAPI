@@ -117,7 +117,7 @@ class OpenAIClient(BaseLLMModel):
             url = "https://chattyapi.tech/v1/chat/completions"
         elif "daku" in self.model_name:
             url = "https://api.daku.tech/v1/chat/completions"
-        elif self.model_name.startswith('gpt-4') or self.model_name.startswith('gpt-4-'):
+        elif self.model_name.startswith('neuro-gpt-4') or self.model_name.startswith('neuro-gpt-4-'):
             url = "https://neuroapi.host/gpt4/v1/chat/completions"
         else:
             url = "http://127.0.0.1:1337/v1/chat/completions"
