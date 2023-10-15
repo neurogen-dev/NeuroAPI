@@ -1,6 +1,6 @@
 <div align="center">
 <a href="https://t.me/neurogen_news">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+Neurogen+AI" alt="NeuroGPT" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+NeurogenAI" alt="NeuroGPT" />
 </a>
 
 <strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT#readme">English </a></strong>
