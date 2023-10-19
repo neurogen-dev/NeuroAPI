@@ -23,21 +23,21 @@ python3 -m pip install --upgrade pip
 python3 -m pip install -U setuptools
 python3 -m pip install -r requirements.txt
 
-# Checking for spacy language models and download if not exists
-if [ ! -d "venv/lib/python3.10/site-packages/en_core_web_sm" ]; then
-    echo "English language model not found, downloading..."
-    python3 -m spacy download en_core_web_sm
-fi
+# Проверка и загрузка языковых моделей SpaCy
 
-if [ ! -d "venv/lib/python3.10/site-packages/zh_core_web_sm" ]; then
-    echo "Chinese language model not found, downloading..."
-    python3 -m spacy download zh_core_web_sm
-fi
+# Функция для проверки и загрузки модели
+check_and_download_model() {
+    local model_name="$1"
+    if ! python -c "import spacy; spacy.load('$model_name')" &>/dev/null; then
+        echo "$model_name language model not found, downloading..."
+        python3 -m spacy download "$model_name"
+    fi
+}
 
-if [ ! -d "venv/lib/python3.10/site-packages/ru_core_news_sm" ]; then
-    echo "Russian language model not found, downloading..."
-    python3 -m spacy download ru_core_news_sm
-fi
+# Проверка и загрузка моделей для разных языков
+check_and_download_model "en_core_web_sm"
+check_and_download_model "zh_core_web_sm"
+check_and_download_model "ru_core_news_sm"
 
 echo "Completed."
 echo "Running NeuroGPT..."
