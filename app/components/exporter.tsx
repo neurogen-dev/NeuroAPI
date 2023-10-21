@@ -520,7 +520,7 @@ export function ImagePreviewer(props: {
           </div>
 
           <div>
-            <div className={styles["main-title"]}>ChatGPT Next Web</div>
+            <div className={styles["main-title"]}>NeuroGPT Chat</div>
             <div className={styles["sub-title"]}>
               Build your own AI assistant.
             </div>
