@@ -7,26 +7,8 @@ const cn = {
   WIP: "该功能仍在开发中……",
   Error: {
     Unauthorized: isApp
-      ? "未经授权的访问，请在 [auth](/#/auth) 页面输入您的 OpenAI API Key。"
+      ? "检测到无效 API Key，请前往[设置](/#/settings)页检查 API Key 是否配置正确。"
       : "访问密码不正确或为空，请前往[登录](/#/auth)页输入正确的访问密码，或者在[设置](/#/settings)页填入你自己的 OpenAI API Key。",
-    Content_Policy: {
-      Title:
-        "您的请求因违反内容政策而被标记。\n阅读详情：https://platform.openai.com/docs/guides/moderation/overview",
-      Reason: {
-        Title: "理由",
-        sexual: "性别",
-        hate: "仇恨",
-        harassment: "骚扰",
-        "self-harm": "自残",
-        "sexual/minors": "性别/未成年人",
-        "hate/threatening": "仇恨/威胁",
-        "violence/graphic": "暴力/图形",
-        "self-harm/intent": "自残/意图",
-        "self-harm/instructions": "自残/指导",
-        "harassment/threatening": "骚扰/威胁",
-        violence: "暴力",
-      },
-    },
   },
   Auth: {
     Title: "需要密码",
@@ -66,17 +48,8 @@ const cn = {
       newm: "从面具新建聊天",
       next: "下一个聊天",
       prev: "上一个聊天",
-      restart: "重新启动客户端",
       clear: "清除上下文",
       del: "删除聊天",
-      save: "保存当前会话聊天",
-      load: "加载会话聊天",
-      copymemoryai: "复制一个记忆会话的提示AI",
-      updatemasks: "更新一个用于掩码的记忆会话提示",
-      UI: {
-        MasksSuccess: "成功更新了掩码会话",
-        MasksFail: "无法更新掩码会话",
-      },
     },
     InputActions: {
       Stop: "停止响应",
@@ -194,9 +167,6 @@ const cn = {
       IsChecking: "正在检查更新...",
       FoundUpdate: (x: string) => `发现新版本：${x}`,
       GoToUpdate: "前往更新",
-      IsUpdating: "正在更新...",
-      UpdateSuccessful: "已成功更新到最新版本",
-      UpdateFailed: "更新失败",
     },
     SendKey: "发送键",
     Theme: "主题",
@@ -233,47 +203,10 @@ const cn = {
           SubTitle: "仅适用于本项目自带的跨域代理",
         },
 
-        AccessControl: {
-          Title: "启用覆盖访问控制",
-          SubTitle: "仅适用于覆盖访问控制设置，例如访问代码",
-        },
-        LockClient: {
-          Title: "启用不同步当前数据",
-          SubTitle: "仅同步其他来源的数据，而不同步当前数据",
-        },
-
         WebDav: {
-          Endpoint: {
-            Name: "WebDav 终端点",
-            SubTitle: "配置 WebDav 终端点",
-          },
-          UserName: {
-            Name: "用户名",
-            SubTitle: "配置用户名",
-          },
-          Password: {
-            Name: "密码",
-            SubTitle: "配置密码",
-          },
-          FileName: {
-            Name: "文件名",
-            SubTitle: "文件名，例如：backtrackz.json（必须是 JSON 文件）",
-          },
-        },
-        GithubGist: {
-          GistID: {
-            Name: "Github Gist ID",
-            SubTitle:
-              "您的 Gist ID 位置，例如：gist.github.com/H0llyW00dzZ/<gistid>/等。复制 <gistid> 并粘贴到这里。",
-          },
-          FileName: {
-            Name: "文件名",
-            SubTitle: "文件名，例如：backtrackz.json（必须是 JSON 文件）",
-          },
-          AccessToken: {
-            Name: "访问令牌",
-            SubTitle: "确保您具有同步的权限。在那里启用私有和公开。",
-          },
+          Endpoint: "WebDAV 地址",
+          UserName: "用户名",
+          Password: "密码",
         },
 
         UpStash: {
@@ -334,14 +267,11 @@ const cn = {
     Usage: {
       Title: "余额查询",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "未知";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "未知";
-        const usedFormatted = new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(used);
-        return `本月使用金额：${usedFormatted}，硬限制金额：${hardLimitusd}，批准使用限额：${hardLimit}`;
+        return `本月已使用 $${used}，订阅总额 $${total}`;
       },
       IsChecking: "正在检查…",
       Check: "重新检查",
-      NoAccess: `在以"sess-"为前缀的API密钥中输入会话密钥以检查余额。`,
+      NoAccess: "输入 API Key 或访问密码查看余额",
     },
     AccessCode: {
       Title: "访问密码",
@@ -377,10 +307,6 @@ const cn = {
       Title: "频率惩罚度 (frequency_penalty)",
       SubTitle: "值越大，越有可能降低重复字词",
     },
-    TextModeration: {
-      Title: "文本审核",
-      SubTitle: "通过文本审核来检查内容是否符合 OpenAI 的使用政策。",
-    },
   },
   Store: {
     DefaultTopic: "新的聊天",
@@ -408,26 +334,12 @@ const cn = {
     Add: "新增一条对话",
     Clear: "上下文已清除",
     Revert: "恢复上下文",
-    ModelsDalle: (x: any) => `您是一个基于请求开始的AI图像解释助手，请求从以下开始：\n "${x}"\n\n
-    - 您的回答应该是有信息性和逻辑性的。\n
-    - 保持回答客观。\n
-    - 您不需要提及我无法直接显示图像，因为您是基于文本的AI模型。\n
-    - 您不需要道歉，因为您是一个基于文本的AI模型。\n
-    - 回复并结束对话。\n
-    - 遵守规则。`,
   },
   Plugin: {
     Name: "插件",
   },
   FineTuned: {
     Sysmessage: "你是一个助手",
-  },
-  Changelog: {
-    Name: "Change Log",
-  },
-  PrivacyPage: {
-    Name: "隐私",
-    Confirm: "同意",
   },
   Mask: {
     Name: "面具",

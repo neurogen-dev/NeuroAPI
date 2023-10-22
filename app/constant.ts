@@ -1,5 +1,5 @@
-export const OWNER = "Yidadaa";
-export const REPO = "ChatGPT-Next-Web";
+export const OWNER = "Em1tSan";
+export const REPO = "NeuroGPT-Web-Client";
 export const REPO_URL = `https://github.com/${OWNER}/${REPO}`;
 export const ISSUE_URL = `https://github.com/${OWNER}/${REPO}/issues`;
 export const UPDATE_URL = `${REPO_URL}#keep-updated`;
@@ -8,14 +8,12 @@ export const FETCH_COMMIT_URL = `https://api.github.com/repos/${OWNER}/${REPO}/c
 export const FETCH_TAG_URL = `https://api.github.com/repos/${OWNER}/${REPO}/tags?per_page=1`;
 export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 
-export const DEFAULT_CORS_HOST = "https://chatgpt.btz.sh";
-export const DEFAULT_API_HOST = `${DEFAULT_CORS_HOST}/api/proxy/`;
+export const DEFAULT_CORS_HOST = "https://neuroapi.host";
+export const DEFAULT_API_HOST = `${DEFAULT_CORS_HOST}`;
 
 export enum Path {
   Home = "/",
   Chat = "/chat",
-  PrivacyPage = "/privacy",
-  ChangeLog = "/changelog",
   Settings = "/settings",
   NewChat = "/new-chat",
   Masks = "/masks",
@@ -29,7 +27,7 @@ export enum ApiPath {
 export enum SlotID {
   AppBody = "app-body",
 }
-// This will automatically generate JSON files without the need to include the ".json" extension.
+
 export enum FileName {
   Masks = "masks.json",
   Prompts = "prompts.json",
@@ -57,23 +55,12 @@ export const UNFINISHED_INPUT = (id: string) => "unfinished-input-" + id;
 
 export const STORAGE_KEY = "chatgpt-next-web";
 
-export const REQUEST_TIMEOUT_MS = 60000;
+export const REQUEST_TIMEOUT_MS = 120000;
 
 export const EXPORT_MESSAGE_CLASS_NAME = "export-markdown";
 
 export const OpenaiPath = {
   ChatPath: "v1/chat/completions",
-  // text moderation
-  ModerationPath: "v1/moderations",
-  TextModerationModels: {
-    latest: "text-moderation-latest",
-    stable: "text-moderation-stable",
-  },
-  // image creation (dalle models)
-  ImageCreationPath: "v1/images/generations",
-  // todo
-  ImageEditPath: "v1/images/edits",
-  ImageVariationPath: "v1/images/variations",
   UsagePath: "dashboard/billing/usage",
   SubsPath: "dashboard/billing/subscription",
   ListModelPath: "v1/models",
@@ -131,14 +118,6 @@ export const DEFAULT_MODELS = [
   },
   {
     name: "gpt-3.5-turbo-16k-0613",
-    available: true,
-  },
-  {
-    name: "DALL-E-2",
-    available: true,
-  },
-  {
-    name: "DALL-E-2-BETA-INSTRUCT-0613",
     available: true,
   },
 ] as const;

@@ -132,14 +132,11 @@ const tr: PartialLocaleType = {
     Usage: {
       Title: "Hesap Bakiyesi",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "bilinmiyor";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "bilinmiyor";
-        const usedFormatted = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'USD' }).format(used);
-        return `Bu ay kullanılan: ${usedFormatted}, Sert sınır: ${hardLimitusd}, Onaylanan kullanım limiti: ${hardLimit}`;
+        return `Bu ay kullanılan $${used}, abonelik $${total}`;
       },
       IsChecking: "Kontrol ediliyor...",
       Check: "Tekrar Kontrol Et",
-      NoAccess: `Bakiyeyi kontrol etmek için, API Anahtarında "sess-" önekiyle başlayan Oturum Anahtarını girin.`,
+      NoAccess: "Bakiyeyi kontrol etmek için API anahtarını girin",
     },
     AccessCode: {
       Title: "Erişim Kodu",
@@ -196,10 +193,6 @@ const tr: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Sen bir asistansın",
-  },
-  PrivacyPage: {
-    Name: "Gizlilik",
-    Confirm: "Kabul Et",
   },
   Mask: {
     Name: "Mask",

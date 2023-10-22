@@ -1,56 +1,14 @@
-import {
-  ModalConfigValidator,
-  ModelConfig,
-  useAccessStore,
-  useAppConfig,
-} from "../store";
+import { ModalConfigValidator, ModelConfig, useAppConfig } from "../store";
 
 import Locale from "../locales";
 import { InputRange } from "./input-range";
 import { ListItem, Select } from "./ui-lib";
-import { getHeaders } from "@/app/client/api";
-import { useEffect, useState } from "react";
 
-interface ModelItem {
-  name: string;
-  available: boolean;
-}
-interface ModelConfigResponse {
-  model_list: ModelItem[];
-}
-async function loadModelList(): Promise<ModelItem[]> {
-  return new Promise((resolve, reject) => {
-    fetch("/api/model-config", {
-      method: "get",
-      body: null,
-      headers: {
-        ...getHeaders(),
-      },
-    })
-      .then((res) => res.json())
-      .then((res: ModelConfigResponse) => {
-        console.log("fetched config", res);
-        if (res.model_list && res.model_list.length > 0) {
-          resolve(res.model_list);
-        }
-      })
-      .catch(reject);
-  });
-}
 export function ModelConfigList(props: {
   modelConfig: ModelConfig;
   updateConfig: (updater: (config: ModelConfig) => void) => void;
 }) {
   const config = useAppConfig();
-  const [modelList, setModelList] = useState<ModelItem[]>(config.allModels());
-  useEffect(() => {
-    (async () => {
-      let model_list = await loadModelList();
-      if (model_list && model_list.length > 0) {
-        setModelList(model_list);
-      }
-    })();
-  }, []);
 
   return (
     <>
@@ -66,7 +24,7 @@ export function ModelConfigList(props: {
             );
           }}
         >
-          {modelList.map((v, i) => (
+          {config.allModels().map((v, i) => (
             <option value={v.name} key={i} disabled={!v.available}>
               {v.name}
             </option>

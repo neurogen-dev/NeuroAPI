@@ -58,8 +58,6 @@ export const DEFAULT_CONFIG = {
     enableInjectSystemPrompts: true,
     template: DEFAULT_INPUT_TEMPLATE,
   },
-
-  textmoderation: true, // text moderation default is enabled
 };
 
 export type ChatConfig = typeof DEFAULT_CONFIG;
@@ -140,7 +138,7 @@ export const useAppConfig = createPersistStore(
   }),
   {
     name: StoreKey.Config,
-    version: 3.9,
+    version: 3.8,
     migrate(persistedState, version) {
       const state = persistedState as ChatConfig;
 
@@ -169,10 +167,6 @@ export const useAppConfig = createPersistStore(
 
       if (version < 3.8) {
         state.lastUpdate = Date.now();
-      }
-
-      if (version < 3.9) {
-        state.textmoderation = true;
       }
 
       return state as any;

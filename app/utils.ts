@@ -1,4 +1,3 @@
-import { getClientConfig } from "./config/client";
 import { useEffect, useState } from "react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
@@ -7,11 +6,9 @@ export function trimTopic(topic: string) {
   return topic.replace(/[，。！？”“"、,.!?]*$/, "");
 }
 
-const isApp = !!getClientConfig()?.isApp;
-
 export async function copyToClipboard(text: string) {
   try {
-    if (isApp && window.__TAURI__) {
+    if (window.__TAURI__) {
       window.__TAURI__.writeText(text);
     } else {
       await navigator.clipboard.writeText(text);
@@ -33,58 +30,52 @@ export async function copyToClipboard(text: string) {
     document.body.removeChild(textArea);
   }
 }
-//To ensure the expected functionality, the default file format must be JSON.
-export async function downloadAs(text: object, filename: string) {
-  const json = JSON.stringify(text);
-  const blob = new Blob([json], { type: "application/json" });
-  const arrayBuffer = await blob.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
 
-  try {
-    if (window.__TAURI__) {
-      /**
-       * Fixed client app [Tauri]
-       * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
-      **/
-      const fileName = filename.replace(/:/g, '');
-      const fileExtension = fileName.split('.').pop();
-      const result = await window.__TAURI__.dialog.save({
-        defaultPath: `${fileName}`,
-        filters: [
-          {
-            name: `${fileExtension} files`,
-            extensions: [`${fileExtension}`],
-          },
-          {
-            name: "All Files",
-            extensions: ["*"],
-          },
-        ],
-      });
+export async function downloadAs(text: string, filename: string) {
+  if (window.__TAURI__) {
+    const result = await window.__TAURI__.dialog.save({
+      defaultPath: `${filename}`,
+      filters: [
+        {
+          name: `${filename.split('.').pop()} files`,
+          extensions: [`${filename.split('.').pop()}`],
+        },
+        {
+          name: "All Files",
+          extensions: ["*"],
+        },
+      ],
+    });
 
-      if (result !== null) {
+    if (result !== null) {
+      try {
         await window.__TAURI__.fs.writeBinaryFile(
           result,
-          Uint8Array.from(uint8Array)
+          new Uint8Array([...text].map((c) => c.charCodeAt(0)))
         );
         showToast(Locale.Download.Success);
-      } else {
+      } catch (error) {
         showToast(Locale.Download.Failed);
       }
     } else {
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `${filename}`;
-      anchor.click();
-      URL.revokeObjectURL(url);
-      showToast(Locale.Download.Success);
+      showToast(Locale.Download.Failed);
     }
-  } catch (error) {
-    showToast(Locale.Download.Failed);
-  }
-}
+  } else {
+    const element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    );
+  element.setAttribute("download", filename);
 
+  element.style.display = "none";
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+}
 export function readFromFile() {
   return new Promise<string>((res, rej) => {
     const fileInput = document.createElement("input");
@@ -107,10 +98,7 @@ export function readFromFile() {
 
 export function isIOS() {
   const userAgent = navigator.userAgent.toLowerCase();
-  return (
-    /iphone|ipad|ipod|macintosh/.test(userAgent) ||
-    (userAgent.includes("mac") && "ontouchend" in document)
-  );
+  return /iphone|ipad|ipod/.test(userAgent);
 }
 
 export function useWindowSize() {

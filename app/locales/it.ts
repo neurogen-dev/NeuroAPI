@@ -133,14 +133,11 @@ const it: PartialLocaleType = {
     Usage: {
       Title: "Bilancio Account",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "sconosciuto";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "sconosciuto";
-        const usedFormatted = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'USD' }).format(used);
-        return `Utilizzato questo mese: ${usedFormatted}, Limite massimo: ${hardLimitusd}, Limite di utilizzo approvato: ${hardLimit}`;
+        return `Attualmente usato in questo mese $${used}, soglia massima $${total}`;
       },
       IsChecking: "Controllando...",
       Check: "Controlla ancora",
-      NoAccess: `Inserisci la chiave di sessione nella chiave API che inizia con il prefisso "sess-" per verificare il saldo.`,
+      NoAccess: "Inserire la chiave API per controllare il saldo",
     },
     AccessCode: {
       Title: "Codice d'accesso",
@@ -196,10 +193,6 @@ const it: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Sei un assistente che",
-  },
-  PrivacyPage: {
-    Name: "Privacy",
-    Confirm: "Accetto",
   },
   Mask: {
     Name: "Mask",

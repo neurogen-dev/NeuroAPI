@@ -27,8 +27,6 @@ import PinIcon from "../icons/pin.svg";
 import EditIcon from "../icons/rename.svg";
 import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
-import DownloadIcon from "../icons/download.svg";
-import UploadIcon from "../icons/upload.svg";
 
 import LightIcon from "../icons/light.svg";
 import DarkIcon from "../icons/dark.svg";
@@ -36,7 +34,6 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
-import { escapeRegExp } from "lodash";
 
 import {
   ChatMessage,
@@ -56,8 +53,6 @@ import {
   selectOrCopy,
   autoGrowTextArea,
   useMobileScreen,
-  downloadAs,
-  readFromFile,
 } from "../utils";
 
 import dynamic from "next/dynamic";
@@ -105,50 +100,12 @@ export function SessionConfigModel(props: { onClose: () => void }) {
   const maskStore = useMaskStore();
   const navigate = useNavigate();
 
-  const [exporting, setExporting] = useState(false);
-
-  const handleExport = async () => {
-    if (exporting) return;
-    setExporting(true);
-    await downloadAs(session, `${session.topic}.json`);
-    setExporting(false);
-  };
-
-  const importchat = async () => {
-    await readFromFile().then((content) => {
-      try {
-        const importedData = JSON.parse(content);
-        chatStore.updateCurrentSession((session) => {
-          Object.assign(session, importedData);
-        });
-      } catch (e) {
-        console.error("[Import] Failed to import JSON file:", e);
-        showToast(Locale.Settings.Sync.ImportFailed);
-      }
-    });
-  };
-
   return (
     <div className="modal-mask">
       <Modal
         title={Locale.Context.Edit}
         onClose={() => props.onClose()}
         actions={[
-          <IconButton
-            key="export"
-            icon={<DownloadIcon />}
-            bordered
-            text={Locale.UI.Export}
-            onClick={handleExport}
-            disabled={exporting}
-          />,
-          <IconButton
-            key="import"
-            icon={<UploadIcon />}
-            bordered
-            text={Locale.UI.Import}
-            onClick={importchat}
-          />,
           <IconButton
             key="reset"
             icon={<ResetIcon />}
@@ -694,76 +651,18 @@ function _Chat() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(measure, [userInput]);
 
-  const loadchat = () => {
-    readFromFile().then((content) => {
-      try {
-        const importedData = JSON.parse(content);
-        chatStore.updateCurrentSession((session) => {
-          Object.assign(session, importedData);
-          // Set any other properties you want to update in the session
-        });
-      } catch (e) {
-        console.error("[Import] Failed to import JSON file:", e);
-        showToast(Locale.Settings.Sync.ImportFailed);
-      }
-    });
-  };
-  
   // chat commands shortcuts
   const chatCommands = useChatCommand({
     new: () => chatStore.newSession(),
     newm: () => navigate(Path.NewChat),
     prev: () => chatStore.nextSession(-1),
     next: () => chatStore.nextSession(1),
-    restart: () => window.__TAURI__?.process.relaunch(),
     clear: () =>
       chatStore.updateCurrentSession(
         (session) => (session.clearContextIndex = session.messages.length),
       ),
     del: () => chatStore.deleteSession(chatStore.currentSessionIndex),
-    save: () =>
-      downloadAs((session), `${session.topic}.json`),
-    load: loadchat,
-    copymemoryai: () => {
-      const memoryPrompt = chatStore.currentSession().memoryPrompt;
-      if (memoryPrompt.trim() !== "") {
-        copyToClipboard(memoryPrompt);
-        showToast(Locale.Copy.Success);
-      } else {
-        showToast(Locale.Copy.Failed);
-      }
-    },
-    updatemasks: () => {
-      chatStore.updateCurrentSession((session) => {
-        const memoryPrompt = session.memoryPrompt;
-        const currentDate = new Date().toLocaleString(); // Get the current date and time as a string
-        const existingContext = session.mask.context;
-        let currentContext = existingContext[0]; // Get the current context message
-    
-        if (!currentContext || currentContext.role !== "system") {
-          // If the current context message doesn't exist or doesn't have the role "system"
-          currentContext = {
-            role: "system",
-            content: memoryPrompt,
-            date: currentDate,
-            id: "", // Generate or set the ID for the new message
-            // Add any other properties you want to set for the context messages
-          };
-          existingContext.unshift(currentContext); // Add the new message at the beginning of the context array
-          showToast(Locale.Chat.Commands.UI.MasksSuccess);
-        } else {
-          // If the current context message already exists and has the role "system"
-          currentContext.content = memoryPrompt; // Update the content
-          currentContext.date = currentDate; // Update the date
-          // You can update other properties of the current context message here
-        }
-    
-        // Set any other properties you want to update in the session
-        session.mask.context = existingContext;
-        showToast(Locale.Chat.Commands.UI.MasksSuccess);
-      });
-    },
-  });  
+  });
 
   // only search prompts when user input is short
   const SEARCH_TEXT_LIMIT = 30;
@@ -787,12 +686,7 @@ function _Chat() {
 
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "") return;
-
-    // reduce a zod cve CVE-2023-4316
-    const escapedInput = escapeRegExp(userInput);
-
-    const matchCommand = chatCommands.match(escapedInput);
-
+    const matchCommand = chatCommands.match(userInput);
     if (matchCommand.matched) {
       setUserInput("");
       setPromptHints([]);
@@ -1260,8 +1154,6 @@ function _Chat() {
                       </div>
                       {isUser ? (
                         <Avatar avatar={config.avatar} />
-                      ) : isContext ? (
-                        <Avatar avatar="1f4ab" /> // Add this line for system messages
                       ) : (
                         <>
                           {["system"].includes(message.role) ? (

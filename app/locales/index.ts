@@ -89,9 +89,9 @@ function setItem(key: string, value: string) {
   } catch {}
 }
 
-function getLanguages() {
+function getLanguage() {
   try {
-    return navigator.languages;
+    return navigator.language.toLowerCase();
   } catch {
     return DEFAULT_LANG;
   }
@@ -104,20 +104,11 @@ export function getLang(): Lang {
     return savedLang as Lang;
   }
 
-  const preferredLangs = getLanguages();
-  if (typeof preferredLangs === "string") return preferredLangs; // no language list, return the only lang
+  const lang = getLanguage();
 
-  // loop for searching best language option based on user accepted language
-  let bestMatch: Lang | null = null;
-  for (let i = 0; i < preferredLangs.length; i++) {
-    for (const option of AllLangs) {
-      if (preferredLangs[i].toLowerCase().includes(option)) {
-        bestMatch = option;
-        break;
-      }
-    }
-    if (bestMatch) {
-      return bestMatch;
+  for (const option of AllLangs) {
+    if (lang.includes(option)) {
+      return option;
     }
   }
 

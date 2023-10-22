@@ -10,8 +10,7 @@ export default async function App() {
   return (
     <>
       <Home />
-      {serverConfig?.isVercel}
-      {serverConfig?.isVercelWebAnalytics && <Analytics />}
+      {serverConfig?.isVercel && <Analytics />}
     </>
   );
 }

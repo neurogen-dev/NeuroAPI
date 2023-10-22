@@ -133,14 +133,11 @@ const ru: PartialLocaleType = {
     Usage: {
       Title: "Баланс аккаунта",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "неизвестно";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "неизвестно";
-        const usedFormatted = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(used);
-        return `Использовано в этом месяце: ${usedFormatted}, Жесткий лимит: ${hardLimitusd}, Утвержденный лимит использования: ${hardLimit}`;
+        return `Использовано в этом месяце $${used}, подписка $${total}`;
       },
       IsChecking: "Проверка...",
       Check: "Проверить",
-      NoAccess: `Введите ключ сеанса в ключ API, начинающийся с префикса "sess-", чтобы проверить баланс.`,
+      NoAccess: "Введите API ключ, чтобы проверить баланс",
     },
     AccessCode: {
       Title: "Код доступа",
@@ -196,10 +193,6 @@ const ru: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Вы - ассистент, который",
-  },
-  PrivacyPage: {
-    Name: "Конфиденциальность",
-    Confirm: "Принять",
   },
   Mask: {
     Name: "Маска",

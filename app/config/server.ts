@@ -6,10 +6,8 @@ declare global {
       OPENAI_API_KEY?: string;
       CODE?: string;
       BASE_URL?: string;
-      MODEL_LIST?: string;
       PROXY_URL?: string;
       VERCEL?: string;
-      VERCEL_ANALYTICS?: string; // vercel web analytics
       HIDE_USER_API_KEY?: string; // disable user's api key input
       DISABLE_GPT4?: string; // allow user to use gpt-4 or not
       BUILD_MODE?: "standalone" | "export";
@@ -47,7 +45,6 @@ export const getServerSideConfig = () => {
     baseUrl: process.env.BASE_URL,
     proxyUrl: process.env.PROXY_URL,
     isVercel: !!process.env.VERCEL,
-    isVercelWebAnalytics: !!process.env.VERCEL_ANALYTICS,
     hideUserApiKey: !!process.env.HIDE_USER_API_KEY,
     disableGPT4: !!process.env.DISABLE_GPT4,
     hideBalanceQuery: !!process.env.HIDE_BALANCE_QUERY,

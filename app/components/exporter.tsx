@@ -31,7 +31,7 @@ import { toBlob, toJpeg, toPng } from "html-to-image";
 import { DEFAULT_MASK_AVATAR } from "../store/mask";
 import { api } from "../client/api";
 import { prettyObject } from "../utils/format";
-import { EXPORT_MESSAGE_CLASS_NAME, REPO_URL } from "../constant";
+import { EXPORT_MESSAGE_CLASS_NAME } from "../constant";
 import { getClientConfig } from "../config/client";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
@@ -172,7 +172,6 @@ export function MessageExporter() {
       );
     }
   }
-
   return (
     <>
       <Steps
@@ -447,13 +446,8 @@ export function ImagePreviewer(props: {
   
       if (isMobile || (isApp && window.__TAURI__)) {
         if (isApp && window.__TAURI__) {
-          /**
-           * Fixed Tauri client app
-           * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
-           */
-          const fileName = props.topic.replace(/:/g, '');
           const result = await window.__TAURI__.dialog.save({
-            defaultPath: `${fileName}.png`,
+            defaultPath: `${props.topic}.png`,
             filters: [
               {
                 name: "PNG Files",
@@ -488,7 +482,7 @@ export function ImagePreviewer(props: {
     } catch (error) {
       showToast(Locale.Download.Failed);
     }
-  };  
+  };
 
   const refreshPreview = () => {
     const dom = previewRef.current;
@@ -520,9 +514,9 @@ export function ImagePreviewer(props: {
           </div>
 
           <div>
-            <div className={styles["main-title"]}>NeuroGPT Chat</div>
+            <div className={styles["main-title"]}>ChatGPT Next Web</div>
             <div className={styles["sub-title"]}>
-              Build your own AI assistant.
+              github.com/Yidadaa/ChatGPT-Next-Web
             </div>
             <div className={styles["icons"]}>
               <ExportAvatar avatar={config.avatar} />
@@ -532,19 +526,16 @@ export function ImagePreviewer(props: {
           </div>
           <div>
             <div className={styles["chat-info-item"]}>
-            {"🔗"} {REPO_URL}
+              {Locale.Exporter.Model}: {mask.modelConfig.model}
             </div>
             <div className={styles["chat-info-item"]}>
-            {"🤖"} {Locale.Exporter.Model}: {mask.modelConfig.model}
+              {Locale.Exporter.Messages}: {props.messages.length}
             </div>
             <div className={styles["chat-info-item"]}>
-            {"💭"} {Locale.Exporter.Messages}: {props.messages.length}
+              {Locale.Exporter.Topic}: {session.topic}
             </div>
             <div className={styles["chat-info-item"]}>
-            {"💫"} {Locale.Exporter.Topic}: {session.topic}
-            </div>
-            <div className={styles["chat-info-item"]}>
-            {"🗓️"} {Locale.Exporter.Time}:{" "}
+              {Locale.Exporter.Time}:{" "}
               {new Date(
                 props.messages.at(-1)?.date ?? Date.now(),
               ).toLocaleString()}
@@ -552,22 +543,15 @@ export function ImagePreviewer(props: {
           </div>
         </div>
         {props.messages.map((m, i) => {
-          const isUserMessage = m.role === "user";
-          const isSystemMessage = m.role === "system";
-          const avatar =
-            isUserMessage && config.avatar
-              ? config.avatar
-              : isSystemMessage
-              ? "1f4ab"
-              : mask.avatar;
-          const messageClass = `${styles["message"]} ${
-            styles["message-" + m.role]
-          }`;
-
           return (
-            <div className={messageClass} key={i}>
+            <div
+              className={styles["message"] + " " + styles["message-" + m.role]}
+              key={i}
+            >
               <div className={styles["avatar"]}>
-                <ExportAvatar avatar={avatar} />
+                <ExportAvatar
+                  avatar={m.role === "user" ? config.avatar : mask.avatar}
+                />
               </div>
 
               <div className={styles["body"]}>
@@ -602,53 +586,9 @@ export function MarkdownPreviewer(props: {
   const copy = () => {
     copyToClipboard(mdText);
   };
-  const download = async () => {
-    const isApp = getClientConfig()?.isApp;
-    const blob = new Blob([mdText], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${props.topic}.md`;
-  
-    if (isApp && window.__TAURI__) {
-      try {
-        const fileName = props.topic.replace(/:/g, '');
-        const result = await window.__TAURI__.dialog.save({
-        /**
-         * Fixed Tauri client app
-         * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
-         */
-          defaultPath: `${fileName}.md`,
-          filters: [
-            {
-              name: "MD Files",
-              extensions: ["md"],
-            },
-            {
-              name: "All Files",
-              extensions: ["*"],
-            },
-          ],
-        });
-  
-        if (result !== null) {
-          const response = await fetch(url);
-          const buffer = await response.arrayBuffer();
-          const uint8Array = new Uint8Array(buffer);
-          await window.__TAURI__.fs.writeBinaryFile(result, uint8Array);
-          showToast(Locale.Download.Success);
-        } else {
-          showToast(Locale.Download.Failed);
-        }
-      } catch (error) {
-        showToast(Locale.Download.Failed);
-      }
-    } else {
-      link.click();
-    }
-  
-    URL.revokeObjectURL(url);
-  };  
+  const download = () => {
+    downloadAs(mdText, `${props.topic}.md`);
+  };
   return (
     <>
       <PreviewActions
@@ -672,6 +612,10 @@ export function JsonPreviewer(props: {
 }) {
   const msgs = {
     messages: [
+      {
+        role: "system",
+        content: `${Locale.FineTuned.Sysmessage} ${props.topic}`,
+      },
       ...props.messages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -685,7 +629,7 @@ export function JsonPreviewer(props: {
     copyToClipboard(minifiedJson);
   };
   const download = () => {
-    downloadAs((msgs), `${props.topic}.json`);
+    downloadAs(JSON.stringify(msgs), `${props.topic}.json`);
   };
 
   return (
@@ -697,7 +641,7 @@ export function JsonPreviewer(props: {
         messages={props.messages}
       />
       <div className="markdown-body" onClick={copy}>
-      <Markdown content={mdText} />
+        <Markdown content={mdText} />
       </div>
     </>
   );

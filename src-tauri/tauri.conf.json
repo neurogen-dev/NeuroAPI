@@ -50,9 +50,6 @@
       },
       "notification": {
         "all": true
-      },
-      "process": {
-        "relaunch": true
       }
     },
     "bundle": {
@@ -92,11 +89,11 @@
       "csp": null
     },
     "updater": {
-      "active": true,
+      "active": false,
       "endpoints": [
         "https://github.com/Yidadaa/ChatGPT-Next-Web/releases/latest/download/latest.json"
       ],
-      "dialog": true,
+      "dialog": false,
       "windows": {
         "installMode": "passive"
       },

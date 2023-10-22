@@ -9,26 +9,8 @@ const en: LocaleType = {
   WIP: "Coming Soon...",
   Error: {
     Unauthorized: isApp
-      ? "Unauthorized access, please enter your OpenAI API Key in [auth](/#/auth) page."
+      ? "Invalid API Key, please check it in [Settings](/#/settings) page."
       : "Unauthorized access, please enter access code in [auth](/#/auth) page, or enter your OpenAI API Key.",
-    Content_Policy: {
-      Title:
-        "Your request got flagged because of a Content Policy Violation.\nRead Here: https://platform.openai.com/docs/guides/moderation/overview",
-      Reason: {
-        Title: "reason",
-        sexual: "sexual",
-        hate: "hate",
-        harassment: "harassment",
-        "self-harm": "self-harm",
-        "sexual/minors": "sexual/minors",
-        "hate/threatening": "hate/threatening",
-        "violence/graphic": "violence/graphic",
-        "self-harm/intent": "self-harm/intent",
-        "self-harm/instructions": "self-harm/instructions",
-        "harassment/threatening": "harassment/threatening",
-        violence: "violence",
-      },
-    },
   },
   Auth: {
     Title: "Need Access Code",
@@ -68,17 +50,8 @@ const en: LocaleType = {
       newm: "Start a new chat with mask",
       next: "Next Chat",
       prev: "Previous Chat",
-      restart: "Restart a client",
       clear: "Clear Context",
       del: "Delete Chat",
-      save: "Save a current session chat",
-      load: "Load a session chat",
-      copymemoryai: "Copy a session of memory prompt ai",
-      updatemasks: "Update a session of memory prompt for a mask",
-      UI: {
-        MasksSuccess: "Successfully updated session of masks",
-        MasksFail: "Failed to update session of masks",
-      },      
     },
     InputActions: {
       Stop: "Stop",
@@ -196,9 +169,6 @@ const en: LocaleType = {
       IsChecking: "Checking update...",
       FoundUpdate: (x: string) => `Found new version: ${x}`,
       GoToUpdate: "Update",
-      IsUpdating: "Updating...",
-      UpdateSuccessful: "A Version has been updated to the latest version",
-      UpdateFailed: "Update Failed",
     },
     SendKey: "Send Key",
     Theme: "Theme",
@@ -235,50 +205,11 @@ const en: LocaleType = {
           SubTitle:
             "Only applicable to the built-in CORS proxy for this project",
         },
-        AccessControl: {
-          Title: "Enable Overwrite Access Control",
-          SubTitle:
-            "Only applicable to the overwrite access control setting such as an access code",
-        },
-        LockClient: {
-          Title: "Enable Do Not Sync Current Data",
-          SubTitle: "Only sync data from other sources, not the current data",
-        },
+
         WebDav: {
-          Endpoint: {
-            Name: "WebDav Endpoint",
-            SubTitle: "Configure the WebDav Endpoint",
-          },
-          UserName: {
-            Name: "User Name",
-            SubTitle: "Configure the User Name",
-          },
-          Password: {
-            Name: "Password",
-            SubTitle: "Configure the Password",
-          },
-          FileName: {
-            Name: "File Name",
-            SubTitle:
-              "File Name, for example: backtrackz.json (must be a JSON file)",
-          },
-        },
-        GithubGist: {
-          GistID: {
-            Name: "Github Gist ID",
-            SubTitle:
-              "Your Gist ID location, for example: gist.github.com/H0llyW00dzZ/<gistid>/etc. copy then paste the <gistid> here.",
-          },
-          FileName: {
-            Name: "File Name",
-            SubTitle:
-              "File Name, for example: backtrackz.json (must be a JSON file)",
-          },
-          AccessToken: {
-            Name: "Access Token",
-            SubTitle:
-              "Make sure you have permission for syncing. Enable Private & Public there.",
-          },
+          Endpoint: "WebDAV Endpoint",
+          UserName: "User Name",
+          Password: "Password",
         },
 
         UpStash: {
@@ -339,14 +270,11 @@ const en: LocaleType = {
     Usage: {
       Title: "Account Balance",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "unknown";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "unknown";
-        const usedFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(used);
-        return `Used this month ${usedFormatted}, Hard limit ${hardLimitusd}, Approved usage limit ${hardLimit}`;
+        return `Used this month $${used}, subscription $${total}`;
       },
       IsChecking: "Checking...",
       Check: "Check",
-      NoAccess: `Enter Session Key in API Key starting with prefix "sess-" to check balance.`,
+      NoAccess: "Enter API Key to check balance",
     },
     AccessCode: {
       Title: "Access Code",
@@ -384,11 +312,6 @@ const en: LocaleType = {
       SubTitle:
         "A larger value decreasing the likelihood to repeat the same line",
     },
-    TextModeration: {
-      Title: "Text Moderation",
-      SubTitle:
-        "A Text Moderation to check whether content complies with OpenAI's usage policies.",
-    },
   },
   Store: {
     DefaultTopic: "New Conversation",
@@ -417,26 +340,12 @@ const en: LocaleType = {
     Add: "Add a Prompt",
     Clear: "Context Cleared",
     Revert: "Revert",
-    ModelsDalle: (x: any) => `You are an AI Image explanation assistant based on request starting request from:\n "${x}"\n\n
-    - Your responses should be informative and logical.\n
-    - Keep your answers impersonal.\n
-    - You don't have to mention that I'm unable to directly display images since you are AI text-based model.\n
-    - You don't have to mention that I apologize, since you are a text-based AI model.\n
-    - Replying and end the conversation.\n
-    - Keep Follow Rules.`,
   },
   Plugin: {
     Name: "Plugin",
   },
   FineTuned: {
     Sysmessage: "You are an assistant that",
-  },
-  Changelog: {
-    Name: "Change Log",
-  },
-  PrivacyPage: {
-    Name: "Privacy",
-    Confirm: "Agree",
   },
   Mask: {
     Name: "Mask",
@@ -504,7 +413,7 @@ const en: LocaleType = {
     Model: "Model",
     Messages: "Messages",
     Topic: "Topic",
-    Time: "Date & Time",
+    Time: "Time",
   },
 
   URLCommand: {

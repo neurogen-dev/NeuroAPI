@@ -7,7 +7,7 @@ const tw: PartialLocaleType = {
     Unauthorized: "目前您的狀態是未授權，請前往[設定頁面](/#/auth)輸入授權碼。",
   },
   ChatItem: {
-    ChatItemCount: (count: number) => `${count} 一則對話`,
+    ChatItemCount: (count: number) => `${count} 則對話`,
   },
   Chat: {
     SubTitle: (count: number) => `您已經與 ChatGPT 進行了 ${count} 則對話`,
@@ -128,14 +128,11 @@ const tw: PartialLocaleType = {
     Usage: {
       Title: "帳戶餘額",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "未知";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "未知";
-        const usedFormatted = new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(used);
-        return `本月使用金额：${usedFormatted}，硬限制金额：${hardLimitusd}，批准使用限额：${hardLimit}`;
+        return `本月已使用 $${used}，訂閱總額 $${total}`;
       },
       IsChecking: "正在檢查…",
       Check: "重新檢查",
-      NoAccess: `輸入以"sess-"為前綴的API金鑰中的會話金鑰以檢查餘額。`,
+      NoAccess: "輸入 API Key 檢視餘額",
     },
     AccessCode: {
       Title: "授權碼",
@@ -184,10 +181,6 @@ const tw: PartialLocaleType = {
   },
   Plugin: { Name: "外掛" },
   FineTuned: { Sysmessage: "你是一個助手" },
-  PrivacyPage: {
-    Name: "隱私",
-    Confirm: "同意",
-  },
   Mask: {
     Name: "面具",
     Page: {
