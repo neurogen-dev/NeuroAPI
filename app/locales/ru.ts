@@ -192,7 +192,7 @@ const ru: PartialLocaleType = {
     Name: "Плагин",
   },
   FineTuned: {
-    Sysmessage: "Вы - ассистент, который",
+    Sysmessage: " ",
   },
   Mask: {
     Name: "Маска",

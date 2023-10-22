@@ -345,7 +345,7 @@ const en: LocaleType = {
     Name: "Plugin",
   },
   FineTuned: {
-    Sysmessage: "You are an assistant that",
+    Sysmessage: " ",
   },
   Mask: {
     Name: "Mask",
