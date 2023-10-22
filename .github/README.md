@@ -4,6 +4,8 @@
 </a>
 
 <strong> <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md">Русский</a> | English </strong>
+
+> ### The project is currently undergoing a transition to another client and reconstruction of the API. Technical work is continuing. We apologize for any inconvenience.
   
 <p> Free API service providing access to GPT-3.5, GPT-4, and other language models. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a web interface. We extend our gratitude to the authors.</p>
 
