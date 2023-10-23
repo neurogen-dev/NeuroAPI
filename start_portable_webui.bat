@@ -59,32 +59,11 @@ del config_temp.json
 
 python -m venv venv
 call venv\Scripts\activate.bat
-python -c "import json; import collections; config = json.load(open('config.json')); keys = list(config.keys()); keys.insert(2, keys.pop(keys.index('daku_api_key'))); config = collections.OrderedDict([(key, config[key]) for key in keys]); json.dump(config, open('config.json', 'w'), indent=4)"
 python -m pip install --upgrade pip
 python -m pip install -U setuptools 
 python -m pip install whl\quickjs-1.19.2-cp311-cp311-win_amd64.whl
 pip install -U gradio==3.36.1
 python -m pip install -r requirements.txt
-IF NOT EXIST venv\Lib\site-packages\torch (
-    echo Torch not found, downloading...
-    python -m pip install -r requirements_advanced.txt
-)
-
-REM checking for spacy language models and download if not exists
-IF NOT EXIST venv\Lib\site-packages\en_core_web_sm (
-    echo English language model not found, downloading...
-    python -m spacy download en_core_web_sm
-)
-
-IF NOT EXIST venv\Lib\site-packages\zh_core_web_sm (
-    echo Chinese language model not found, downloading...
-    python -m spacy download zh_core_web_sm
-)
-
-IF NOT EXIST venv\Lib\site-packages\ru_core_news_sm (
-    echo Russian language model not found, downloading...
-    python -m spacy download ru_core_news_sm
-)
 
 echo Completed.
 echo Running NeuroGPT...
