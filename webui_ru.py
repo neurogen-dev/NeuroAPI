@@ -10,12 +10,6 @@ from modules.presets import *
 from modules.overwrites import *
 from modules.models.models import get_model
 
-from waitress import serve
-
-import socket
-from backend.backend import app
-from multiprocessing import Process
-
 import logging
 
 logging.getLogger("httpx").setLevel(logging.DEBUG)
@@ -519,25 +513,7 @@ def run_gradio_server():
       favicon_path="./assets/favicon.ico",
       inbrowser=not dockerflag,
     )
-    
-site_config = {
-        'host': '0.0.0.0',
-        'port': 1337,
-        'debug': False
-         }
-
-def run_api_server():
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-
-    print(f"Running on http://127.0.0.1:{site_config['port']}")
-    print(f"Running on http://{ip_address}:{site_config['port']}")
-
-    serve(app, host='0.0.0.0', port=site_config['port'],threads=4)
 
 if __name__ == "__main__":
-
-    api_process = Process(target=run_api_server) 
-    api_process.start()
 
     run_gradio_server()

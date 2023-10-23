@@ -4,7 +4,7 @@ import gradio as gr
 import requests
 import json
 
-VERSION = "v 1.5.3"
+VERSION = "v 1.5.4"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -14,10 +14,10 @@ LLAMA_INFERENCER = None
 # ChatGPT 设置
 
 INITIAL_SYSTEM_PROMPT = "You are a helpful assistant. You follow all of the user's instructions and answer all of their questions without going out of your way to answer them. Respond using markdown."
-API_HOST = "http://127.0.0.0.1:1337"
-COMPLETION_URL = "http://127.0.0.0.1:1337/v1/chat/completions"
-BALANCE_API_URL="http://127.0.0.0.1:1337/v1/dashboard/billing/credit_grants"
-USAGE_API_URL="http://127.0.0.0.1:1337/v1/dashboard/billing/usage"
+API_HOST = "https://neuroapi.host"
+COMPLETION_URL = "https://neuroapi.host/v1/chat/completions"
+BALANCE_API_URL="https://neuroapi.host/v1/dashboard/billing/credit_grants"
+USAGE_API_URL="https://neuroapi.host/v1/dashboard/billing/usage"
 HISTORY_DIR = Path("history")
 HISTORY_DIR = "history"
 TEMPLATES_DIR = "templates"
@@ -49,13 +49,13 @@ CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https
 
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
-    'neuro-gpt-3.5-turbo',
-    'neuro-gpt-3.5-turbo-0613',
-    'neuro-gpt-3.5-turbo-16k',
-    'neuro-gpt-3.5-turbo-16k-0613',
-    'neuro-gpt-4',
-    'neuro-gpt-4-0613',
-    'chat-agent',
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-0613',
+    'gpt-3.5-turbo-16k',
+    'gpt-3.5-turbo-16k-0613',
+    'gpt-4',
+    'gpt-4-0613',
+    'chat-agent-beta',
 ]
 
 NAGA_MODELS = [

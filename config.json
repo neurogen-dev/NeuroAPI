@@ -1,8 +1,8 @@
 {
     "openai_api_key": "",
     "purgpt_api_key": "",
-    "chatty_api_key": "",
     "daku_api_key": "",
+    "chatty_api_key": "",
     "usage_limit": 999,
     "language": "ru_RU",
     "users": [],
@@ -27,6 +27,6 @@
         "sk-xxxxxxxxxxxxxxxxxxxxxxxx2",
         "sk-xxxxxxxxxxxxxxxxxxxxxxxx3"
     ],
-     "server_name": "0.0.0.0",
-     "share": false
+    "server_name": "0.0.0.0",
+    "share": false
 }
