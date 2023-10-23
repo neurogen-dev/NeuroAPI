@@ -264,7 +264,7 @@ class BaseLLMModel:
             status = "Полный"
             logging.info("Создание сводки контента...")
             os.environ["OPENAI_API_KEY"] = self.api_key
-            os.environ["OPENAI_API_BASE"] = "http://127.0.0.1:1337"
+            os.environ["OPENAI_API_BASE"] = "https://neuroapi.host"
             from langchain.chains.summarize import load_summarize_chain
             from langchain.prompts import PromptTemplate
             from langchain.chat_models import ChatOpenAI
