@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import json
-import commentjson as cjson
+import json
 import requests
 
 import colorama
@@ -35,7 +35,7 @@ class OpenAIClient(BaseLLMModel):
             user=user_name
         )
         with open("config.json", "r") as f:
-            self.configuration_json = cjson.load(f)
+            self.configuration_json = json.load(f)
         self.api_key = api_key
         self.need_api_key = True
         self._refresh_header()
@@ -327,7 +327,7 @@ def get_model(
 
 if __name__ == "__main__":
     with open("config.json", "r") as f:
-        openai_api_key = cjson.load(f)["openai_api_key"]
+        openai_api_key = json.load(f)["openai_api_key"]
     # set logging level to debug
     logging.basicConfig(level=logging.DEBUG)
     # client = ModelManager(model_name="gpt-3.5-turbo", access_key=openai_api_key)
