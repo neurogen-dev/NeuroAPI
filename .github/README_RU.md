@@ -5,6 +5,8 @@
 
 <strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT#readme">English </a></strong>
 
+> ### В данный момент проект находится в процессе перехода на другой клиент и реконструкции API. Технические работы продолжаются. Извиняемся за предоставленные неудобства.
+
 <p> Бесплатный API-сервис, предоставляющий доступ к GPT-3.5, GPT-4 и другим языковым моделям. Перед использованием, пожалуйста, убедитесь, что ознакомились с нашей <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. В проекте используется модифицированная версия <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, а также <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> в качестве веб-интерфейса. Выражаем благодарность авторам. </p>
 
 <p>
