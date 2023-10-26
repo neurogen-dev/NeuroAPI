@@ -9,7 +9,7 @@
 
 <p>
   
-**NeuroAPI** — core of the project. RE API server compatible with OpenAI API format. We provide free access with limits on the number of requests. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki.
+**NeuroAPI** — core of the project. Reverse API server compatible with OpenAI API format. We provide free access with limits on the number of requests. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki.
 
 Endpoints:
 
