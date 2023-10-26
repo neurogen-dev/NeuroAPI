@@ -5,18 +5,22 @@
 
 <strong> Русский | <a href="https://github.com/Em1tSan/NeuroGPT#readme">English </a></strong>
 
-> ### В данный момент проект находится в процессе перехода на другой клиент и реконструкции API. Технические работы продолжаются. Извиняемся за предоставленные неудобства.
-
-<p> Бесплатный API-сервис, предоставляющий доступ к GPT-3.5, GPT-4 и другим языковым моделям. Перед использованием, пожалуйста, убедитесь, что ознакомились с нашей <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. В проекте используется модифицированная версия <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, а также <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> в качестве веб-интерфейса. Выражаем благодарность авторам. </p>
+> ### Ведутся технические работы. Приносим извинения за причиненные неудобства.
 
 <p>
-<a href="https://github.com/Em1tSan/NeuroGPT/blob/main/LICENSE">
-  <img src="https://img.shields.io/badge/license-GPL_3.0-darkgreen.svg" alt="license"/>
-</a>
-<a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
-  <img src="https://img.shields.io/badge/latest-v1.5.3-darkgreen.svg" alt="latest"/>
-</a></p>
+  
+**NeuroAPI** — ядро проекта. RE API сервер, совместимый с форматом OpenAI API. Мы предоставляем бесплатный доступ с ограничением по количеству запросов. Перед использованием, пожалуйста, ознакомьтесь с <a href="https://github.com/Em1tSan/NeuroGPT/wiki#русский-язык">wiki.
 
+Эндпоинты:
+
+https://neuroapi.host - GPT-3.5 модели
+
+https://neuroapi.host/gpt4 - GPT-4 модели
+
+**NeuroGPT** — настроенный клиент для использования ChatGPT. Также у нас есть [веб-сайт](https://chat.neuroapi.host/), находящийся в стадии разработки (UI может меняться).
+</p>
+
+<br>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
 </a>
@@ -29,6 +33,7 @@
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#portable-version">
   <img src="https://img.shields.io/badge/-Портативная версия-8080ff?logo=portable" alt="portable"/>
 </a>
+<br/>
 
 <br> Новости и обратная связь: <br/>
 
@@ -50,11 +55,9 @@
 ## Возможности
 
 - Веб-поиск
-- [Список моделей](https://status.neuroapi.host/v1/status)
 - Контекст беседы
 - Отсутствие логов
 - История диалога
-- Режим endpoint для работы с API
 - Изменение параметров генерации для GPT-моделей
 - Встроенные джейлбрейки и шаблоны промптов под разные задачи
 
