@@ -5,18 +5,22 @@
 
 <strong> <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md">Русский</a> | English </strong>
 
-> ### The project is currently undergoing a transition to another client and reconstruction of the API. Technical work is continuing. We apologize for any inconvenience.
-  
-<p> Free API service providing access to GPT-3.5, GPT-4, and other language models. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki</a>. The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a web interface. We extend our gratitude to the authors.</p>
+> ### Technical work is underway. We apologize for any inconvenience caused.
 
 <p>
-<a href="https://github.com/Em1tSan/NeuroGPT/blob/main/LICENSE">
-  <img src="https://img.shields.io/badge/license-GPL_3.0-darkgreen.svg" alt="license"/>
-</a>
-<a href="https://github.com/Em1tSan/NeuroGPT/commits/main">
-  <img src="https://img.shields.io/badge/latest-v1.5.4-darkgreen.svg" alt="latest"/>
-</a></p>
+  
+**NeuroAPI** — core of the project. RE API server compatible with OpenAI API format. We provide free access with limits on the number of requests. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki.
 
+Endpoints:
+
+https://neuroapi.host - GPT-3.5 models
+
+https://neuroapi.host/gpt4 - GPT-4 models
+
+**NeuroGPT** — configured client for using ChatGPT. We also have a [website](https://chat.neuroapi.host/) that is currently in development phase (UI may change).
+</p>
+
+<br>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
 </a>
@@ -29,6 +33,7 @@
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#portable-version">
   <img src="https://img.shields.io/badge/-Portable version-8080ff?logo=portable" alt="portable"/>
 </a>
+<br/>
 
 <br> News and feedback: <br/>
 
@@ -50,10 +55,8 @@
 ## Features
 
 - Web search
-- [Model list](https://status.neuroapi.host/v1/status)
 - Dialog context
 - No-logs
-- API endpoint
 - Dialog history
 - Setting generation parameters for GPT models
 - Built-in prompt templates and jailbreaks for various tasks
@@ -61,6 +64,8 @@
 <div align="center">
   <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
 
+## Gratitude
+The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a web interface. We extend our gratitude to the authors.
 ***
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Em1tSan/NeuroGPT&type=Date)](https://star-history.com/#Em1tSan/NeuroGPT&Date)
