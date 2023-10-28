@@ -1,24 +1,28 @@
 <div align="center">
+
 <a href="https://t.me/neurogen_news">
   <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+NeurogenAI" alt="NeuroGPT" />
 </a>
 
 <strong> <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md">Русский</a> | English </strong>
 
-> ### Technical work is underway. We apologize for any inconvenience caused.
+**NeuroGPT** — configured desktop client for using ChatGPT.
 
-<p>
-  
-**NeuroAPI** — core of the project. Reverse API server compatible with OpenAI API format. We provide free access with limits on the number of requests. Before using it, please make sure you check out our <a href="https://github.com/Em1tSan/NeuroGPT/wiki#english-language">wiki.
+**NeuroAPI** — core of the project. Reverse API server compatible with OpenAI API format. Freemium.
 
+<pre>
 Endpoints:
+https://neuroapi.host — GPT-3.5 models
+https://neuroapi.host/gpt4 — GPT-4 models
+  
+Technical work is underway to improve stability
+</pre>
 
-https://neuroapi.host - GPT-3.5 models
+</div>
 
-https://neuroapi.host/gpt4 - GPT-4 models
+<div align="center">
 
-**NeuroGPT** — configured client for using ChatGPT. We also have a [website](https://chat.neuroapi.host/) that is currently in development phase (UI may change).
-</p>
+· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Client](https://chat.neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
 <br>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installing-and-running#windows">
@@ -35,8 +39,6 @@ https://neuroapi.host/gpt4 - GPT-4 models
 </a>
 <br/>
 
-<br> News and feedback: <br/>
-
 <a href="https://t.me/neurogen_news">
   <img src="https://img.shields.io/badge/-Telegram channel-0088CC?logo=telegram" alt="telegram"/>
 </a>
@@ -45,7 +47,6 @@ https://neuroapi.host/gpt4 - GPT-4 models
 </a>
 
 <br> Support the project: <br/>
-
 <a href="https://boosty.to/neurogen">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Boosty_logo.svg/512px-Boosty_logo.svg.png?20230209172145" alt="neurogen_boosty" width="20%">
 </a>
@@ -62,10 +63,10 @@ https://neuroapi.host/gpt4 - GPT-4 models
 - Built-in prompt templates and jailbreaks for various tasks
 
 <div align="center">
-  <img src="https://github.com/NealBelov/screenshots/blob/main/img_03.png?raw=true" width="100%">
+  <img src="https://github.com/NealBelov/screenshots/blob/main/demo001.gif?raw=true" width="100%">
 
 ## Gratitude
-The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a web interface. We extend our gratitude to the authors.
+The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a desktop client. We extend our gratitude to the authors.
 ***
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Em1tSan/NeuroGPT&type=Date)](https://star-history.com/#Em1tSan/NeuroGPT&Date)
