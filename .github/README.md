@@ -19,16 +19,16 @@ Technical work is underway to improve stability
 · [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Site](https://chat.neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
 <br>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installation-of-PC-client#windows">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installation-of-PC-client#linux">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#linux">
   <img src="https://img.shields.io/badge/-Linux-F1502F?logo=linux" alt="linux"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installation-of-PC-client#macos">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#macos">
   <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Installation-of-PC-client#portable-version">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#portable-version">
   <img src="https://img.shields.io/badge/-Portable version-8080ff?logo=portable" alt="portable"/>
 </a>
 <br/>
