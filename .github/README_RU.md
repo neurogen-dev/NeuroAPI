@@ -18,16 +18,16 @@
 · [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#русский-язык) · [Web Site](https://chat.neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
 <br>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-и-запуск#windows">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-ПК-клиента#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-и-запуск#linux">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-ПК-клиента#linux">
   <img src="https://img.shields.io/badge/-Linux-F1502F?logo=linux" alt="linux"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-и-запуск#macos">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-ПК-клиента#macos">
   <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
 </a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-и-запуск#портативная-версия">
+<a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-ПК-клиента#портативная-версия">
   <img src="https://img.shields.io/badge/-Портативная версия-8080ff?logo=portable" alt="portable"/>
 </a>
 <br/>
