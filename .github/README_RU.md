@@ -47,7 +47,7 @@
 </div>
 
 ## О NeuroGPT
-Десктоп клиент настроенный на использование ChatGPT с [нашим API](https://github.com/Em1tSan/NeuroGPT/edit/main/.github/README_RU.md#%D0%BE-neuroapi). Основано на <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
+Десктоп клиент настроенный на использование ChatGPT с [нашим API](https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md#%D0%BE-neuroapi). Основано на <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
 
 - Веб-поиск
 - Контекст диалога
