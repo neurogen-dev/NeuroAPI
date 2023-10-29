@@ -48,7 +48,7 @@ Technical work is underway to improve stability
 </div>
 
 ## About NeuroGPT
-Desktop client configured to use ChatGPT with [our API](https://github.com/Em1tSan/NeuroGPT/edit/main/.github/README.md#about-neuroapi). Based on <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
+Desktop client configured to use ChatGPT with [our API](https://github.com/Em1tSan/NeuroGPT#about-neuroapi). Based on <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
 
 - Web search
 - Dialog context
