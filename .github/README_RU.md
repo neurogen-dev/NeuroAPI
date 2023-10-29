@@ -15,7 +15,7 @@
 
 <div align="center">
 
-· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#русский-язык) · [Web Client](https://chat.neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
+· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#русский-язык) · [Web Site](https://chat.neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
 <br>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/Установка-и-запуск#windows">
@@ -47,7 +47,7 @@
 </div>
 
 ## О NeuroGPT
-Десктоп клиент настроенный на использование ChatGPT с [нашим API](https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md#%D0%BE-neuroapi). Основано на <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
+ПК клиент настроенный на использование ChatGPT с [нашим API](https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md#%D0%BE-neuroapi). Основано на <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
 
 - Веб-поиск
 - Контекст диалога
