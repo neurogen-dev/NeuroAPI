@@ -6,15 +6,9 @@
 
 <strong> <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md">Русский</a> | English </strong>
 
-**NeuroGPT** — configured desktop client for using ChatGPT.
-
-**NeuroAPI** — core of the project. Reverse API server compatible with OpenAI API format. Freemium.
+Your API access to ChatGPT.
 
 <pre>
-Endpoints:
-https://neuroapi.host — GPT-3.5 models
-https://neuroapi.host/gpt4 — GPT-4 models
-  
 Technical work is underway to improve stability
 </pre>
 
@@ -53,7 +47,8 @@ Technical work is underway to improve stability
 
 </div>
 
-## Features
+## About NeuroGPT
+Desktop client configured to use ChatGPT with [our API](https://github.com/Em1tSan/NeuroGPT/edit/main/.github/README.md#about-neuroapi). Based on <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
 
 - Web search
 - Dialog context
@@ -62,13 +57,30 @@ Technical work is underway to improve stability
 - Setting generation parameters for GPT models
 - Built-in prompt templates and jailbreaks for various tasks
 
-<div align="center">
-  <img src="https://github.com/NealBelov/screenshots/blob/main/demo001.gif?raw=true" width="100%">
+<img src="https://github.com/NealBelov/screenshots/blob/main/demo001.gif?raw=true" width="100%">
 
-## Gratitude
-The project utilizes a modified version of <a href="https://github.com/xtekky/gpt4free">gpt4free</a>, as well as <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a> as a desktop client. We extend our gratitude to the authors.
+## About NeuroAPI
+Core of the project. Reverse API server compatible with OpenAI API format. Freemium. Multiple hundreds of providers. Based on a modified version of [gpt4free](https://github.com/xtekky/gpt4free).
+
+### GPT-3.5 models
+
+15 requests per minute, 2000 per day.
+
+**Endpoint:**
+```
+https://neuroapi.host
+```
+### GPT-4 models
+
+3 requests per minute, 200 per day.
+
+**Endpoint:**
+```
+https://neuroapi.host/gpt4
+```
+
 ***
-
+<div align="center">
+  
 [![Star History Chart](https://api.star-history.com/svg?repos=Em1tSan/NeuroGPT&type=Date)](https://star-history.com/#Em1tSan/NeuroGPT&Date)
-
 </div>
