@@ -50,7 +50,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     with gr.Row(equal_height=True):
         with gr.Column(scale=5):
             with gr.Row():
-                chatbot = gr.Chatbot(label="Chuanhu Chat", elem_id="chuanhu_chatbot", latex_delimiters=latex_delimiters_set, height=600)
+                chatbot = gr.Chatbot(label="NeuroGPT Chat", elem_id="chuanhu_chatbot", latex_delimiters=latex_delimiters_set, height=600)
             with gr.Row():
                 with gr.Column(min_width=225, scale=12):
                     user_input = gr.Textbox(
@@ -83,7 +83,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         placeholder="Ваш API-ключ...",
                         value=hide_middle_chars(user_api_key.value),
                         type="password",
-                        label="API Ключ (при использовании альтернативного API провайдера)",
+                        label="API ключ",
                         visible=True
                     )
                     if multi_api_key:
