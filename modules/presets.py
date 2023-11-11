@@ -4,7 +4,7 @@ import gradio as gr
 import requests
 import json
 
-VERSION = "v 1.5.4"
+VERSION = "v 1.6.0"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -45,16 +45,18 @@ INDEX_QUERY_TEMPRATURE = 1.0
 
 CHUANHU_TITLE = "NeuroGPT " + VERSION
 
-CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал проекта](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://boosty.to/neurogen) </br>"
+CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал автора](https://t.me/neurogen_news) <br /> [💰 Поддержать автора](https://boosty.to/neurogen) </br>"
 
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
     'gpt-3.5-turbo',
+    'gpt-3.5-turbo-1106',
     'gpt-3.5-turbo-0613',
     'gpt-3.5-turbo-16k',
     'gpt-3.5-turbo-16k-0613',
     'gpt-4',
     'gpt-4-0613',
+    'gpt-4-1106-preview'
     'chat-agent-beta',
 ]
 
@@ -95,6 +97,7 @@ os.makedirs("history", exist_ok=True)
 
 MODEL_TOKEN_LIMIT = {
     "gpt-3.5-turbo": 4096,
+    "gpt-3.5-turbo-1106": 16384,
     "gpt-3.5-turbo-16k": 16384,
     "gpt-3.5-turbo-0301": 4096,
     "gpt-3.5-turbo-0613": 4096,
@@ -108,6 +111,7 @@ MODEL_TOKEN_LIMIT = {
     "neuro-gpt-4-32k": 32768,
     "neuro-gpt-4-32k-0613": 32768,
     "gpt-4-32k-poe": 32768,
+    "gpt-4-1106-preview": 128000,
     "gpt-3.5-turbo-16k-openai": 16384,
     "gpt-3.5-turbo-16k-poe": 16384,
     "gpt-4": 8192,
