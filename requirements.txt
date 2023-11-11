@@ -57,8 +57,6 @@ huggingface_hub
 watchdog~=3.0.0
 js2py
 httpx
-spacy
-zhconv
 flask_http_middleware
 nest_asyncio
 waitress
