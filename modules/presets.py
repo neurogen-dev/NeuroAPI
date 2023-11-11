@@ -97,6 +97,7 @@ os.makedirs("history", exist_ok=True)
 
 MODEL_TOKEN_LIMIT = {
     "gpt-3.5-turbo": 4096,
+    "gpt-3.5-turbo-1106": 16384,
     "gpt-3.5-turbo-16k": 16384,
     "gpt-3.5-turbo-0301": 4096,
     "gpt-3.5-turbo-0613": 4096,
@@ -110,6 +111,7 @@ MODEL_TOKEN_LIMIT = {
     "neuro-gpt-4-32k": 32768,
     "neuro-gpt-4-32k-0613": 32768,
     "gpt-4-32k-poe": 32768,
+    "gpt-4-1106-preview": 128000,
     "gpt-3.5-turbo-16k-openai": 16384,
     "gpt-3.5-turbo-16k-poe": 16384,
     "gpt-4": 8192,
