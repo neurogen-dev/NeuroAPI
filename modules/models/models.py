@@ -111,14 +111,6 @@ class OpenAIClient(BaseLLMModel):
     def _get_api_url(self):
         if "naga-gpt" in self.model_name or "naga-llama" in self.model_name or "naga-claude" in self.model_name: 
             url = "https://api.naga.ac/v1/chat/completions"
-        elif "naga-text" in self.model_name:
-            url = "https://api.naga.ac/v1/completions"
-        elif "chatty" in self.model_name:
-            url = "https://chattyapi.tech/v1/chat/completions"
-        elif "daku" in self.model_name:
-            url = "https://api.daku.tech/v1/chat/completions"
-        elif self.model_name.startswith('gpt-4') or self.model_name.startswith('gpt-4-'):
-            url = "https://neuroapi.host/gpt4/v1/chat/completions"
         else:
             url = "https://neuroapi.host/v1/chat/completions"
         return url
