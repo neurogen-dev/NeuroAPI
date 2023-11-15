@@ -261,7 +261,7 @@ class OpenAIClient(BaseLLMModel):
             elif "Reverse engineered site does not respond" in error_msg:
                 yield '<span style="color: red;">Провайдер API ответил ошибкой: На данный момент, все сайты-провайдеры недоступны. Попробуйте позже.'
             elif "one_api_error" in error_msg:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Сервер Chatty API недоступен. Попробуйте позднее.'
+                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> API ключ не найден. Убедитесь, что вы ввели его.'
             else:
                 yield '<span style="color: red;">Ошибка:</span> ' + error_msg
 
