@@ -245,17 +245,17 @@ class OpenAIClient(BaseLLMModel):
                         yield chunk["choices"][0]["delta"]["content"]
                     except Exception as e:
                         continue
-        if error_msg: 
-            if "Not authenticated" in error_msg:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Ключ ChimeraAPI не обнаружен. Убедитесь что ввели его.'
-            elif "Invalid API key" in error_msg:
-                yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Неверный ключ ChimeraAPI. Возможно вы ввели его неправильно либо он деактивирован. Вы можете сгенерировать его заново в Discord: https://discord.gg/chimeragpt'
-            elif "Reverse engineered site does not respond" in error_msg:
-                yield '<span style="color: red;">The API provider responded with an error: At the moment, all provider sites are unavailable. Try again later.'
-            elif "one_api_error" in error_msg:
-                yield '<span style="color: red;">The API provider responded with an error:</span> API key not found. Make sure you have entered it. If you don\'t have it, get it at https://neuroapi.host '
-            else:
-                yield '<span style="color: red;">Error:</span> ' + error_msg
+        #if error_msg: 
+        #    if "Not authenticated" in error_msg:
+        #        yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Ключ ChimeraAPI не обнаружен. Убедитесь что ввели его.'
+        #    elif "Invalid API key" in error_msg:
+        #        yield '<span style="color: red;">Провайдер API ответил ошибкой:</span> Неверный ключ ChimeraAPI. Возможно вы ввели его неправильно либо он деактивирован. Вы можете сгенерировать его заново в Discord: https://discord.gg/chimeragpt'
+        #    elif "Reverse engineered site does not respond" in error_msg:
+        #        yield '<span style="color: red;">The API provider responded with an error: At the moment, all provider sites are unavailable. Try again later.'
+        #    elif "one_api_error" in error_msg:
+        #        yield '<span style="color: red;">The API provider responded with an error:</span> API key not found. Make sure you have entered it. If you don\'t have it, get it at https://neuroapi.host '
+        #    else:
+        #        yield '<span style="color: red;">Error:</span> ' + error_msg
 
     def set_key(self, new_access_key):
         ret = super().set_key(new_access_key)
