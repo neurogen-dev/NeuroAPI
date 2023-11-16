@@ -12,7 +12,7 @@ Your API access to ChatGPT.
 
 <div align="center">
 
-· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Site](https://chat.neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
+· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Site](https://neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
 <br>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#windows">
@@ -29,10 +29,10 @@ Your API access to ChatGPT.
 </a>
 <br/>
 
-<a href="https://t.me/neurogen_news">
+<a href="https://t.me/neuro_api">
   <img src="https://img.shields.io/badge/-Telegram channel-0088CC?logo=telegram" alt="telegram"/>
 </a>
-<a href="https://t.me/neurogen_chat">
+<a href="https://t.me/+IhL96RXP3D9iZTky">
   <img src="https://img.shields.io/badge/-Telegram chat-0088CC?logo=telegram" alt="telegram_chat"/>
 </a>
 
@@ -44,7 +44,7 @@ Your API access to ChatGPT.
 </div>
 
 
-# About NeuroAPI
+# About [NeuroAPI](https://neuroapi.host)
 Core of the project. Reverse API server compatible with OpenAI API format. Freemium. Multiple hundreds of providers.
 
 **Endpoint:**
@@ -91,7 +91,10 @@ We currently support the following models:
  
  • gpt-4-32k-0613 (for Boosty subscribers)
 
+## Follow us
 
+[Our Discord server](https://discord.gg/5BnKdYm3)
+[Telegram](https://t.me/neuro_api)
 
 # About NeuroGPT
 PC app configured to use ChatGPT with [our API](https://github.com/Em1tSan/NeuroGPT#about-neuroapi). Based on <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
