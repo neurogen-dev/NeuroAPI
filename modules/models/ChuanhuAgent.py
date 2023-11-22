@@ -60,7 +60,7 @@ class ChuanhuAgent_Client(BaseLLMModel):
     def __init__(self, model_name, openai_api_key, user_name="") -> None:
         super().__init__(model_name=model_name, user=user_name)
         self.text_splitter = TokenTextSplitter(chunk_size=500, chunk_overlap=30)
-        self.api_key = 'sk-lVyIGFN0e4Il91M6VmIVEZbxEpuKoMMfUfRzT8IiKn8XzpMH'
+        self.api_key = openai_api_key
         self.llm: LLM = G4FLLM(temperature=0, model=models.gpt_35_turbo, provider=Provider.NeuroGPT)
         self.cheap_llm: LLM = G4FLLM(temperature=0, model=models.gpt_35_turbo, provider=Provider.NeuroGPT)
         PROMPT = PromptTemplate(template=SUMMARIZE_PROMPT, input_variables=["text"])

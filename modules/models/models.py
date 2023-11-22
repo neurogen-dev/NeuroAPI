@@ -4,6 +4,7 @@ import logging
 import json
 import json
 import requests
+import time
 
 import colorama
 
@@ -188,15 +189,10 @@ class OpenAIClient(BaseLLMModel):
             timeout = TIMEOUT_STREAMING
         else:
             timeout = TIMEOUT_ALL
-        try: #Заготовочка для переписания системы отправки запросов
-            if any(substring in self.model_name for substring in ["purgpt", "naga", "chatty"]):
-                response = requests.post(
-                    shared.state.completion_url,
-                    headers = headers,
-                    json=payload,
-                    stream=stream,
-                )
-            else:
+    
+        max_retry_attempts = 10  # Общее количество попыток
+        for attempt in range(max_retry_attempts):
+            try: 
                 response = requests.post(
                     shared.state.completion_url,
                     headers=headers,
@@ -204,9 +200,26 @@ class OpenAIClient(BaseLLMModel):
                     stream=stream,
                     timeout=timeout,
                 )
-        except:
-            return None
-        return response
+    
+                # Декодирование ответа и проверка на пустоту
+                response_json = response.json()
+                #print(response.text)
+                #print(response_json)
+    
+                if response and response.status_code == 200 and not response_json['choices'][0]['message']['content']:
+                    print(f'Попытка {attempt + 1} из {max_retry_attempts} получила пустой ответ, повтор...')
+                else:
+                    return response
+    
+            except Exception as e:
+                print(f'Попытка {attempt + 1} из {max_retry_attempts} завершилась сбоем: {e}')
+             
+            if attempt < max_retry_attempts - 1:  # Если текущая попытка не последняя, ждем перед следующей
+                time.sleep(2 ** attempt)  # Таким образом, время ожидания будет увеличиваться после каждой неудачной попытки
+    
+        return None
+
+
 
     def _refresh_header(self):
         self.headers = {
