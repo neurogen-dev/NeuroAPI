@@ -57,7 +57,7 @@ https://neuroapi.host/v1
 ```
 ## Limits:
 
-Once you have registered your personal account, you will have $20 available for the first month. On the first day of the following month, your balance will be updated, and you will receive another $20. We have implemented these limits due to the increasing demand on our service and to prevent misuse.
+Once you have registered your personal account, you will have $30 available for the first month. On the first day of the following month, your balance will be updated, and you will receive another $30. We have implemented these limits due to the increasing demand on our service and to prevent misuse.
 We use the original pricing system for tokens, which is the same as the one used by OpenAI.
 If the free limits are not sufficient for your needs, you can support us by subscribing to [Boosty](https://boosty.to/neuroapi). As a token of appreciation, you will receive extended limits based on your subscription level. Here are the available tiers:
 
