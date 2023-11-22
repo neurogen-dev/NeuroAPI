@@ -180,7 +180,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 with gr.Tab(label="Настройки"):
                     gr.HTML(get_html("appearance_switcher.html").format(label="Переключить светлую/темную тему"), elem_classes="insert_block")
                     use_streaming_checkbox = gr.Checkbox(
-                            label="Стриминг текста", value=True, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
+                            label="Стриминг текста", value=False, visible=ENABLE_STREAMING_OPTION, elem_classes="switch_checkbox"
                         )
                     checkUpdateBtn = gr.Button("🔄 Проверить обновления...", visible=check_update)
                     gr.Markdown("# ⚠️ ОСТОРОЖНО ⚠️", elem_id="advanced_warning")
@@ -227,7 +227,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         max_generation_slider = gr.Slider(
                             minimum=1,
                             maximum=100000,
-                            value=2000,
+                            value=4000,
                             step=1,
                             interactive=True,
                             label="max generations",
