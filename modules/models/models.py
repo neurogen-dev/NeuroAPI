@@ -151,7 +151,7 @@ class OpenAIClient(BaseLLMModel):
         return history
 
     def _get_payload(self, history, stream): 
-        model = self.model_name.replace("naga-", "").replace("chatty-", "").replace("neuro-", "").replace("daku-", "")
+        model = self.model_name.replace("neuro-", "")
         if "naga-text" in self.model_name:
             last_msg = self.history[-1]
             last_user_input = last_msg["role"] == "user"
