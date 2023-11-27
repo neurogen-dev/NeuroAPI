@@ -190,14 +190,14 @@ class OpenAIClient(BaseLLMModel):
         else:
             timeout = TIMEOUT_ALL
     
-        max_retry_attempts = 10  # Общее количество попыток
+        max_retry_attempts = 5  # Общее количество попыток
         for attempt in range(max_retry_attempts):
             try: 
                 response = requests.post(
                     shared.state.completion_url,
                     headers=headers,
                     json=payload,
-                    stream=stream,
+                    stream=False,
                     timeout=timeout,
                 )
     
@@ -206,8 +206,9 @@ class OpenAIClient(BaseLLMModel):
                 #print(response.text)
                 #print(response_json)
     
-                if response and response.status_code == 200 and not response_json['choices'][0]['message']['content']:
-                    print(f'Попытка {attempt + 1} из {max_retry_attempts} получила пустой ответ, повтор...')
+                # Декодирование ответа и проверка на пустоту или отсутствие 'choices'
+                if response and response.status_code == 200 and ('choices' not in response_json or not response_json['choices']):
+                    print(f'Попытка {attempt + 1} из {max_retry_attempts} получила неверный ответ, повтор...')
                 else:
                     return response
     
@@ -228,17 +229,7 @@ class OpenAIClient(BaseLLMModel):
         }
 
     def _get_billing_data(self, billing_url):
-        with retrieve_proxy():
-            response = requests.get(
-                billing_url,
-                headers=self.headers,
-                timeout=TIMEOUT_ALL,
-            )
-        if response.status_code == 200:
-            data = response.json()
-            return data
-        else:
-            raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
+        return None
 
     def _decode_chat_response(self, response):
         error_msg = ""

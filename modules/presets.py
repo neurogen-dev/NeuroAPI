@@ -4,7 +4,7 @@ import gradio as gr
 import requests
 import json
 
-VERSION = "v 1.6.1"
+VERSION = "v 1.6.2"
 
 CHATGLM_MODEL = None
 CHATGLM_TOKENIZER = None
@@ -49,7 +49,6 @@ CHUANHU_DESCRIPTION = "[ℹ️ Телеграм канал автора](https:/
 
 ONLINE_MODELS = [
     'gpt-3.5-turbo',
-    'gpt-3.5-turbo',
     'gpt-3.5-turbo-1106',
     'gpt-3.5-turbo-0613',
     'gpt-3.5-turbo-16k',
@@ -57,6 +56,7 @@ ONLINE_MODELS = [
     'gpt-4',
     'gpt-4-0613',
     'gpt-4-1106-preview',
+    'gpt-4-32k',
     'chat-agent-beta',
 ]
 
@@ -120,22 +120,8 @@ MODEL_TOKEN_LIMIT = {
     'claude-2': 100000,
     "claude-instant-100k": 100000,
     "claude-2-100k": 100000,
-    'naga-gpt-3.5-turbo-16k': 16384,
-    'naga-gpt-4': 8192,
-    'naga-llama-2-70b-chat': 4096,
-    'chatty-gpt-3.5-turbo-16k': 16384,
-    'chatty-gpt-4': 8192,
-    'purgpt-gpt-3.5-turbo-16k': 16384,
-    'purgpt-gpt-3.5-turbo': 4096,
-    'purgpt-text-davinci-003': 4096,
     'naga-text-davinci-003': 4096,
     'text-davinci-003': 4096,
-    'daku-gpt-4': 8192,
-    'daku-gpt-4-32k': 32768,
-    'daku-claude-2': 100000,
-    'daku-claude-2-100k': 100000,
-    'daku-codellama-34b': 4096,
-    'daku-llama-2-70b': 4096,
 }
 
 TOKEN_OFFSET = 1000 
