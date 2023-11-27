@@ -61,3 +61,6 @@ flask_http_middleware
 nest_asyncio
 waitress
 git+https://github.com/MIDORIBIN/langchain-gpt4free.git
+setuptools
+wheel
+spacy
