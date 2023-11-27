@@ -61,11 +61,11 @@ Once you have registered your personal account, you will have $30 available for 
 We use the original pricing system for tokens, which is the same as the one used by OpenAI.
 If the free limits are not sufficient for your needs, you can support us by subscribing to [Boosty](https://boosty.to/neuroapi). As a token of appreciation, you will receive extended limits based on your subscription level. Here are the available tiers:
 
- • Tier 1: $10/month, providing $40 monthly.
+ • Tier 1: $10/month, providing $60 monthly.
  
- • Tier 2: $20/month, providing $85 monthly.
+ • Tier 2: $20/month, providing $120 monthly.
  
- • Tier 3: $100/month, providing $500 monthly. Subscribers at this tier also gain access to separate private providers and receive personalized support.
+ • Tier 3: $100/month, providing $700 monthly. Subscribers at this tier also gain access to separate private providers and receive personalized support.
 
 ## Supported models
 
@@ -85,7 +85,7 @@ We currently support the following models:
  
  • gpt-4-0613
  
- • gpt-4-1106-preview (gpt-4-turbo)
+ • gpt-4-1106-preview (Temporary offline)
  
  • gpt-4-32k (for Boosty subscribers)
  
