@@ -10,7 +10,7 @@ Your API access to ChatGPT.
 
 <div align="center">
 
-· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Site](https://neuroapi.host/) · Docs · Q&A · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
+· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Site](https://neuroapi.host/) · [Online Chat](https://chat.neuroapi.host) · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
 <br>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#windows">
