@@ -39,7 +39,7 @@ def predict(current_model, *args):
         yield i
 
 def billing_info(current_model):
-    return current_model.billing_info()
+    return None
 
 def set_key(current_model, *args):
     return current_model.set_key(*args)
