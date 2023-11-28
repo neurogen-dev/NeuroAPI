@@ -82,8 +82,24 @@ We currently support the following models:
 
 ## Follow us
 
-[Our Discord server](https://discord.gg/5BnKdYm3)
+[Our Discord server](https://discord.gg/9v9GgYsThY)
 [Telegram](https://t.me/neuro_api)
+
+## How generate API key
+
+1. Visit the main page of our service: [neuroapi.host](https://neuroapi.host).
+2. Choose **Login** from the menu, then click on **[Click to register](https://key.neuroapi.host/register)** to register your account.
+3. After registration, in the top menu, select **Token** and then **Add New Token**.
+4. Fill in the following details:
+   - **Name**: Enter the name for your API key.
+   - **Expiration time**: Click on the "Never Expires" button or choose a suitable option for you.
+   - **Quota**: Click on the "Set to unlimited quota" button.
+5. Click **Submit** to create the token.
+6. Once again, click on **Token** at the top, and next to your key, click the **Copy** button.
+
+You have now successfully obtained your API key! Make sure to keep it secure and use it responsibly.
+
+https://github.com/Em1tSan/NeuroGPT/assets/70670181/a75f3aae-972e-49f7-a264-02ae165e642a
 
 # About NeuroGPT
 PC app configured to use ChatGPT with [our API](https://github.com/Em1tSan/NeuroGPT#about-neuroapi). Based on <a href="https://github.com/Yidadaa/ChatGPT-Next-Web">ChatGPT Next Web</a>.
