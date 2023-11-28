@@ -114,6 +114,26 @@ PC app configured to use ChatGPT with [our API](https://github.com/Em1tSan/Neuro
 - Setting generation parameters for GPT models
 - Built-in prompt templates and jailbreaks for various tasks
 
+## Local launch
+
+Before starting, you must create a new .env file at project root, and place your api key into it:
+
+```
+OPENAI_API_KEY=<your api key here>
+
+# if you are not able to access openai service, use this BASE_URL
+BASE_URL=https://neuroapi.host
+```
+
+```shell
+# 1. install nodejs and yarn first
+# 2. config local env vars in `.env.local`
+# 3. run
+yarn install
+yarn dev
+```
+Then open http://127.0.0.1:3000 in your browser
+
 ***
 <div align="center">
   
