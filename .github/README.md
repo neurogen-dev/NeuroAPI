@@ -4,8 +4,6 @@
   <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+NeuroAI" alt="NeuroGPT" />
 </a>
 
-<strong> <a href="https://github.com/Em1tSan/NeuroGPT/blob/main/.github/README_RU.md">Русский</a> | English </strong>
-
 Your API access to ChatGPT.
 
 </div>
@@ -17,15 +15,6 @@ Your API access to ChatGPT.
 <br>
 <a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#windows">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
-</a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#linux">
-  <img src="https://img.shields.io/badge/-Linux-F1502F?logo=linux" alt="linux"/>
-</a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#macos">
-  <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
-</a>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#portable-version">
-  <img src="https://img.shields.io/badge/-Portable version-8080ff?logo=portable" alt="portable"/>
 </a>
 <br/>
 
@@ -97,18 +86,18 @@ We currently support the following models:
 [Telegram](https://t.me/neuro_api)
 
 # About NeuroGPT
-PC app configured to use ChatGPT with [our API](https://github.com/Em1tSan/NeuroGPT#about-neuroapi). Based on <a href="https://github.com/GaiZhenbiao/ChuanhuChatGPT">ChuanhuChatGPT</a>.
+PC app configured to use ChatGPT with [our API](https://github.com/Em1tSan/NeuroGPT#about-neuroapi). Based on <a href="https://github.com/Yidadaa/ChatGPT-Next-Web">ChatGPT Next Web</a>.
 
-- Web search
 - Dialog context
 - Dialog history
 - Setting generation parameters for GPT models
 - Built-in prompt templates and jailbreaks for various tasks
-
-<img src="https://github.com/NealBelov/screenshots/blob/main/demo001.gif?raw=true" width="100%">
 
 ***
 <div align="center">
   
 [![Star History Chart](https://api.star-history.com/svg?repos=Em1tSan/NeuroGPT&type=Date)](https://star-history.com/#Em1tSan/NeuroGPT&Date)
 </div>
+
+# LICENSE
+[MIT](https://opensource.org/license/mit/)
