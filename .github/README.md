@@ -12,9 +12,14 @@ Your API access to ChatGPT.
 
 · [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Site](https://neuroapi.host/) · [Online Chat](https://chat.neuroapi.host) · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
-<br>
-<a href="https://github.com/Em1tSan/NeuroGPT/wiki/PC-client-installation#windows">
+<a href="https://github.com/Em1tSan/NeuroGPT/releases/latest">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
+</a>
+<a href="https://github.com/Em1tSan/NeuroGPT/releases/latest">
+  <img src="https://img.shields.io/badge/-Linux-F1502F?logo=linux" alt="linux"/>
+</a>
+<a href="https://github.com/Em1tSan/NeuroGPT/releases/latest">
+  <img src="https://img.shields.io/badge/-MacOS-C0BFC0?logo=apple" alt="macos"/>
 </a>
 <br/>
 
