@@ -51,6 +51,9 @@ jobs:
           - os: windows-latest
             arch: x86_64
             rust_target: x86_64-pc-windows-msvc
+          - os: windows-latest
+            arch: i686
+            rust_target: i686-pc-windows-msvc
 
     runs-on: ${{ matrix.config.os }}
     steps:
