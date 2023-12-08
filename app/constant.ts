@@ -108,14 +108,6 @@ export const KnowledgeCutOffDate: Record<string, string> = {
 };
 
 export const DEFAULT_MODELS = [
-  {
-    name: "dall-e-2",
-    available: true,
-  },
-  {
-    name: "dall-e-3",
-    available: true,
-  },
 //  {
 //    name: "dall-e-2-beta-instruct-vision",
 //    available: true,
@@ -152,10 +144,6 @@ export const DEFAULT_MODELS = [
   // read here : https://openai.com/blog/new-models-and-developer-products-announced-at-devday
   {
     name: "gpt-4-1106-preview",
-    available: true,
-  },
-  {
-    name: "gpt-4-vision-preview",
     available: true,
   },
   {
