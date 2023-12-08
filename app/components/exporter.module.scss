@@ -186,13 +186,18 @@
         box-shadow: var(--card-shadow);
         border: var(--border-in-light);
 
-        code,
-        pre {
+        *:not(li) {
           overflow: hidden;
         }
       }
 
       &-assistant {
+        .body {
+          background-color: var(--white);
+        }
+      }
+
+      &-system {
         .body {
           background-color: var(--white);
         }

@@ -15,6 +15,8 @@ export const OPENAI_BASE_URL = "https://neuroapi.host";
 export enum Path {
   Home = "/",
   Chat = "/chat",
+  PrivacyPage = "/privacy",
+  ChangeLog = "/changelog",
   Settings = "/settings",
   NewChat = "/new-chat",
   Masks = "/masks",
@@ -30,7 +32,7 @@ export enum SlotID {
   AppBody = "app-body",
   CustomModel = "custom-model",
 }
-
+// This will automatically generate JSON files without the need to include the ".json" extension.
 export enum FileName {
   Masks = "masks.json",
   Prompts = "prompts.json",
@@ -56,7 +58,7 @@ export const ACCESS_CODE_PREFIX = "nk-";
 export const LAST_INPUT_KEY = "last-input";
 export const UNFINISHED_INPUT = (id: string) => "unfinished-input-" + id;
 
-export const STORAGE_KEY = "chatgpt-next-web";
+export const STORAGE_KEY = "NeuroGPT";
 
 export const REQUEST_TIMEOUT_MS = 60000;
 
@@ -69,6 +71,17 @@ export enum ServiceProvider {
 
 export const OpenaiPath = {
   ChatPath: "v1/chat/completions",
+  // text moderation
+  ModerationPath: "v1/moderations",
+  TextModerationModels: {
+    latest: "text-moderation-latest",
+    stable: "text-moderation-stable",
+  },
+  // image creation (dalle models)
+  ImageCreationPath: "v1/images/generations",
+  // todo
+  ImageEditPath: "v1/images/edits",
+  ImageVariationPath: "v1/images/variations",
   UsagePath: "dashboard/billing/usage",
   SubsPath: "dashboard/billing/subscription",
   ListModelPath: "v1/models",
@@ -84,8 +97,6 @@ You are ChatGPT, a large language model trained by OpenAI.
 Knowledge cutoff: {{cutoff}}
 Current model: {{model}}
 Current time: {{time}}
-Latex inline: $x^2$ 
-Latex block: $$e=mc^2$$
 `;
 
 export const SUMMARIZE_MODEL = "gpt-3.5-turbo";
@@ -97,6 +108,22 @@ export const KnowledgeCutOffDate: Record<string, string> = {
 };
 
 export const DEFAULT_MODELS = [
+  {
+    name: "dall-e-2",
+    available: true,
+  },
+  {
+    name: "dall-e-3",
+    available: true,
+  },
+//  {
+//    name: "dall-e-2-beta-instruct-vision",
+//    available: true,
+//  },
+//  {
+//    name: "dall-e-3-beta-instruct-vision",
+//    available: true,
+//  },
   {
     name: "gpt-4",
     available: true,
@@ -121,8 +148,14 @@ export const DEFAULT_MODELS = [
     name: "gpt-4-32k-0613",
     available: true,
   },
+  // recent update 
+  // read here : https://openai.com/blog/new-models-and-developer-products-announced-at-devday
   {
     name: "gpt-4-1106-preview",
+    available: true,
+  },
+  {
+    name: "gpt-4-vision-preview",
     available: true,
   },
   {
@@ -145,6 +178,7 @@ export const DEFAULT_MODELS = [
     name: "gpt-3.5-turbo-16k-0613",
     available: true,
   },
+
 ] as const;
 
 export const CHAT_PAGE_SIZE = 15;

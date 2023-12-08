@@ -12,7 +12,7 @@ import LoadingIcon from "../icons/three-dots.svg";
 import { getCSSVar, useMobileScreen } from "../utils";
 
 import dynamic from "next/dynamic";
-import { Path, SlotID } from "../constant";
+import { Path, SlotID, DEFAULT_CORS_HOST } from "../constant";
 import { ErrorBoundary } from "./error";
 
 import { getISOLang, getLang } from "../locales";
@@ -52,6 +52,14 @@ const NewChat = dynamic(async () => (await import("./new-chat")).NewChat, {
 });
 
 const MaskPage = dynamic(async () => (await import("./mask")).MaskPage, {
+  loading: () => <Loading noLogo />,
+});
+
+const PrivacyPage = dynamic(async () => (await import("./privacy")).PrivacyPage, {
+  loading: () => <Loading noLogo />,
+});
+
+const ChangeLog = dynamic(async () => (await import("./changelog")).ChangeLog, {
   loading: () => <Loading noLogo />,
 });
 
@@ -110,15 +118,13 @@ const useHasHydrated = () => {
 const loadAsyncGoogleFont = () => {
   const linkEl = document.createElement("link");
   const proxyFontUrl = "/google-fonts";
-  const remoteFontUrl = "https://fonts.googleapis.com";
+  const remoteFontUrl = `${DEFAULT_CORS_HOST}/google-fonts`; // we use proxy in client app
   const googleFontUrl =
     getClientConfig()?.buildMode === "export" ? remoteFontUrl : proxyFontUrl;
   linkEl.rel = "stylesheet";
-  linkEl.href =
-    googleFontUrl +
-    "/css2?family=" +
-    encodeURIComponent("Noto Sans:wght@300;400;700;900") +
-    "&display=swap";
+  const fontFamilies = encodeURIComponent("Noto Sans:wght@300;400;700;900");
+  const fontUrl = `${googleFontUrl}/css2?family=${fontFamilies}&display=swap`;
+  linkEl.href = fontUrl;
   document.head.appendChild(linkEl);
 };
 
@@ -157,6 +163,8 @@ function Screen() {
               <Route path={Path.NewChat} element={<NewChat />} />
               <Route path={Path.Masks} element={<MaskPage />} />
               <Route path={Path.Chat} element={<Chat />} />
+              <Route path={Path.PrivacyPage} element={<PrivacyPage />} />
+              <Route path={Path.ChangeLog} element={<ChangeLog />} />
               <Route path={Path.Settings} element={<Settings />} />
             </Routes>
           </div>

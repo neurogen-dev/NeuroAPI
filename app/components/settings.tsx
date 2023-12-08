@@ -267,7 +267,7 @@ function CheckButton() {
   const syncStore = useSyncStore();
 
   const couldCheck = useMemo(() => {
-    return syncStore.coundSync();
+    return syncStore.countSync();
   }, [syncStore]);
 
   const [checkState, setCheckState] = useState<
@@ -294,10 +294,8 @@ function CheckButton() {
           <LoadingIcon />
         ) : checkState === "success" ? (
           <CloudSuccessIcon />
-        ) : checkState === "failed" ? (
-          <CloudFailIcon />
         ) : (
-          <ConnectionIcon />
+          <CloudFailIcon />
         )
       }
     ></IconButton>
@@ -375,12 +373,43 @@ function SyncConfigModal(props: { onClose?: () => void }) {
               ></input>
             </ListItem>
           ) : null}
+          <ListItem
+            title={Locale.Settings.Sync.Config.AccessControl.Title}
+            subTitle={Locale.Settings.Sync.Config.AccessControl.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.enableAccessControl}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) =>
+                    (config.enableAccessControl = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Config.LockClient.Title}
+            subTitle={Locale.Settings.Sync.Config.LockClient.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.lockclient}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) => (config.lockclient = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
         </List>
 
         {syncStore.provider === ProviderType.WebDAV && (
           <>
             <List>
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.Endpoint}>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.Endpoint.Name}
+              >
                 <input
                   type="text"
                   value={syncStore.webdav.endpoint}
@@ -393,7 +422,9 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                 ></input>
               </ListItem>
 
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.UserName}>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.UserName.Name}
+              >
                 <input
                   type="text"
                   value={syncStore.webdav.username}
@@ -405,7 +436,9 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                   }}
                 ></input>
               </ListItem>
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.Password}>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.Password.Name}
+              >
                 <PasswordInput
                   value={syncStore.webdav.password}
                   onChange={(e) => {
@@ -415,6 +448,21 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                     );
                   }}
                 ></PasswordInput>
+              </ListItem>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.FileName.Name}
+                subTitle={Locale.Settings.Sync.Config.WebDav.FileName.SubTitle}
+              >
+                <input
+                  type="text"
+                  value={syncStore.webdav.filename}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.webdav.filename = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
               </ListItem>
             </List>
           </>
@@ -460,6 +508,68 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             </ListItem>
           </List>
         )}
+        {syncStore.provider === ProviderType.GitHubGist && (
+          <>
+            <List>
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.GistID.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.GistID.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.githubGist.gistId}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.gistId = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.FileName.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.FileName.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.githubGist.filename}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.filename = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.AccessToken.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.AccessToken.SubTitle
+                }
+              >
+                <PasswordInput
+                  value={syncStore.githubGist.token}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.token = e.currentTarget.value),
+                    );
+                  }}
+                ></PasswordInput>
+              </ListItem>
+            </List>
+          </>
+        )}
+        {syncStore.provider === ProviderType.GoSync && (
+          <List>
+            <ListItem title={Locale.WIP}></ListItem>
+          </List>
+        )}
       </Modal>
     </div>
   );
@@ -471,7 +581,7 @@ function SyncItems() {
   const promptStore = usePromptStore();
   const maskStore = useMaskStore();
   const couldSync = useMemo(() => {
-    return syncStore.coundSync();
+    return syncStore.countSync();
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
@@ -635,11 +745,6 @@ export function Settings() {
         navigate(Path.Home);
       }
     };
-    if (clientConfig?.isApp) { // Force to set custom endpoint to true if it's app
-      accessStore.update((state) => {
-        state.useCustomConfig = true;
-      });
-    }
     document.addEventListener("keydown", keydownEvent);
     return () => {
       document.removeEventListener("keydown", keydownEvent);
@@ -648,7 +753,7 @@ export function Settings() {
   }, []);
 
   const clientConfig = useMemo(() => getClientConfig(), []);
-  const showAccessCode = enabledAccessControl && !clientConfig?.isApp;
+  const showAccessCode = clientConfig?.isSysHasOpenaiApiKey && !clientConfig?.isApp;
 
   return (
     <ErrorBoundary>
@@ -914,26 +1019,21 @@ export function Settings() {
 
           {!accessStore.hideUserApiKey && (
             <>
-              {
-                // Conditionally render the following ListItem based on clientConfig.isApp
-                !clientConfig?.isApp && ( // only show if isApp is false
-                  <ListItem
-                    title={Locale.Settings.Access.CustomEndpoint.Title}
-                    subTitle={Locale.Settings.Access.CustomEndpoint.SubTitle}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={accessStore.useCustomConfig}
-                      onChange={(e) =>
-                        accessStore.update(
-                          (access) =>
-                            (access.useCustomConfig = e.currentTarget.checked),
-                        )
-                      }
-                    ></input>
-                  </ListItem>
-                )
-              }
+              <ListItem
+                title={Locale.Settings.Access.CustomEndpoint.Title}
+                subTitle={Locale.Settings.Access.CustomEndpoint.SubTitle}
+              >
+                <input
+                  type="checkbox"
+                  checked={accessStore.useCustomConfig}
+                  onChange={(e) =>
+                    accessStore.update(
+                      (access) =>
+                        (access.useCustomConfig = e.currentTarget.checked),
+                    )
+                  }
+                ></input>
+              </ListItem>
               {accessStore.useCustomConfig && (
                 <>
                   <ListItem
@@ -1062,7 +1162,7 @@ export function Settings() {
             </>
           )}
 
-          {!shouldHideBalanceQuery && !clientConfig?.isApp ? (
+          {!shouldHideBalanceQuery ? (
             <ListItem
               title={Locale.Settings.Usage.Title}
               subTitle={
@@ -1114,6 +1214,21 @@ export function Settings() {
               config.update((config) => (config.modelConfig = modelConfig));
             }}
           />
+          <ListItem
+            title={Locale.Settings.TextModeration.Title}
+            subTitle={Locale.Settings.TextModeration.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={config.textmoderation}
+              onChange={(e) =>
+                updateConfig(
+                  (config) =>
+                    (config.textmoderation = e.currentTarget.checked),
+                )
+              }
+            ></input>
+          </ListItem>
         </List>
 
         {shouldShowPromptModal && (

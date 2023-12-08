@@ -9,12 +9,12 @@
 3. 프로젝트를 선택합니다.
 
 ![vercel-create-2](./images/vercel/vercel-create-2.jpg)
-1. Git 리포지토리 가져오기에서 chatgpt-next-web을 검색합니다. 2. 새 포크를 선택합니다;
+1. Git 리포지토리 가져오기에서 NeuroGPT을 검색합니다. 2. 새 포크를 선택합니다;
 2. 새로 포크된 프로젝트를 선택하고 가져오기를 클릭합니다.
 
 ![vercel-create-3](./images/vercel/vercel-create-3.jpg)
 1. 프로젝트 구성 페이지에서 환경 변수 설정을 클릭하여 환경 변수 설정을 시작합니다;
-2. OPENAI_API_KEY, CODE ([Access Code](https://github.com/Em1tSan/NeuroGPT/blob/357296986609c14de10bf210871d30e2f67a8784/docs/faq-cn.md#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F-code-%E6%98%AF%E4%BB%80%E4%B9%88%E5%BF%85%E9%A1%BB%E8%AE%BE%E7%BD%AE%E5%90%97)). 환경 변수를 설정합니다;
+2. OPENAI_API_KEY, CODE ([Access Code](https://github.com/Yidadaa/NeuroGPT/blob/357296986609c14de10bf210871d30e2f67a8784/docs/faq-cn.md#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F-code-%E6%98%AF%E4%BB%80%E4%B9%88%E5%BF%85%E9%A1%BB%E8%AE%BE%E7%BD%AE%E5%90%97)). 환경 변수를 설정합니다;
 3. 환경 변수의 값을 입력합니다;
 4. 추가를 클릭하여 환경 변수 추가를 확인합니다;
 5. OPENAI_API_KEY를 추가해야 하며, 그렇지 않으면 작동하지 않습니다;

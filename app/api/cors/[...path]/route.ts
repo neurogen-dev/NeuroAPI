@@ -16,6 +16,33 @@ async function handle(
     method?.toLowerCase() ?? "",
   );
 
+  function isRealDevicez(userAgent: string | null): boolean {
+    // Author : @H0llyW00dzZ
+    // Note : This just an experiment for a prevent suspicious bot
+    // Modify this function to define your logic for determining if the user-agent belongs to a real device
+    // For example, you can check if the user-agent contains certain keywords or patterns that indicate a real device
+    if (userAgent) {
+      return userAgent.includes("AppleWebKit") && !userAgent.includes("Headless");
+    }
+    return false;
+  }
+  
+
+  const userAgent = req.headers.get("User-Agent");
+  const isRealDevice = isRealDevicez(userAgent);
+
+  if (!isRealDevice) {
+    return NextResponse.json(
+      {
+        error: true,
+        msg: "Access Forbidden",
+      },
+      {
+        status: 403,
+      },
+    );
+  }
+
   const fetchOptions: RequestInit = {
     headers: {
       authorization: req.headers.get("authorization") ?? "",
@@ -28,7 +55,7 @@ async function handle(
 
   const fetchResult = await fetch(targetUrl, fetchOptions);
 
-  console.log("[Any Proxy]", targetUrl, {
+  console.log("[Cloud Sync]", targetUrl, {
     status: fetchResult.status,
     statusText: fetchResult.statusText,
   });
@@ -40,4 +67,4 @@ export const POST = handle;
 export const GET = handle;
 export const OPTIONS = handle;
 
-export const runtime = "nodejs";
+export const runtime = "edge";

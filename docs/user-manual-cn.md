@@ -2,7 +2,7 @@
 
 > No english version yet, please read this doc with ChatGPT or other translation tools.
 
-本文档用于解释 NeuroGPT 的部分功能介绍和设计原则。
+本文档用于解释 NeuroGPT Web 的部分功能介绍和设计原则。
 
 ## 面具 (Mask)
 
@@ -22,7 +22,7 @@
 
 编辑步骤如下：
 
-1. 在 NeuroGPT 中配置好一个面具；
+1. 在 NeuroGPT Web 中配置好一个面具；
 2. 使用面具编辑页面的下载按钮，将面具保存为 JSON 格式；
 3. 让 ChatGPT 帮你将 json 文件格式化为对应的 ts 代码；
 4. 放入对应的 .ts 文件。
@@ -69,7 +69,7 @@
 ### 全局设置项的含义
 
 - model / temperature / top_p / max_tokens / presence_penalty / frequency_penalty 均为 ChatGPT 的设置参数，详情请查阅 OpenAI 官方文档，再次不再赘述；
-- 注入系统级提示信息、用户输入预处理：详情请看 [https://github.com/Em1tSan/NeuroGPT/issues/2144](https://github.com/Em1tSan/NeuroGPT/issues/2144)
+- 注入系统级提示信息、用户输入预处理：详情请看 [https://github.com/Yidadaa/NeuroGPT/issues/2144](https://github.com/Yidadaa/NeuroGPT/issues/2144)
 - 附带历史消息数：用户每次输入消息并发送时，所携带的最近 n 条消息数量；
 - 历史消息长度压缩阈值：当已经产生的聊天字数达到该数值以后，则自动触发历史摘要功能；
 - 历史摘要：是否启用历史摘要功能。

@@ -22,6 +22,7 @@ export function createUpstashClient(store: SyncStore) {
           method: "GET",
           headers: this.headers(),
           proxyUrl,
+          mode: "cors",
         });
         console.log("[Upstash] check", res.status, res.statusText);
         return [200].includes(res.status);
@@ -36,6 +37,7 @@ export function createUpstashClient(store: SyncStore) {
         method: "GET",
         headers: this.headers(),
         proxyUrl,
+        mode: "cors",
       });
 
       console.log("[Upstash] get key = ", key, res.status, res.statusText);
@@ -50,6 +52,7 @@ export function createUpstashClient(store: SyncStore) {
         headers: this.headers(),
         body: value,
         proxyUrl,
+        mode: "cors",
       });
 
       console.log("[Upstash] set key = ", key, res.status, res.statusText);

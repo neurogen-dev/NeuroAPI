@@ -128,11 +128,14 @@ const es: PartialLocaleType = {
     Usage: {
       Title: "Saldo de la cuenta",
       SubTitle(used: any, total: any) {
-        return `Usado $${used}, subscription $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "desconocido";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "desconocido";
+        const usedFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(used);
+        return `Usado este mes: ${usedFormatted}, Límite máximo: ${hardLimitusd}, Límite de uso aprobado: ${hardLimit}`;
       },
       IsChecking: "Comprobando...",
       Check: "Comprobar de nuevo",
-      NoAccess: "Introduzca la clave API para comprobar el saldo",
+      NoAccess: `Ingresa la clave de sesión en la clave API comenzando con el prefijo "sess-" para verificar el saldo.`,
     },
 
     Model: "Modelo",
@@ -184,6 +187,10 @@ const es: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Eres un asistente que",
+  },
+  PrivacyPage: {
+    Name: "Privacidad",
+    Confirm: "Aceptar",
   },
   Mask: {
     Name: "Mask",

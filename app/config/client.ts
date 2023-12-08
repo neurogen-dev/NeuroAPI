@@ -3,12 +3,28 @@ import { BuildConfig, getBuildConfig } from "./build";
 export function getClientConfig() {
   if (typeof document !== "undefined") {
     // client side
-    return JSON.parse(queryMeta("config")) as BuildConfig;
+    const buildConfig = JSON.parse(queryMeta("config")) as BuildConfig;
+    const commitMessage = buildConfig.commitMessage.description;
+    return {
+      ...buildConfig,
+      commitMessage: {
+        ...buildConfig.commitMessage,
+        description: commitMessage,
+      },
+    };
   }
 
   if (typeof process !== "undefined") {
     // server side
-    return getBuildConfig();
+    const buildConfig = getBuildConfig();
+    const commitMessage = buildConfig.commitMessage.description;
+    return {
+      ...buildConfig,
+      commitMessage: {
+        ...buildConfig.commitMessage,
+        description: commitMessage,
+      },
+    };
   }
 }
 

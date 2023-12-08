@@ -27,6 +27,8 @@ import PinIcon from "../icons/pin.svg";
 import EditIcon from "../icons/rename.svg";
 import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
+import DownloadIcon from "../icons/download.svg";
+import UploadIcon from "../icons/upload.svg";
 
 import LightIcon from "../icons/light.svg";
 import DarkIcon from "../icons/dark.svg";
@@ -34,6 +36,9 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
+import EyeOnIcon from "../icons/eye.svg";
+import EyeOffIcon from "../icons/eye-off.svg";
+import { escapeRegExp } from "lodash";
 
 import {
   ChatMessage,
@@ -53,6 +58,8 @@ import {
   selectOrCopy,
   autoGrowTextArea,
   useMobileScreen,
+  downloadAs,
+  readFromFile,
 } from "../utils";
 
 import dynamic from "next/dynamic";
@@ -100,12 +107,60 @@ export function SessionConfigModel(props: { onClose: () => void }) {
   const maskStore = useMaskStore();
   const navigate = useNavigate();
 
+  const [exporting, setExporting] = useState(false);
+  const isApp = !!getClientConfig()?.isApp;
+
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    const currentDate = new Date();
+    const currentSession = chatStore.currentSession();
+    const messageCount = currentSession.messages.length;
+    const datePart = isApp
+      ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
+      : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
+  
+    const formattedMessageCount = Locale.ChatItem.ChatItemCount(messageCount); // Format the message count using the translation function
+    const fileName = `${session.topic}-(${formattedMessageCount})-${datePart}.json`;
+    await downloadAs(session, fileName);
+    setExporting(false);
+  };
+
+  const importchat = async () => {
+    await readFromFile().then((content) => {
+      try {
+        const importedData = JSON.parse(content);
+        chatStore.updateCurrentSession((session) => {
+          Object.assign(session, importedData);
+        });
+      } catch (e) {
+        console.error("[Import] Failed to import JSON file:", e);
+        showToast(Locale.Settings.Sync.ImportFailed);
+      }
+    });
+  };
+
   return (
     <div className="modal-mask">
       <Modal
         title={Locale.Context.Edit}
         onClose={() => props.onClose()}
         actions={[
+          <IconButton
+            key="export"
+            icon={<DownloadIcon />}
+            bordered
+            text={Locale.UI.Export}
+            onClick={handleExport}
+            disabled={exporting}
+          />,
+          <IconButton
+            key="import"
+            icon={<UploadIcon />}
+            bordered
+            text={Locale.UI.Import}
+            onClick={importchat}
+          />,
           <IconButton
             key="reset"
             icon={<ResetIcon />}
@@ -410,6 +465,8 @@ export function ChatActions(props: {
   scrollToBottom: () => void;
   showPromptHints: () => void;
   hitBottom: boolean;
+  showContextPrompts: boolean;
+  toggleContextPrompts: () => void;
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -431,25 +488,10 @@ export function ChatActions(props: {
 
   // switch model
   const currentModel = chatStore.currentSession().mask.modelConfig.model;
-  const allModels = useAllModels();
-  const models = useMemo(
-    () => allModels.filter((m) => m.available),
-    [allModels],
-  );
+  const models = useAllModels()
+    .filter((m) => m.available)
+    .map((m) => m.name);
   const [showModelSelector, setShowModelSelector] = useState(false);
-
-  useEffect(() => {
-    // if current model is not available
-    // switch to first available model
-    const isUnavaliableModel = !models.some((m) => m.name === currentModel);
-    if (isUnavaliableModel && models.length > 0) {
-      const nextModel = models[0].name as ModelType;
-      chatStore.updateCurrentSession(
-        (session) => (session.mask.modelConfig.model = nextModel),
-      );
-      showToast(nextModel);
-    }
-  }, [chatStore, currentModel, models]);
 
   return (
     <div className={styles["chat-input-actions"]}>
@@ -498,6 +540,22 @@ export function ChatActions(props: {
       />
 
       <ChatAction
+        onClick={props.toggleContextPrompts}
+        text={
+          props.showContextPrompts
+            ? Locale.Mask.Config.HideContext.UnHide
+            : Locale.Mask.Config.HideContext.Hide
+        }
+        icon={
+          props.showContextPrompts ? (
+            <EyeOffIcon />
+          ) : (
+            <EyeOnIcon />
+          )
+        }
+      />
+
+      <ChatAction
         onClick={() => {
           navigate(Path.Masks);
         }}
@@ -530,8 +588,8 @@ export function ChatActions(props: {
         <Selector
           defaultSelectedValue={currentModel}
           items={models.map((m) => ({
-            title: m.displayName,
-            value: m.name,
+            title: m,
+            value: m,
           }))}
           onClose={() => setShowModelSelector(false)}
           onSelection={(s) => {
@@ -662,18 +720,78 @@ function _Chat() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(measure, [userInput]);
 
+  const loadchat = () => {
+    readFromFile().then((content) => {
+      try {
+        const importedData = JSON.parse(content);
+        chatStore.updateCurrentSession((session) => {
+          Object.assign(session, importedData);
+          // Set any other properties you want to update in the session
+        });
+      } catch (e) {
+        console.error("[Import] Failed to import JSON file:", e);
+        showToast(Locale.Settings.Sync.ImportFailed);
+      }
+    });
+  };
+  
   // chat commands shortcuts
   const chatCommands = useChatCommand({
     new: () => chatStore.newSession(),
     newm: () => navigate(Path.NewChat),
     prev: () => chatStore.nextSession(-1),
     next: () => chatStore.nextSession(1),
+    restart: () => window.__TAURI__?.process.relaunch(),
     clear: () =>
       chatStore.updateCurrentSession(
         (session) => (session.clearContextIndex = session.messages.length),
       ),
     del: () => chatStore.deleteSession(chatStore.currentSessionIndex),
-  });
+    save: () =>
+      downloadAs((session), `${session.topic}.json`),
+    load: loadchat,
+    copymemoryai: () => {
+      const memoryPrompt = chatStore.currentSession().memoryPrompt;
+      if (memoryPrompt.trim() !== "") {
+        copyToClipboard(memoryPrompt);
+        showToast(Locale.Copy.Success);
+      } else {
+        showToast(Locale.Copy.Failed);
+      }
+    },
+    updatemasks: () => {
+      chatStore.updateCurrentSession((session) => {
+        const memoryPrompt = session.memoryPrompt;
+        const currentDate = new Date().toLocaleString(); // Get the current date and time as a string
+        const existingContext = session.mask.context;
+        let currentContext = existingContext[0]; // Get the current context message
+    
+        if (!currentContext || currentContext.role !== "system") {
+          // If the current context message doesn't exist or doesn't have the role "system"
+          currentContext = {
+            role: "system",
+            content: memoryPrompt,
+            date: currentDate,
+            id: "", // Generate or set the ID for the new message
+            // Add any other properties you want to set for the context messages
+          };
+          existingContext.unshift(currentContext); // Add the new message at the beginning of the context array
+          showToast(Locale.Chat.Commands.UI.MasksSuccess);
+        } else {
+          // If the current context message already exists and has the role "system"
+          currentContext.content = memoryPrompt; // Update the content
+          currentContext.date = currentDate; // Update the date
+          // You can update other properties of the current context message here
+        }
+    
+        // Set any other properties you want to update in the session
+        session.mask.context = existingContext;
+        showToast(Locale.Chat.Commands.UI.MasksSuccess);
+      });
+    },
+    // Currently the feature to summarize a conversation as manual is not yet enabled.
+    summarize: () => chatStore.summarizeSession(),
+  });  
 
   // only search prompts when user input is short
   const SEARCH_TEXT_LIMIT = 30;
@@ -697,7 +815,12 @@ function _Chat() {
 
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "") return;
-    const matchCommand = chatCommands.match(userInput);
+
+    // reduce a zod cve CVE-2023-4316
+    const escapedInput = escapeRegExp(userInput);
+
+    const matchCommand = chatCommands.match(escapedInput);
+
     if (matchCommand.matched) {
       setUserInput("");
       setPromptHints([]);
@@ -870,21 +993,25 @@ function _Chat() {
     });
   };
 
-  const context: RenderMessage[] = useMemo(() => {
-    return session.mask.hideContext ? [] : session.mask.context.slice();
-  }, [session.mask.context, session.mask.hideContext]);
   const accessStore = useAccessStore();
+  const isAuthorized = accessStore.isAuthorized();
+  const context: RenderMessage[] = useMemo(() => {
+    const contextMessages = session.mask.hideContext ? [] : session.mask.context.slice();
 
-  if (
-    context.length === 0 &&
-    session.messages.at(0)?.content !== BOT_HELLO.content
-  ) {
-    const copiedHello = Object.assign({}, BOT_HELLO);
-    if (!accessStore.isAuthorized()) {
-      copiedHello.content = Locale.Error.Unauthorized;
+    if (
+      contextMessages.length === 0 &&
+      session.messages.at(0)?.role !== "system"
+    ) {
+      const copiedHello = Object.assign({}, BOT_HELLO);
+      if (!isAuthorized) {
+        copiedHello.role = "system";
+        copiedHello.content = Locale.Error.Unauthorized;
+      }
+      contextMessages.push(copiedHello);
     }
-    context.push(copiedHello);
-  }
+
+    return contextMessages;
+  }, [session.mask.context, session.mask.hideContext, session.messages, isAuthorized]);
 
   // preview messages
   const renderMessages = useMemo(() => {
@@ -1013,9 +1140,7 @@ function _Chat() {
           ).then((res) => {
             if (!res) return;
             if (payload.key) {
-              accessStore.update(
-                (access) => (access.openaiApiKey = payload.key!),
-              );
+              accessStore.update((access) => (access.openaiApiKey = payload.key!));
             }
             if (payload.url) {
               accessStore.update((access) => (access.openaiUrl = payload.url!));
@@ -1170,17 +1295,14 @@ function _Chat() {
                       </div>
                       {isUser ? (
                         <Avatar avatar={config.avatar} />
+                      ) : isContext ? (
+                        <Avatar avatar="1f4ab" /> // Add this line for system messages
                       ) : (
                         <>
                           {["system"].includes(message.role) ? (
                             <Avatar avatar="2699-fe0f" />
                           ) : (
-                            <MaskAvatar
-                              avatar={session.mask.avatar}
-                              model={
-                                message.model || session.mask.modelConfig.model
-                              }
-                            />
+                            <MaskAvatar mask={session.mask} />
                           )}
                         </>
                       )}
@@ -1280,6 +1402,8 @@ function _Chat() {
             setUserInput("/");
             onSearch("");
           }}
+          showContextPrompts={false}
+          toggleContextPrompts={() => showToast(Locale.WIP)}
         />
         <div className={styles["chat-input-panel-inner"]}>
           <textarea

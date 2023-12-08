@@ -66,7 +66,7 @@ if (mode !== "export") {
     const ret = [
       {
         source: "/api/proxy/:path*",
-        destination: "https://neuroapi.host/:path*",
+        destination: "https://api.openai.com/:path*",
       },
       {
         source: "/google-fonts/:path*",

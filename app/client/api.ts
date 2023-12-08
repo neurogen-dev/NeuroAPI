@@ -26,6 +26,7 @@ export interface LLMConfig {
 export interface ChatOptions {
   messages: RequestMessage[];
   config: LLMConfig;
+  whitelist: boolean;
 
   onUpdate?: (message: string, chunk: string) => void;
   onFinish: (message: string) => void;
@@ -93,7 +94,7 @@ export class ClientApi {
         {
           from: "human",
           value:
-            "Share from [NeuroGPT]: https://github.com/Em1tSan/NeuroGPT",
+            "Share from [NeuroGPT Web]: https://github.com/Yidadaa/NeuroGPT",
         },
       ]);
     // 敬告二开开发者们，为了开源大模型的发展，请不要修改上述消息，此消息用于后续数据清洗使用

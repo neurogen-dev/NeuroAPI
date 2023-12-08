@@ -61,10 +61,7 @@ export function ChatItem(props: {
           {props.narrow ? (
             <div className={styles["chat-item-narrow"]}>
               <div className={styles["chat-item-avatar"] + " no-dark"}>
-                <MaskAvatar
-                  avatar={props.mask.avatar}
-                  model={props.mask.modelConfig.model}
-                />
+                <MaskAvatar mask={props.mask} />
               </div>
               <div className={styles["chat-item-narrow-count"]}>
                 {props.count}

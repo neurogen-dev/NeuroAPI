@@ -8,9 +8,29 @@ import { ModelType } from "../store";
 
 import BotIcon from "../icons/bot.svg";
 import BlackBotIcon from "../icons/black-bot.svg";
+import { isIOS, isMacOS } from "../utils"; // Import the isIOS & isMacOS functions from the utils file
 
 export function getEmojiUrl(unified: string, style: EmojiStyle) {
-  return `https://cdn.staticfile.org/emoji-datasource-apple/14.0.0/img/${style}/64/${unified}.png`;
+  const isAppleDevice = isMacOS() || isIOS();
+  const emojiDataSource =
+    (isAppleDevice && style === "apple") ||
+    (!isAppleDevice && style === "google")
+      ? "emoji-datasource-apple"
+      : "emoji-datasource-google";
+
+  const emojiStyle = style === "apple" && isAppleDevice ? "apple" : "google";
+
+  return `https://cdn.staticfile.org/${emojiDataSource}/14.0.0/img/${emojiStyle}/64/${unified}.png`;
+}
+
+export function debounce(func: Function, delay: number) {
+  let timeoutId: NodeJS.Timeout;
+  return function (...args: any[]) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(null, args);
+    }, delay);
+  };
 }
 
 export function AvatarPicker(props: {
@@ -35,7 +55,7 @@ export function Avatar(props: { model?: ModelType; avatar?: string }) {
         {props.model?.startsWith("gpt-4") ? (
           <BlackBotIcon className="user-avatar" />
         ) : (
-          <BotIcon className="user-avatar" />
+          <BlackBotIcon className="user-avatar" />
         )}
       </div>
     );

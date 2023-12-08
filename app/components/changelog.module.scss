@@ -1,0 +1,108 @@
+.changelog-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+
+  .changelog-logo {
+    width: 100px; /* Set the desired width */
+    height: 100px; /* Set the desired height */
+    margin-bottom: 20px; /* Add margin for spacing */
+  }
+
+  .changelog-title {
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 3;
+    position: relative;
+  }
+
+  .changelog-tips {
+    box-sizing: border-box;
+    max-width: 100%;
+    margin-top: 10px;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 10px;
+    font-size: 14px;
+    user-select: text;
+    word-break: break-word;
+    border: var(--border-in-light);
+    position: relative;
+    transition: all ease 0.3s;
+  }
+
+  .changelog-input {
+    margin: 3vh 0;
+  }
+
+  .changelog-content {
+    max-height: 78%; /* Set the desired max height */
+    overflow: auto; /* Enable scrolling */
+    width: 95%; /* Set the desired width */
+    margin-top: auto; /* Add margin for spacing */
+  }
+
+  .changelog-actions {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    height: 10%;
+    width: 10%;
+    margin-top: auto; /* Add margin for spacing */
+    padding-top: 20px;
+    padding-bottom: 20px;
+    position: relative;
+  
+    button:not(:last-child) {
+      margin-bottom: auto;
+    }
+  
+    // Media query for small screens
+    @media (max-width: 600px) {
+      flex-direction: row; /* Change to horizontal layout */
+      justify-content: space-evenly; /* Spread the buttons evenly */
+      align-items: center; /* Center align the buttons vertically */
+      margin-top: auto; /* Adjust the margin */
+      button {
+        width: auto; /* Set a fixed width for the buttons */
+      }
+    }
+  
+    // Media query for non-fullscreen mode
+    @media not all and (display-mode: fullscreen) {
+      flex-direction: row; /* Change to horizontal layout */
+      justify-content: space-evenly; /* Spread the buttons evenly */
+      align-items: center; /* Center align the buttons vertically */
+      margin-top: auto; /* Adjust the margin */
+      position: relative;
+      button {
+        width: auto; /* Reset the width to auto */
+      }
+    }
+  }  
+
+  .scroll-title {
+    font-size: 18px; /* Set the desired font size */
+    font-weight: bold;
+    line-height: 2;
+    color: #888; /* Set the desired color */
+  }
+
+  // Media query for small screens
+  @media (max-width: 600px) {
+    .changelog-actions {
+      flex-direction: row; /* Change to horizontal layout */
+      justify-content: space-evenly; /* Spread the buttons evenly */
+      align-items: center; /* Center align the buttons vertically */
+      margin-top: auto; /* Adjust the margin */
+      position: relative;
+    }
+
+    button {
+      width: auto; /* Set a fixed width for the buttons */
+    }
+  }
+}

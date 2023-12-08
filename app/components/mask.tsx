@@ -18,7 +18,6 @@ import {
   ChatMessage,
   createMessage,
   ModelConfig,
-  ModelType,
   useAppConfig,
   useChatStore,
 } from "../store";
@@ -59,11 +58,11 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
   return result;
 }
 
-export function MaskAvatar(props: { avatar: string; model?: ModelType }) {
-  return props.avatar !== DEFAULT_MASK_AVATAR ? (
-    <Avatar avatar={props.avatar} />
+export function MaskAvatar(props: { mask: Mask }) {
+  return props.mask.avatar !== DEFAULT_MASK_AVATAR ? (
+    <Avatar avatar={props.mask.avatar} />
   ) : (
-    <Avatar model={props.model} />
+    <Avatar model={props.mask.modelConfig.model} />
   );
 }
 
@@ -124,10 +123,7 @@ export function MaskConfig(props: {
               onClick={() => setShowPicker(true)}
               style={{ cursor: "pointer" }}
             >
-              <MaskAvatar
-                avatar={props.mask.avatar}
-                model={props.mask.modelConfig.model}
-              />
+              <MaskAvatar mask={props.mask} />
             </div>
           </Popover>
         </ListItem>
@@ -402,7 +398,7 @@ export function MaskPage() {
     setSearchText(text);
     if (text.length > 0) {
       const result = allMasks.filter((m) =>
-        m.name.toLowerCase().includes(text.toLowerCase()),
+        m.name.toLowerCase().includes(text.toLowerCase())
       );
       setSearchMasks(result);
     } else {
@@ -416,7 +412,10 @@ export function MaskPage() {
   const closeMaskModal = () => setEditingMaskId(undefined);
 
   const downloadAll = () => {
-    downloadAs(JSON.stringify(masks.filter((v) => !v.builtin)), FileName.Masks);
+    downloadAs(
+      masks.filter((v) => !v.builtin),
+      FileName.Masks,
+    );
   };
 
   const importFromFile = () => {
@@ -527,7 +526,7 @@ export function MaskPage() {
               <div className={styles["mask-item"]} key={m.id}>
                 <div className={styles["mask-header"]}>
                   <div className={styles["mask-icon"]}>
-                    <MaskAvatar avatar={m.avatar} model={m.modelConfig.model} />
+                    <MaskAvatar mask={m} />
                   </div>
                   <div className={styles["mask-title"]}>
                     <div className={styles["mask-name"]}>{m.name}</div>
@@ -589,12 +588,7 @@ export function MaskPage() {
                 text={Locale.Mask.EditModal.Download}
                 key="export"
                 bordered
-                onClick={() =>
-                  downloadAs(
-                    JSON.stringify(editingMask),
-                    `${editingMask.name}.json`,
-                  )
-                }
+                onClick={() => downloadAs(editingMask, `${editingMask.name}.json`)}
               />,
               <IconButton
                 key="copy"

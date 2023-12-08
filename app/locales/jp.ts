@@ -151,11 +151,14 @@ const jp: PartialLocaleType = {
     Usage: {
       Title: "残高照会",
       SubTitle(used: any, total: any) {
-        return `今月は $${used} を使用しました。総額は $${total} です。`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "不明";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "不明";
+        const usedFormatted = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'USD' }).format(used);
+        return `今月の使用額：${usedFormatted}、ハードリミット：${hardLimitusd}、承認された使用制限：${hardLimit}`;
       },
       IsChecking: "確認中...",
       Check: "再確認",
-      NoAccess: "APIキーまたはアクセスパスワードを入力して残高を表示",
+      NoAccess: `残高を確認するには、APIキーの先頭に「sess-」を付けたセッションキーを入力してください。`,
     },
 
     Model: "モデル (model)",
@@ -202,6 +205,10 @@ const jp: PartialLocaleType = {
   },
   Plugin: { Name: "プラグイン" },
   FineTuned: { Sysmessage: "あなたはアシスタントです" },
+  PrivacyPage: {
+    Name: "プライバシー",
+    Confirm: "同意する",
+  },
   Mask: {
     Name: "キャラクタープリセット",
     Page: {

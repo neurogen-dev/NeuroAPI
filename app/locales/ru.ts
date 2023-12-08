@@ -21,6 +21,39 @@ const ru: PartialLocaleType = {
       Retry: "Повторить",
       Delete: "Удалить",
     },
+    Commands: {
+      new: "Начать новый чат",
+      newm: "Начать новый чат с маской",
+      next: "Следующий чат",
+      prev: "Предыдущий чат",
+      restart: "Перезапустить клиент",
+      clear: "Очистить контекст",
+      del: "Удалить чат",
+      save: "Сохранить текущий сеанс чата",
+      load: "Загрузить сеанс чата",
+      copymemoryai: "Copy a session of memory prompt ai",
+      updatemasks: "Update a session of memory prompt for a mask",
+      summarize: "Суммируйте текущий сеанс этого чата",
+      UI: {
+        MasksSuccess: "Успешно обновлены сеансы масок",
+        MasksFail: "Не удалось обновить сеанс масок",
+        SummarizeSuccess: "Успешно суммирование сеанса этого чата",
+        SummarizeFail: "Не удалось суммировать сеанс этого чата",
+      }, 
+    },
+    InputActions: {
+      Stop: "Стоп",
+      ToBottom: "К последнему",
+      Theme: {
+        auto: "Авто",
+        light: "Светлая тема",
+        dark: "Темная тема",
+      },
+      Prompt: "Промпты",
+      Masks: "Маски",
+      Clear: "Очистить контекст",
+      Settings: "Настройки",
+    },
     Rename: "Переименовать чат",
     Typing: "Печатает…",
     Input: (submitKey: string) => {
@@ -61,7 +94,20 @@ const ru: PartialLocaleType = {
   Settings: {
     Title: "Настройки",
     SubTitle: "Все настройки",
-
+    Danger: {
+      Reset: {
+        Title: "Сбросить все настройки",
+        SubTitle: "Вернуть все пункты настроек к значениям по умолчанию",
+        Action: "Сброс",
+        Confirm: "Подтвердить сброс всех настроек к значениям по умолчанию?",
+      },
+      Clear: {
+        Title: "Очистить все данные",
+        SubTitle: "Очистить все сообщения и настройки",
+        Action: "Очистить",
+        Confirm: "Подтвердить очистку всех сообщений и настроек?",
+      },
+    },
     Lang: {
       Name: "Language", // ATTENTION: if you wanna add a new translation, please do not translate this value, leave it as `Language`
       All: "Все языки",
@@ -129,11 +175,14 @@ const ru: PartialLocaleType = {
     Usage: {
       Title: "Баланс аккаунта",
       SubTitle(used: any, total: any) {
-        return `Использовано в этом месяце $${used}, подписка $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "неизвестно";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "неизвестно";
+        const usedFormatted = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(used);
+        return `Использовано в этом месяце: ${usedFormatted}, Жесткий лимит: ${hardLimitusd}, Утвержденный лимит использования: ${hardLimit}`;
       },
       IsChecking: "Проверка...",
       Check: "Проверить",
-      NoAccess: "Введите API ключ, чтобы проверить баланс",
+      NoAccess: `Введите ключ сеанса в ключ API, начинающийся с префикса "sess-", чтобы проверить баланс.`,
     },
 
     Model: "Модель",
@@ -185,6 +234,10 @@ const ru: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Вы - ассистент, который",
+  },
+  PrivacyPage: {
+    Name: "Конфиденциальность",
+    Confirm: "Принять",
   },
   Mask: {
     Name: "Маска",

@@ -11,6 +11,8 @@ import CloseIcon from "../icons/close.svg";
 import DeleteIcon from "../icons/delete.svg";
 import MaskIcon from "../icons/mask.svg";
 import PluginIcon from "../icons/plugin.svg";
+import PrivacyIcon from "../icons/locked.svg";
+import ChangelogIcon from "../icons/pin.svg";
 import DragIcon from "../icons/drag.svg";
 
 import Locale from "../locales";
@@ -158,10 +160,12 @@ export function SideBar(props: { className?: string }) {
           NeuroGPT
         </div>
         <div className={styles["sidebar-sub-title"]}>
-          https://t.me/neuro_api
+          Build your own AI assistant.
         </div>
-        <div className={styles["sidebar-logo"] + " no-dark"}>
-          <ChatGptIcon />
+        <div className={`${styles["sidebar-logo"]} + no-dark`}>
+          <div className={`${styles["animated-logo"]} + no-dark`}>
+            <ChatGptIcon className={`${styles["rotate"]} + no-dark`} />
+          </div>
         </div>
       </div>
 
@@ -184,6 +188,24 @@ export function SideBar(props: { className?: string }) {
           text={shouldNarrow ? undefined : Locale.Plugin.Name}
           className={styles["sidebar-bar-button"]}
           onClick={() => showToast(Locale.WIP)}
+          shadow
+        />
+        <IconButton
+          icon={<PrivacyIcon />}
+          text={shouldNarrow ? undefined : Locale.PrivacyPage.Name}
+          className={styles["sidebar-bar-button"]}
+          onClick={() =>
+            navigate(Path.PrivacyPage, { state: { fromHome: true } })
+          }
+          shadow
+        />
+      </div>
+      <div className={styles["sidebar-header-bar"]}>
+      <IconButton
+          icon={<ChangelogIcon />}
+          text={shouldNarrow ? undefined : Locale.Changelog.Name}
+          className={styles["sidebar-bar-button"]}
+          onClick={() => navigate(Path.ChangeLog, { state: { fromHome: true } })}
           shadow
         />
       </div>

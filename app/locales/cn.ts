@@ -7,8 +7,28 @@ const cn = {
   WIP: "该功能仍在开发中……",
   Error: {
     Unauthorized: isApp
-      ? "检测到无效 API Key，请前往[设置](/#/settings)页检查 API Key 是否配置正确。"
+      ? "未经授权的访问，请在 [auth](/#/auth) 页面输入您的 OpenAI API Key。"
       : "访问密码不正确或为空，请前往[登录](/#/auth)页输入正确的访问密码，或者在[设置](/#/settings)页填入你自己的 OpenAI API Key。",
+    Content_Policy: {
+      Title:
+        "您的请求因违反内容政策而被标记。",
+      SubTitle: 
+        "阅读详情：https://platform.openai.com/docs/guides/moderation/overview",
+      Reason: {
+        Title: "理由",
+        sexual: "性别",
+        hate: "仇恨",
+        harassment: "骚扰",
+        "self-harm": "自残",
+        "sexual/minors": "性别/未成年人",
+        "hate/threatening": "仇恨/威胁",
+        "violence/graphic": "暴力/图形",
+        "self-harm/intent": "自残/意图",
+        "self-harm/instructions": "自残/指导",
+        "harassment/threatening": "骚扰/威胁",
+        violence: "暴力",
+      },
+    },
   },
   Auth: {
     Title: "需要密码",
@@ -48,8 +68,20 @@ const cn = {
       newm: "从面具新建聊天",
       next: "下一个聊天",
       prev: "上一个聊天",
+      restart: "重新启动客户端",
       clear: "清除上下文",
       del: "删除聊天",
+      save: "保存当前会话聊天",
+      load: "加载会话聊天",
+      copymemoryai: "复制一个记忆会话的提示AI",
+      updatemasks: "更新一个用于掩码的记忆会话提示",
+      summarize: "总结当前会话的聊天内容",
+      UI: {
+        MasksSuccess: "成功更新了掩码会话",
+        MasksFail: "无法更新掩码会话",
+        SummarizeSuccess: "成功总结此次聊天的会话内容",
+        SummarizeFail: "无法总结此次聊天的会话内容",
+      },
     },
     InputActions: {
       Stop: "停止响应",
@@ -85,8 +117,8 @@ const cn = {
     Copy: "全部复制",
     Download: "下载文件",
     Share: "分享到 ShareGPT",
-    MessageFromYou: "用户",
-    MessageFromChatGPT: "ChatGPT",
+    MessageFromYou: "来自你的消息",
+    MessageFromChatGPT: "来自 ChatGPT 的消息",
     Format: {
       Title: "导出格式",
       SubTitle: "可以导出 Markdown 文本或者 PNG 图片",
@@ -167,6 +199,9 @@ const cn = {
       IsChecking: "正在检查更新...",
       FoundUpdate: (x: string) => `发现新版本：${x}`,
       GoToUpdate: "前往更新",
+      IsUpdating: "正在更新...",
+      UpdateSuccessful: "已成功更新到最新版本",
+      UpdateFailed: "更新失败",
     },
     SendKey: "发送键",
     Theme: "主题",
@@ -203,10 +238,47 @@ const cn = {
           SubTitle: "仅适用于本项目自带的跨域代理",
         },
 
+        AccessControl: {
+          Title: "启用覆盖访问控制",
+          SubTitle: "仅适用于覆盖访问控制设置，例如访问代码",
+        },
+        LockClient: {
+          Title: "启用不同步当前数据",
+          SubTitle: "仅同步其他来源的数据，而不同步当前数据",
+        },
+
         WebDav: {
-          Endpoint: "WebDAV 地址",
-          UserName: "用户名",
-          Password: "密码",
+          Endpoint: {
+            Name: "WebDav 终端点",
+            SubTitle: "配置 WebDav 终端点",
+          },
+          UserName: {
+            Name: "用户名",
+            SubTitle: "配置用户名",
+          },
+          Password: {
+            Name: "密码",
+            SubTitle: "配置密码",
+          },
+          FileName: {
+            Name: "文件名",
+            SubTitle: "文件名，例如：backtrackz.json（必须是 JSON 文件）",
+          },
+        },
+        GithubGist: {
+          GistID: {
+            Name: "Github Gist ID",
+            SubTitle:
+              "您的 Gist ID 位置，例如：gist.github.com/H0llyW00dzZ/<gistid>/等。复制 <gistid> 并粘贴到这里。",
+          },
+          FileName: {
+            Name: "文件名",
+            SubTitle: "文件名，例如：backtrackz.json（必须是 JSON 文件）",
+          },
+          AccessToken: {
+            Name: "访问令牌",
+            SubTitle: "确保您具有同步的权限。在那里启用私有和公开。",
+          },
         },
 
         UpStash: {
@@ -214,6 +286,14 @@ const cn = {
           UserName: "备份名称",
           Password: "UpStash Redis REST Token",
         },
+
+        GoSync: {
+          Endpoint: "GoSync REST URL",
+          UserName: "备份名称",
+          Password: "GoSync REST 令牌",
+          FileName: "文件名",
+        },
+
       },
 
       LocalState: "本地数据",
@@ -258,15 +338,32 @@ const cn = {
       Title: "历史消息长度压缩阈值",
       SubTitle: "当未压缩的历史消息超过该值时，将进行压缩",
     },
+    Token: {
+      Title: "API Key",
+      SubTitle: "使用自己的 Key 可绕过密码访问限制",
+      Placeholder: "OpenAI API Key",
+    },
 
     Usage: {
       Title: "余额查询",
       SubTitle(used: any, total: any) {
-        return `本月已使用 $${used}，订阅总额 $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "未知";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "未知";
+        const usedFormatted = new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(used);
+        return `本月使用金额：${usedFormatted}，硬限制金额：${hardLimitusd}，批准使用限额：${hardLimit}`;
       },
       IsChecking: "正在检查…",
       Check: "重新检查",
-      NoAccess: "输入 API Key 或访问密码查看余额",
+      NoAccess: `在以"sess-"为前缀的API密钥中输入会话密钥以检查余额。`,
+    },
+    AccessCode: {
+      Title: "访问密码",
+      SubTitle: "管理员已开启加密访问",
+      Placeholder: "请输入访问密码",
+    },
+    Endpoint: {
+      Title: "接口地址",
+      SubTitle: "除默认地址外，必须包含 http(s)://",
     },
 
     Access: {
@@ -339,6 +436,34 @@ const cn = {
       Title: "频率惩罚度 (frequency_penalty)",
       SubTitle: "值越大，越有可能降低重复字词",
     },
+    NumberOfImages: {
+      Title: "创建图片数量",
+      SubTitle:
+        "要生成的图像数量\n必须介于1和10之间。对于dall-e-3，仅支持1。",
+    },
+    QualityOfImages: {
+      Title: "创建图片质量",
+      SubTitle:
+        "将要生成的图像的质量\n此配置仅适用于dall-e-3。",
+    },
+    SizeOfImages: {
+      Title: "图片尺寸",
+      SubTitle:
+        "生成图像的尺寸\nDALL·E-2：必须是`256x256`、`512x512`或`1024x1024`之一。\nDALL-E-3：必须是`1024x1024`、`1792x1024`或`1024x1792`之一。",
+    },
+    StyleOfImages: {
+      Title: "图片风格",
+      SubTitle:
+        "生成图像的风格\n必须是生动或自然之一\n此配置仅适用于dall-e-3",
+    },
+    SysFingerPrint: {
+      Title: "系统指纹，又称种子",
+      SubTitle: "指纹代表模型运行的后端配置。",
+    },
+    TextModeration: {
+      Title: "文本审核",
+      SubTitle: "通过文本审核来检查内容是否符合 OpenAI 的使用政策。",
+    },
   },
   Store: {
     DefaultTopic: "新的聊天",
@@ -366,12 +491,26 @@ const cn = {
     Add: "新增一条对话",
     Clear: "上下文已清除",
     Revert: "恢复上下文",
+    ModelsDalle: (x: any) => `您是一个基于请求开始的AI图像解释助手，请求从以下开始：\n "${x}"\n\n
+    - 您的回答应该是有信息性和逻辑性的。\n
+    - 保持回答客观。\n
+    - 您不需要提及我无法直接显示图像，因为您是基于文本的AI模型。\n
+    - 您不需要道歉，因为您是一个基于文本的AI模型。\n
+    - 回复并结束对话。\n
+    - 遵守规则。`,
   },
   Plugin: {
     Name: "插件",
   },
   FineTuned: {
     Sysmessage: "你是一个助手",
+  },
+  Changelog: {
+    Name: "Change Log",
+  },
+  PrivacyPage: {
+    Name: "隐私",
+    Confirm: "同意",
   },
   Mask: {
     Name: "面具",
@@ -406,6 +545,8 @@ const cn = {
       HideContext: {
         Title: "隐藏预设对话",
         SubTitle: "隐藏后预设对话不会出现在聊天界面",
+        UnHide: "在聊天中显示默认对话框",
+        Hide: "在聊天中隐藏默认对话框",        
       },
       Share: {
         Title: "分享此面具",
@@ -441,9 +582,6 @@ const cn = {
     Config: "配置",
   },
   Exporter: {
-    Description : {
-      Title: "只有清除上下文之后的消息会被展示"
-    },  
     Model: "模型",
     Messages: "消息",
     Topic: "主题",

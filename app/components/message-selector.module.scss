@@ -58,8 +58,8 @@
       }
 
       .body {
-        flex: 1;
-        max-width: calc(100% - 80px);
+        flex-grow: 1;
+        max-width: calc(100% - 40px);
 
         .date {
           font-size: 12px;
@@ -70,12 +70,6 @@
         .content {
           font-size: 12px;
         }
-      }
-
-      .checkbox {
-        display: flex;
-        justify-content: flex-end;
-        flex: 1;
       }
     }
   }

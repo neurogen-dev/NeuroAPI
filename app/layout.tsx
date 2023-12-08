@@ -3,22 +3,23 @@ import "./styles/globals.scss";
 import "./styles/markdown.scss";
 import "./styles/highlight.scss";
 import { getClientConfig } from "./config/client";
-import { type Metadata } from "next";
+import { type Metadata, type Viewport } from "next";
 
-export const metadata: Metadata = {
-  title: "NeuroGPT",
-  description: "Your personal ChatGPT Chat Bot.",
-  viewport: {
+export const viewport: Viewport = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 1,
-  },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#151515" },
-  ],
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+      { media: "(prefers-color-scheme: dark)", color: "#151515" },
+    ],
+};
+
+export const metadata: Metadata = {
+  title: "NeuroGPT Web",
+  description: "Your personal ChatGPT Chat Bot.",
   appleWebApp: {
-    title: "NeuroGPT",
+    title: "NeuroGPT Web",
     statusBarStyle: "default",
   },
 };

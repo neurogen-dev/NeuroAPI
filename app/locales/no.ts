@@ -110,11 +110,14 @@ const no: PartialLocaleType = {
     Usage: {
       Title: "Saldo for konto",
       SubTitle(used: any, total: any) {
-        return `Brukt denne måneden $${used}, abonnement $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('nn-NO', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "ukjent";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('nn-NO', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "ukjent";
+        const usedFormatted = new Intl.NumberFormat('nn-NO', { style: 'currency', currency: 'USD' }).format(used);
+        return `Brukt denne månaden: ${usedFormatted}, Hard grense: ${hardLimitusd}, Godkjent bruksgrense: ${hardLimit}`;
       },
       IsChecking: "Sjekker ...",
       Check: "Sjekk",
-      NoAccess: "Skriv inn API-nøkkelen for å sjekke saldo",
+      NoAccess: `Skriv inn øktnøkkelen i API-nøkkelen som starter med prefikset "sess-" for å sjekke saldoen.`,
     },
 
     Model: "Model",
@@ -155,6 +158,10 @@ const no: PartialLocaleType = {
     Messages: "Meldingar",
     Topic: "Emne",
     Time: "Tid",
+  },
+  PrivacyPage: {
+    Name: "Personvern",
+    Confirm: "Godta",
   },
 };
 

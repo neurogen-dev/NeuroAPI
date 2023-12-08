@@ -1,7 +1,7 @@
-# 同步聊天记录
+# 同步聊天记录（upStash）
 ## 准备工作
 - GitHub账号
-- 拥有自己搭建过的ChatGPT-Next-Web的服务器
+- 拥有自己搭建过的NeuroGPT的服务器
 - [UpStash](https://upstash.com)
 
 ## 开始教程

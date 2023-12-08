@@ -9,14 +9,13 @@
   },
   "package": {
     "productName": "NeuroGPT",
-    "version": "2.0.0"
+    "version": "2.1.0"
   },
   "tauri": {
     "allowlist": {
       "all": false,
       "shell": {
-        "all": false,
-        "open": true
+        "all": true
       },
       "dialog": {
         "all": true,
@@ -50,6 +49,12 @@
       },
       "notification": {
         "all": true
+      },
+      "process": {
+        "relaunch": true
+      },
+      "path": {
+        "all": true
       }
     },
     "bundle": {
@@ -77,7 +82,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "NeuroGPT App",
+      "shortDescription": "NeuroGPT",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -93,7 +98,7 @@
       "endpoints": [
         "https://github.com/Em1tSan/NeuroGPT/releases/latest/download/latest.json"
       ],
-      "dialog": false,
+      "dialog": true,
       "windows": {
         "installMode": "passive"
       },
