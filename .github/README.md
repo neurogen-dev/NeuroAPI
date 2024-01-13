@@ -41,6 +41,12 @@ Your API access to ChatGPT.
 # About [NeuroAPI](https://neuroapi.host)
 Core of the project. Reverse API server compatible with OpenAI API format. Freemium. Multiple hundreds of providers.
 
+# Docs 
+
+[NeuroAPI Docs (EN)](https://neuroapi.gitbook.io/en/)
+
+[NeuroAPI Docs (RU)](https://neuroapi.gitbook.io/ru/)
+
 **Endpoint:**
 ```
 https://neuroapi.host
