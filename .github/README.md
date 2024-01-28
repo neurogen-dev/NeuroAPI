@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://t.me/neurogen_news">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroAPI+by+NeuroAI" alt="NeuroGPT" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroAPI+by+Neurogen" alt="NeuroAPI" />
 </a>
 
 Your API access to ChatGPT.
@@ -10,7 +10,7 @@ Your API access to ChatGPT.
 
 <div align="center">
 
-· [Wiki](https://github.com/Em1tSan/NeuroGPT/wiki#english-language) · [Web Site](https://neuroapi.host/) · [Online Chat](https://chat.neuroapi.host) · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
+[Docs](https://neuroapi.gitbook.io/en/) · [Web Site](https://neuroapi.host/) · [Online Chat](https://chat.neuroapi.host) · [Change Log](https://github.com/Em1tSan/NeuroGPT/commits/main) ·
 
 <a href="https://github.com/Em1tSan/NeuroGPT/releases/latest">
   <img src="https://img.shields.io/badge/-Windows-1371c3?logo=windows" alt="windows"/>
