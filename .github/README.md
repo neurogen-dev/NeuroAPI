@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://t.me/neurogen_news">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroGPT+by+NeuroAI" alt="NeuroGPT" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Jura&weight=700&size=30&duration=4000&pause=1000&color=1BED29&center=true&width=435&lines=NeuroAPI+by+NeuroAI" alt="NeuroGPT" />
 </a>
 
 Your API access to ChatGPT.
