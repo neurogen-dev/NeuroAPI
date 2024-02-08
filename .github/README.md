@@ -269,7 +269,7 @@ Then open http://127.0.0.1:3000 in your browser
 ***
 <div align="center">
   
-[![Star History Chart](https://api.star-history.com/svg?repos=Em1tSan/NeuroGPT&type=Date)](https://star-history.com/#Em1tSan/NeuroGPT&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=neurogen-dev/NeuroAPI&type=Date)](https://star-history.com/#neurogen-dev/NeuroAPI&Date)
 </div>
 
 # LICENSE
