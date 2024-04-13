@@ -116,6 +116,10 @@ export const DEFAULT_MODELS = [
 //    name: "dall-e-3-beta-instruct-vision",
 //    available: true,
 //  },
+    {
+    name: "gpt-4-turbo",
+    available: false,
+  },
   {
     name: "gpt-3.5-turbo",
     available: true,
