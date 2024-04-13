@@ -8,9 +8,9 @@ export const FETCH_COMMIT_URL = `https://api.github.com/repos/${OWNER}/${REPO}/c
 export const FETCH_TAG_URL = `https://api.github.com/repos/${OWNER}/${REPO}/tags?per_page=1`;
 export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 
-export const DEFAULT_CORS_HOST = "https://neuroapi.host";
+export const DEFAULT_CORS_HOST = "https://lk.neuroapi.host";
 export const DEFAULT_API_HOST = `${DEFAULT_CORS_HOST}`;
-export const OPENAI_BASE_URL = "https://neuroapi.host";
+export const OPENAI_BASE_URL = "https://lk.neuroapi.host";
 
 export enum Path {
   Home = "/",
@@ -60,7 +60,7 @@ export const UNFINISHED_INPUT = (id: string) => "unfinished-input-" + id;
 
 export const STORAGE_KEY = "NeuroGPT";
 
-export const REQUEST_TIMEOUT_MS = 60000;
+export const REQUEST_TIMEOUT_MS = 30000;
 
 export const EXPORT_MESSAGE_CLASS_NAME = "export-markdown";
 
@@ -117,55 +117,29 @@ export const DEFAULT_MODELS = [
 //    available: true,
 //  },
   {
-    name: "gpt-4",
-    available: true,
-  },
-  {
-    name: "gpt-4-0314",
-    available: true,
-  },
-  {
-    name: "gpt-4-0613",
-    available: true,
-  },
-  {
-    name: "gpt-4-32k",
-    available: true,
-  },
-  {
-    name: "gpt-4-32k-0314",
-    available: true,
-  },
-  {
-    name: "gpt-4-32k-0613",
-    available: true,
-  },
-  // recent update 
-  // read here : https://openai.com/blog/new-models-and-developer-products-announced-at-devday
-  {
-    name: "gpt-4-1106-preview",
-    available: true,
-  },
-  {
     name: "gpt-3.5-turbo",
     available: true,
   },
   {
-    name: "gpt-3.5-turbo-0613",
+    name: "gpt-3.5-turbo-0125",
     available: true,
   },
   {
-    name: "gpt-3.5-turbo-1106",
+    name: "claude-3-haiku",
     available: true,
   },
   {
-    name: "gpt-3.5-turbo-16k",
+    name: "claude-3-haiku",
     available: true,
   },
   {
-    name: "gpt-3.5-turbo-16k-0613",
+    name: "dolphin-2.6-mixtral-8x7b",
     available: true,
   },
+  {
+    name: "gemma-1.1-7b-it",
+    available: true,
+  }
 
 ] as const;
 
