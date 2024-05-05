@@ -1,7 +1,7 @@
 # UpStash를 사용하여 채팅 기록 동기화
 ## 사전 준비물
 - GitHub 계정
-- 자체 NeuroGPT 서버 설정
+- 자체 NeuroAPI Chat 서버 설정
 - [UpStash](https://upstash.com)
 
 ## 시작하기

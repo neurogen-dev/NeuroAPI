@@ -11,9 +11,8 @@ import mermaid from "mermaid";
 
 import LoadingIcon from "../icons/three-dots.svg";
 import React from "react";
-import { useDebouncedCallback, useThrottledCallback } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
 import { showImageModal } from "./ui-lib";
-import { isIOS, isMacOS } from "../utils"; // Import the isIOS & isMacOS functions from the utils file
 
 export function Mermaid(props: { code: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -100,54 +99,45 @@ export function PreCode(props: { children: any }) {
   );
 }
 
-function escapeMarkdownContent(content: string): string {
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isAppleIosDevice = isIOS() || isMacOS(); // Load isAppleDevice from isIOS functions
-  // According to this post: https://www.drupal.org/project/next_webform/issues/3358901
-  // iOS 16.4 is the first version to support lookbehind
-  const iosVersionSupportsLookBehind = 16.4;
-  let doesIosSupportLookBehind = false;
+function escapeDollarNumber(text: string) {
+  let escapedText = "";
 
-  if (isAppleIosDevice) {
-    const match = /os (\d+([_.]\d+)+)/.exec(userAgent);
-    if (match && match[1]) {
-      const iosVersion = parseFloat(match[1].replace("_", "."));
-      doesIosSupportLookBehind = iosVersion >= iosVersionSupportsLookBehind;
+  for (let i = 0; i < text.length; i += 1) {
+    let char = text[i];
+    const nextChar = text[i + 1] || " ";
+
+    if (char === "$" && nextChar >= "0" && nextChar <= "9") {
+      char = "\\$";
     }
+
+    escapedText += char;
   }
 
-  if (isAppleIosDevice && !doesIosSupportLookBehind) {
-    return content.replace(
-      // Exclude code blocks & math block from replacement
-      // custom-regex for unsupported Apple devices
-      /(`{3}[\s\S]*?`{3}|`[^`]*`)|(\$(?!\$))/g,
-      (match, codeBlock) => {
-        if (codeBlock) {
-          return match; // Return the code block as it is
-        } else {
-          return "&#36;"; // Escape dollar signs outside of code blocks
-        }
+  return escapedText;
+}
+
+function escapeBrackets(text: string) {
+  const pattern =
+    /(```[\s\S]*?```|`.*?`)|\\\[([\s\S]*?[^\\])\\\]|\\\((.*?)\\\)/g;
+  return text.replace(
+    pattern,
+    (match, codeBlock, squareBracket, roundBracket) => {
+      if (codeBlock) {
+        return codeBlock;
+      } else if (squareBracket) {
+        return `$$${squareBracket}$$`;
+      } else if (roundBracket) {
+        return `$${roundBracket}$`;
       }
-    );
-  } else {
-    return content.replace(
-      // Exclude code blocks & math block from replacement
-      /(`{3}[\s\S]*?`{3}|`[^`]*`)|(?<!\$)(\$(?!\$))/g,
-      (match, codeBlock) => {
-        if (codeBlock) {
-          return match; // Return the code block as it is
-        } else {
-          return "&#36;"; // Escape dollar signs outside of code blocks
-        }
-      }
-    );
-  }
+      return match;
+    },
+  );
 }
 
 function _MarkDownContent(props: { content: string }) {
-  const escapedContent = useMemo(() => escapeMarkdownContent(props.content), [
-    props.content,
-  ]);
+  const escapedContent = useMemo(() => {
+    return escapeBrackets(escapeDollarNumber(props.content));
+  }, [props.content]);
 
   return (
     <ReactMarkdown

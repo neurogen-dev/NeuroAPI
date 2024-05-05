@@ -12,7 +12,9 @@ import { ensure } from "../utils/clone";
 let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
 
 const DEFAULT_OPENAI_URL =
-  getClientConfig()?.buildMode === "export" ? DEFAULT_API_HOST : ApiPath.OpenAI;
+  getClientConfig()?.buildMode === "export"
+    ? DEFAULT_API_HOST + "/api/proxy/openai"
+    : ApiPath.OpenAI;
 
 const DEFAULT_ACCESS_STATE = {
   accessCode: "",
@@ -28,6 +30,16 @@ const DEFAULT_ACCESS_STATE = {
   azureUrl: "",
   azureApiKey: "",
   azureApiVersion: "2023-08-01-preview",
+
+  // google ai studio
+  googleUrl: "",
+  googleApiKey: "",
+  googleApiVersion: "v1",
+
+  // anthropic
+  anthropicApiKey: "",
+  anthropicApiVersion: "2023-06-01",
+  anthropicUrl: "",
 
   // server config
   needCode: true,
@@ -49,11 +61,19 @@ export const useAccessStore = createPersistStore(
     },
 
     isValidOpenAI() {
-      return ensure(get(), ["openaiUrl", "openaiApiKey"]);
+      return ensure(get(), ["openaiApiKey"]);
     },
 
     isValidAzure() {
       return ensure(get(), ["azureUrl", "azureApiKey", "azureApiVersion"]);
+    },
+
+    isValidGoogle() {
+      return ensure(get(), ["googleApiKey"]);
+    },
+
+    isValidAnthropic() {
+      return ensure(get(), ["anthropicApiKey"]);
     },
 
     isAuthorized() {
@@ -63,6 +83,8 @@ export const useAccessStore = createPersistStore(
       return (
         this.isValidOpenAI() ||
         this.isValidAzure() ||
+        this.isValidGoogle() ||
+        this.isValidAnthropic() ||
         !this.enabledAccessControl() ||
         (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
       );
@@ -99,6 +121,7 @@ export const useAccessStore = createPersistStore(
           token: string;
           openaiApiKey: string;
           azureApiVersion: string;
+          googleApiKey: string;
         };
         state.openaiApiKey = state.token;
         state.azureApiVersion = "2023-08-01-preview";

@@ -54,8 +54,8 @@ if ! command -v node >/dev/null || ! command -v git >/dev/null || ! command -v y
 fi
 
 # Clone the repository and install dependencies
-git clone https://github.com/Yidadaa/NeuroGPT
-cd NeuroGPT
+git clone https://github.com/neurogen-dev/NeuroAPI
+cd NeuroAPI Chat
 yarn install
 
 # Prompt user for environment variables

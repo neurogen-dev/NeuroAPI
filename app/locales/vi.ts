@@ -127,14 +127,11 @@ const vi: PartialLocaleType = {
     Usage: {
       Title: "Hạn mức tài khoản",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "không xác định";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "không xác định";
-        const usedFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'USD' }).format(used);
-        return `Sử dụng trong tháng này: ${usedFormatted}, Giới hạn cứng: ${hardLimitusd}, Giới hạn sử dụng được phê duyệt: ${hardLimit}`;
+        return `Đã sử dụng $${used} trong tháng này, hạn mức $${total}`;
       },
       IsChecking: "Đang kiểm tra...",
       Check: "Kiểm tra",
-      NoAccess: `Nhập Khóa Phiên vào Khóa API bắt đầu bằng tiền tố "sess-" để kiểm tra số dư.`,
+      NoAccess: "Nhập API Key để kiểm tra hạn mức",
     },
 
     Model: "Mô hình",
@@ -183,10 +180,6 @@ const vi: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Bạn là một trợ lý",
-  },
-  PrivacyPage: {
-    Name: "Quyền riêng tư",
-    Confirm: "Đồng ý",
   },
   Mask: {
     Name: "Mẫu",

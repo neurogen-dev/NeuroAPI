@@ -1,5 +1,6 @@
 import cn from "./cn";
 import en from "./en";
+import pt from "./pt";
 import tw from "./tw";
 import id from "./id";
 import fr from "./fr";
@@ -15,7 +16,7 @@ import cs from "./cs";
 import ko from "./ko";
 import ar from "./ar";
 import bn from "./bn";
-import hi from "./hi";
+import sk from "./sk";
 import { merge } from "../utils/merge";
 
 import type { LocaleType } from "./cn";
@@ -25,6 +26,7 @@ const ALL_LANGS = {
   cn,
   en,
   tw,
+  pt,
   jp,
   ko,
   id,
@@ -39,7 +41,7 @@ const ALL_LANGS = {
   no,
   ar,
   bn,
-  hi,
+  sk,
 };
 
 export type Lang = keyof typeof ALL_LANGS;
@@ -49,6 +51,7 @@ export const AllLangs = Object.keys(ALL_LANGS) as Lang[];
 export const ALL_LANG_OPTIONS: Record<Lang, string> = {
   cn: "简体中文",
   en: "English",
+  pt: "Português",
   tw: "繁體中文",
   jp: "日本語",
   ko: "한국어",
@@ -64,7 +67,7 @@ export const ALL_LANG_OPTIONS: Record<Lang, string> = {
   no: "Nynorsk",
   ar: "العربية",
   bn: "বাংলা",
-  hi: "हिंदी",
+  sk: "Slovensky",
 };
 
 const LANG_KEY = "lang";
@@ -92,9 +95,9 @@ function setItem(key: string, value: string) {
   } catch {}
 }
 
-function getLanguages() {
+function getLanguage() {
   try {
-    return navigator.languages;
+    return navigator.language.toLowerCase();
   } catch {
     return DEFAULT_LANG;
   }
@@ -107,20 +110,11 @@ export function getLang(): Lang {
     return savedLang as Lang;
   }
 
-  const preferredLangs = getLanguages();
-  if (typeof preferredLangs === "string") return preferredLangs; // no language list, return the only lang
+  const lang = getLanguage();
 
-  // loop for searching best language option based on user accepted language
-  let bestMatch: Lang | null = null;
-  for (let i = 0; i < preferredLangs.length; i++) {
-    for (const option of AllLangs) {
-      if (preferredLangs[i].toLowerCase().includes(option)) {
-        bestMatch = option;
-        break;
-      }
-    }
-    if (bestMatch) {
-      return bestMatch;
+  for (const option of AllLangs) {
+    if (lang.includes(option)) {
+      return option;
     }
   }
 

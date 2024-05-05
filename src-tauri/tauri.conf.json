@@ -8,14 +8,15 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "NeuroGPT",
-    "version": "2.1.1"
+    "productName": "NeuroAPI Chat",
+    "version": "2.11.3"
   },
   "tauri": {
     "allowlist": {
       "all": false,
       "shell": {
-        "all": true
+        "all": false,
+        "open": true
       },
       "dialog": {
         "all": true,
@@ -49,12 +50,6 @@
       },
       "notification": {
         "all": true
-      },
-      "process": {
-        "relaunch": true
-      },
-      "path": {
-        "all": true
       }
     },
     "bundle": {
@@ -73,7 +68,7 @@
         "icons/icon.ico"
       ],
       "identifier": "com.yida.chatgpt.next.web",
-      "longDescription": "NeuroGPT is a cross-platform ChatGPT client, including Web/Win/Linux/OSX/PWA.",
+      "longDescription": "NeuroAPI Chat is a cross-platform ChatGPT client, including Web/Win/Linux/OSX/PWA.",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -82,7 +77,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "NeuroGPT",
+      "shortDescription": "NeuroAPI Chat App",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -91,14 +86,15 @@
       }
     },
     "security": {
-      "csp": null
+      "csp": null,
+      "dangerousUseHttpScheme": true
     },
     "updater": {
-      "active": false,
+      "active": true,
       "endpoints": [
-        "https://github.com/Em1tSan/NeuroGPT/releases/latest/download/latest.json"
+        "https://github.com/neurogen-dev/NeuroAPI/releases/latest/download/latest.json"
       ],
-      "dialog": true,
+      "dialog": false,
       "windows": {
         "installMode": "passive"
       },
@@ -109,7 +105,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "NeuroGPT",
+        "title": "NeuroAPI Chat",
         "width": 960,
         "hiddenTitle": true,
         "titleBarStyle": "Overlay"

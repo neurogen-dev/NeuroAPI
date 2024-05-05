@@ -28,7 +28,7 @@ export enum Theme {
 export const DEFAULT_CONFIG = {
   lastUpdate: Date.now(), // timestamp, to merge state
 
-  submitKey: isMacOS() ? SubmitKey.MetaEnter : SubmitKey.CtrlEnter,
+  submitKey: SubmitKey.Enter,
   avatar: "1f603",
   fontSize: 14,
   theme: Theme.Auto as Theme,
@@ -52,43 +52,12 @@ export const DEFAULT_CONFIG = {
     max_tokens: 4000,
     presence_penalty: 0,
     frequency_penalty: 0,
-    /**
-     * DALL·E Models
-     * Author: @H0llyW00dzZ
-     *
-     **/
-    n: 1, // The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.
-    /** Quality Only DALL·E-3 Models
-     * Author: @H0llyW00dzZ
-     * The quality of the image that will be generated. 
-     * `hd` creates images with finer details and greater consistency across the image.
-     **/
-    quality: "hd", // Only DALL·E-3 for DALL·E-2 not not really needed
-    /** SIZE ALL·E Models
-     * Author: @H0llyW00dzZ
-     * DALL·E-2 : Must be one of `256x256`, `512x512`, or `1024x1024`.
-     * DALL-E-3 : Must be one of `1024x1024`, `1792x1024`, or `1024x1792`.
-     **/
-    size: "1024x1024",
-    /** Style DALL-E-3 Models
-     * Author: @H0llyW00dzZ
-     * Must be one of `vivid` or `natural`. 
-     * `Vivid` causes the model to lean towards generating hyper-real and dramatic images. 
-     * `Natural` causes the model to produce more natural, less hyper-real looking images. 
-     */
-    style: "vivid", // Only DALL·E-3 for DALL·E-2 not not really needed
-    system_fingerprint: "",
     sendMemory: true,
     historyMessageCount: 4,
     compressMessageLengthThreshold: 1000,
     enableInjectSystemPrompts: true,
     template: DEFAULT_INPUT_TEMPLATE,
   },
-  /**
-   * Text Moderation Open AI
-   * Author: @H0llyW00dzZ
-   **/
-  textmoderation: true, // text moderation default is enabled
 };
 
 export type ChatConfig = typeof DEFAULT_CONFIG;
@@ -122,29 +91,10 @@ export const ModalConfigValidator = {
     return limitNumber(x, -2, 2, 0);
   },
   temperature(x: number) {
-    return limitNumber(x, 0, 1, 1);
+    return limitNumber(x, 0, 2, 1);
   },
   top_p(x: number) {
     return limitNumber(x, 0, 1, 1);
-  },
-  n(x: number) {
-    return limitNumber(x, 1, 10, 1);
-  },
-  quality(x: string) {
-    return ["hd"].includes(x) ? x : "hd";
-  },
-  size(x: string) {
-    const validSizes = ["256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"];
-    return validSizes.includes(x) ? x : "1024x1024";
-  },
-  style(x: string) {
-    const validStyles = ["vivid", "natural"];
-    return validStyles.includes(x) ? x : "vivid";
-  },
-  system_fingerprint(x: string) {
-    // Example: Ensure the fingerprint matches the format "fp_XXXXXXXXXX" where X represents a hexadecimal digit
-    const regex = /^fp_[0-9a-fA-F]{10}$/;
-    return regex.test(x) ? x : "";
   },
 };
 
@@ -182,7 +132,7 @@ export const useAppConfig = createPersistStore(
   }),
   {
     name: StoreKey.Config,
-    version: 4.2, // DALL·E Models switching version to 4.1 because in 4.0 @Yidadaa using it.
+    version: 3.8,
     migrate(persistedState, version) {
       const state = persistedState as ChatConfig;
 
@@ -211,29 +161,6 @@ export const useAppConfig = createPersistStore(
 
       if (version < 3.8) {
         state.lastUpdate = Date.now();
-      }
-
-      if (version < 3.9) {
-        state.textmoderation = true;
-      }
-
-      if (version < 4.1) {
-        state.modelConfig = {
-          ...state.modelConfig,
-          n: 1,
-          quality: "hd",
-          size: "1024x1024",
-          style: "vivid",
-        };
-      }
-
-      // In the wilds 🚀
-
-      if (version < 4.2) {
-        state.modelConfig = {
-          ...state.modelConfig,
-          system_fingerprint: "",
-        };
       }
 
       return state as any;

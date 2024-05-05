@@ -1,7 +1,7 @@
 # Sincronizzare i Log delle Chat con UpStash
 ## Prerequisiti
 - Account GitHub
-- Server NeuroGPT di propria configurazione
+- Server NeuroAPI Chat di propria configurazione
 - [UpStash](https://upstash.com)
 
 ## Per iniziare

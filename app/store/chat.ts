@@ -1,4 +1,4 @@
-import { trimTopic } from "../utils";
+import { trimTopic, getMessageTextContent } from "../utils";
 
 import Locale, { getLang } from "../locales";
 import { showToast } from "../components/ui-lib";
@@ -6,17 +6,21 @@ import { ModelConfig, ModelType, useAppConfig } from "./config";
 import { createEmptyMask, Mask } from "./mask";
 import {
   DEFAULT_INPUT_TEMPLATE,
+  DEFAULT_MODELS,
   DEFAULT_SYSTEM_TEMPLATE,
   KnowledgeCutOffDate,
+  ModelProvider,
   StoreKey,
   SUMMARIZE_MODEL,
+  GEMINI_SUMMARIZE_MODEL,
 } from "../constant";
-import { api, RequestMessage } from "../client/api";
+import { ClientApi, RequestMessage, MultimodalContent } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
+import { identifyDefaultClaudeModel } from "../utils/checkers";
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -81,28 +85,52 @@ function createEmptySession(): ChatSession {
 }
 
 function getSummarizeModel(currentModel: string) {
-  // should be depends of user selected
-  const modelConfig = useAppConfig.getState().modelConfig;
-  return currentModel.startsWith("gpt") ? modelConfig.model : currentModel;
+  // if it is using gpt-* models, force to use 3.5 to summarize
+  if (currentModel.startsWith("gpt")) {
+    return SUMMARIZE_MODEL;
+  }
+  if (currentModel.startsWith("gemini-pro")) {
+    return GEMINI_SUMMARIZE_MODEL;
+  }
+  return currentModel;
 }
 
 function countMessages(msgs: ChatMessage[]) {
-  return msgs.reduce((pre, cur) => pre + estimateTokenLength(cur.content), 0);
+  return msgs.reduce(
+    (pre, cur) => pre + estimateTokenLength(getMessageTextContent(cur)),
+    0,
+  );
 }
 
 function fillTemplateWith(input: string, modelConfig: ModelConfig) {
-  let cutoff =
+  const cutoff =
     KnowledgeCutOffDate[modelConfig.model] ?? KnowledgeCutOffDate.default;
+  // Find the model in the DEFAULT_MODELS array that matches the modelConfig.model
+  const modelInfo = DEFAULT_MODELS.find((m) => m.name === modelConfig.model);
+
+  var serviceProvider = "OpenAI";
+  if (modelInfo) {
+    // TODO: auto detect the providerName from the modelConfig.model
+
+    // Directly use the providerName from the modelInfo
+    serviceProvider = modelInfo.provider.providerName;
+  }
 
   const vars = {
+    ServiceProvider: serviceProvider,
     cutoff,
     model: modelConfig.model,
-    time: new Date().toLocaleString(),
+    time: new Date().toString(),
     lang: getLang(),
     input: input,
   };
 
   let output = modelConfig.template ?? DEFAULT_INPUT_TEMPLATE;
+
+  // remove duplicate
+  if (input.startsWith(output)) {
+    output = "";
+  }
 
   // must contains {{input}}
   const inputVar = "{{input}}";
@@ -111,7 +139,8 @@ function fillTemplateWith(input: string, modelConfig: ModelConfig) {
   }
 
   Object.entries(vars).forEach(([name, value]) => {
-    output = output.replaceAll(`{{${name}}}`, value);
+    const regex = new RegExp(`{{${name}}}`, "g");
+    output = output.replace(regex, value.toString()); // Ensure value is a string
   });
 
   return output;
@@ -267,16 +296,36 @@ export const useChatStore = createPersistStore(
         get().summarizeSession();
       },
 
-      async onUserInput(content: string) {
+      async onUserInput(content: string, attachImages?: string[]) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
 
         const userContent = fillTemplateWith(content, modelConfig);
         console.log("[User Input] after template: ", userContent);
 
-        const userMessage: ChatMessage = createMessage({
+        let mContent: string | MultimodalContent[] = userContent;
+
+        if (attachImages && attachImages.length > 0) {
+          mContent = [
+            {
+              type: "text",
+              text: userContent,
+            },
+          ];
+          mContent = mContent.concat(
+            attachImages.map((url) => {
+              return {
+                type: "image_url",
+                image_url: {
+                  url: url,
+                },
+              };
+            }),
+          );
+        }
+        let userMessage: ChatMessage = createMessage({
           role: "user",
-          content: userContent,
+          content: mContent,
         });
 
         const botMessage: ChatMessage = createMessage({
@@ -294,7 +343,7 @@ export const useChatStore = createPersistStore(
         get().updateCurrentSession((session) => {
           const savedUserMessage = {
             ...userMessage,
-            content,
+            content: mContent,
           };
           session.messages = session.messages.concat([
             savedUserMessage,
@@ -302,11 +351,19 @@ export const useChatStore = createPersistStore(
           ]);
         });
 
+        var api: ClientApi;
+        if (modelConfig.model.startsWith("gemini")) {
+          api = new ClientApi(ModelProvider.GeminiPro);
+        } else if (identifyDefaultClaudeModel(modelConfig.model)) {
+          api = new ClientApi(ModelProvider.Claude);
+        } else {
+          api = new ClientApi(ModelProvider.GPT);
+        }
+
         // make request
         api.llm.chat({
           messages: sendMessages,
           config: { ...modelConfig, stream: true },
-          whitelist: false,
           onUpdate(message) {
             botMessage.streaming = true;
             if (message) {
@@ -380,8 +437,12 @@ export const useChatStore = createPersistStore(
         const contextPrompts = session.mask.context.slice();
 
         // system prompts, to get close to OpenAI Web ChatGPT
-        const shouldInjectSystemPrompts = modelConfig.enableInjectSystemPrompts;
-        const systemPrompts = shouldInjectSystemPrompts
+        const shouldInjectSystemPrompts =
+          modelConfig.enableInjectSystemPrompts &&
+          session.mask.modelConfig.model.startsWith("gpt-");
+
+        var systemPrompts: ChatMessage[] = [];
+        systemPrompts = shouldInjectSystemPrompts
           ? [
               createMessage({
                 role: "system",
@@ -438,10 +499,9 @@ export const useChatStore = createPersistStore(
         ) {
           const msg = messages[i];
           if (!msg || msg.isError) continue;
-          tokenCount += estimateTokenLength(msg.content);
+          tokenCount += estimateTokenLength(getMessageTextContent(msg));
           reversedRecentMessages.push(msg);
         }
-
         // concat all messages
         const recentMessages = [
           ...systemPrompts,
@@ -475,6 +535,16 @@ export const useChatStore = createPersistStore(
       summarizeSession() {
         const config = useAppConfig.getState();
         const session = get().currentSession();
+        const modelConfig = session.mask.modelConfig;
+
+        var api: ClientApi;
+        if (modelConfig.model.startsWith("gemini")) {
+          api = new ClientApi(ModelProvider.GeminiPro);
+        } else if (identifyDefaultClaudeModel(modelConfig.model)) {
+          api = new ClientApi(ModelProvider.Claude);
+        } else {
+          api = new ClientApi(ModelProvider.GPT);
+        }
 
         // remove error messages if any
         const messages = session.messages;
@@ -492,69 +562,28 @@ export const useChatStore = createPersistStore(
               content: Locale.Store.Prompt.Topic,
             }),
           );
-      
-          const topicModel = getSummarizeModel(session.mask.modelConfig.model);
-      
-          if (topicModel.startsWith("dall-e")) {
-            api.llm.chat({
-              messages: topicMessages,
-              config: {
-                model: "gpt-4-vision-preview",
-                stream: false,
-              },
-              whitelist: true,
-              onFinish(message) {
-                get().updateCurrentSession(
-                  (session) => {
-                    session.topic =
-                      message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC;
-                    // Add system message after summarizing the topic
-                    const systemMessage: ChatMessage = {
-                      role: "system",
-                      content: `${Locale.FineTuned.Sysmessage} ${session.topic}`,
-                      date: new Date().toLocaleString(),
-                      id: nanoid(),
-                    };
-                    session.messages = [systemMessage, ...session.messages];
-                  });
-              },
-            });
-          } else {
-            // Summarize topic using the selected model
-            api.llm.chat({
-              messages: topicMessages,
-              config: {
-                model: topicModel,
-                stream: false,
-              },
-              whitelist: true,
-              onFinish(message) {
-                get().updateCurrentSession(
-                  (session) => {
-                  session.topic =
-                    message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC;
-                  // Add system message after summarizing the topic
-                  const systemMessage: ChatMessage = {
-                    role: "system",
-                    content: `${Locale.FineTuned.Sysmessage} ${session.topic}`,
-                    date: new Date().toLocaleString(),
-                    id: nanoid(),
-                  };
-                  session.messages = [systemMessage, ...session.messages];
-                });
-              },
-            });
-          }
+          api.llm.chat({
+            messages: topicMessages,
+            config: {
+              model: getSummarizeModel(session.mask.modelConfig.model),
+              stream: false,
+            },
+            onFinish(message) {
+              get().updateCurrentSession(
+                (session) =>
+                  (session.topic =
+                    message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC),
+              );
+            },
+          });
         }
-
-        const modelConfig = session.mask.modelConfig;
         const summarizeIndex = Math.max(
           session.lastSummarizeIndex,
           session.clearContextIndex ?? 0,
         );
         let toBeSummarizedMsgs = messages
-        .filter((msg) => !msg.isError)
-        .slice(summarizeIndex);
+          .filter((msg) => !msg.isError)
+          .slice(summarizeIndex);
 
         const historyMsgLength = countMessages(toBeSummarizedMsgs);
 
@@ -581,64 +610,37 @@ export const useChatStore = createPersistStore(
           historyMsgLength > modelConfig.compressMessageLengthThreshold &&
           modelConfig.sendMemory
         ) {
-          const summarizeModel = getSummarizeModel(session.mask.modelConfig.model);
+          /** Destruct max_tokens while summarizing
+           * this param is just shit
+           **/
           const { max_tokens, ...modelcfg } = modelConfig;
-
-          if (summarizeModel.startsWith("dall-e")) {
-            api.llm.chat({
-              messages: toBeSummarizedMsgs.concat(
-                createMessage({
-                  role: "system",
-                  content: Locale.Store.Prompt.Summarize,
-                  date: "",
-                }),
-              ),
-              config: { ...modelcfg, model: "gpt-4-vision-preview", stream: true },
-              whitelist: true,
-              onFinish(message) {
-                console.log("[Memory] ", message);
+          api.llm.chat({
+            messages: toBeSummarizedMsgs.concat(
+              createMessage({
+                role: "system",
+                content: Locale.Store.Prompt.Summarize,
+                date: "",
+              }),
+            ),
+            config: {
+              ...modelcfg,
+              stream: true,
+              model: getSummarizeModel(session.mask.modelConfig.model),
+            },
+            onUpdate(message) {
+              session.memoryPrompt = message;
+            },
+            onFinish(message) {
+              console.log("[Memory] ", message);
+              get().updateCurrentSession((session) => {
                 session.lastSummarizeIndex = lastSummarizeIndex;
-                showToast(
-                  Locale.Chat.Commands.UI.SummarizeSuccess,
-                );
-              },
-              onError(err) {
-                console.error("[Summarize] ", err);
-                showToast(
-                  Locale.Chat.Commands.UI.SummarizeFail,
-                );
-              },
-            });
-          } else {
-            // Summarize using the selected model
-            api.llm.chat({
-              messages: toBeSummarizedMsgs.concat(
-                createMessage({
-                  role: "system",
-                  content: Locale.Store.Prompt.Summarize,
-                  date: "",
-                }),
-              ),
-              config: { ...modelcfg, stream: true },
-              onUpdate(message) {
-                session.memoryPrompt = message;
-              },
-              whitelist: true,
-              onFinish(message) {
-                console.log("[Memory] ", message);
-                session.lastSummarizeIndex = lastSummarizeIndex;
-                showToast(
-                  Locale.Chat.Commands.UI.SummarizeSuccess,
-                );
-              },
-              onError(err) {
-                console.error("[Summarize] ", err);
-                showToast(
-                  Locale.Chat.Commands.UI.SummarizeFail,
-                );
-              },
-            });
-          }
+                session.memoryPrompt = message; // Update the memory prompt for stored it in local storage
+              });
+            },
+            onError(err) {
+              console.error("[Summarize] ", err);
+            },
+          });
         }
       },
 

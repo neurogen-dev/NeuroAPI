@@ -1,13 +1,12 @@
 import { STORAGE_KEY } from "@/app/constant";
 import { SyncStore } from "@/app/store/sync";
-import { corsFetch } from "../cors";
 
 export type WebDAVConfig = SyncStore["webdav"];
 export type WebDavClient = ReturnType<typeof createWebDavClient>;
 
 export function createWebDavClient(store: SyncStore) {
   const folder = STORAGE_KEY;
-  const fileName = `${folder}/${store.webdav.filename}`;
+  const fileName = `${folder}/backup.json`;
   const config = store.webdav;
   const proxyUrl =
     store.useProxy && store.proxyUrl.length > 0 ? store.proxyUrl : undefined;
@@ -15,19 +14,19 @@ export function createWebDavClient(store: SyncStore) {
   return {
     async check() {
       try {
-        const res = await corsFetch(this.path(fileName), {
-          method: "PROPFIND",
+        const res = await fetch(this.path(folder, proxyUrl), {
+          method: "MKCOL",
           headers: this.headers(),
-          proxyUrl,
-          mode: "cors",
         });
-        console.log(
-          "[WebDav] Check Data From File Name",
-          `${fileName}`,
+        const success = [201, 200, 404, 405, 301, 302, 307, 308].includes(
           res.status,
-          res.statusText,
         );
-        return [200, 207, 404].includes(res.status);
+        console.log(
+          `[WebDav] check ${success ? "success" : "failed"}, ${res.status} ${
+            res.statusText
+          }`,
+        );
+        return success;
       } catch (e) {
         console.error("[WebDav] failed to check", e);
       }
@@ -36,45 +35,24 @@ export function createWebDavClient(store: SyncStore) {
     },
 
     async get(key: string) {
-      const res = await corsFetch(this.path(fileName), {
+      const res = await fetch(this.path(fileName, proxyUrl), {
         method: "GET",
         headers: this.headers(),
-        proxyUrl,
-        mode: "cors",
       });
 
-      console.log("[WebDav] Get File Name =", key, res.status, res.statusText);
+      console.log("[WebDav] get key = ", key, res.status, res.statusText);
 
       return await res.text();
     },
 
     async set(key: string, value: string) {
-      const exists = await this.check();
-
-      if (!exists) {
-        await corsFetch(this.path(fileName), {
-          method: "PUT",
-          headers: this.headers(),
-          body: "",
-          proxyUrl,
-          mode: "cors",
-        });
-      }
-
-      const res = await corsFetch(this.path(fileName), {
+      const res = await fetch(this.path(fileName, proxyUrl), {
         method: "PUT",
         headers: this.headers(),
         body: value,
-        proxyUrl,
-        mode: "cors",
       });
 
-      console.log(
-        "[WebDav] Set A new data from File Name =",
-        key,
-        res.status,
-        res.statusText,
-      );
+      console.log("[WebDav] set key = ", key, res.status, res.statusText);
     },
 
     headers() {
@@ -84,18 +62,28 @@ export function createWebDavClient(store: SyncStore) {
         authorization: `Basic ${auth}`,
       };
     },
-    path(path: string) {
-      let url = config.endpoint;
-
-      if (!url.endsWith("/")) {
-        url += "/";
-      }
-
+    path(path: string, proxyUrl: string = "") {
       if (path.startsWith("/")) {
         path = path.slice(1);
       }
 
-      return url + path;
+      if (proxyUrl.endsWith("/")) {
+        proxyUrl = proxyUrl.slice(0, -1);
+      }
+
+      let url;
+      const pathPrefix = "/api/webdav/";
+
+      try {
+        let u = new URL(proxyUrl + pathPrefix + path);
+        // add query params
+        u.searchParams.append("endpoint", config.endpoint);
+        url = u.toString();
+      } catch (e) {
+        url = pathPrefix + path + "?endpoint=" + config.endpoint;
+      }
+
+      return url;
     },
   };
 }

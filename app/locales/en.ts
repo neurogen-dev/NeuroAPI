@@ -9,33 +9,13 @@ const en: LocaleType = {
   WIP: "Coming Soon...",
   Error: {
     Unauthorized: isApp
-      ? "Unauthorized access, please enter your OpenAI API Key in [auth](/#/auth) page."
+      ? "Invalid API Key, please check it in [Settings](/#/settings) page."
       : "Unauthorized access, please enter access code in [auth](/#/auth) page, or enter your OpenAI API Key.",
-    Content_Policy: {
-      Title:
-        "Your request got flagged because of a Content Policy Violation.",
-      SubTitle: 
-        "Read Here: https://platform.openai.com/docs/guides/moderation/overview",
-      Reason: {
-        Title: "Reason",
-        sexual: "Sexual",
-        hate: "Hate",
-        harassment: "Harassment",
-        "self-harm": "Self-harm",
-        "sexual/minors": "Sexual/minors",
-        "hate/threatening": "Hate/threatening",
-        "violence/graphic": "Violence/graphic",
-        "self-harm/intent": "Self-harm/intent",
-        "self-harm/instructions": "Self-harm/instructions",
-        "harassment/threatening": "Harassment/threatening",
-        violence: "Violence",
-      },
-    },
   },
   Auth: {
     Title: "Need Access Code",
     Tips: "Please enter access code below",
-    SubTips: "Or enter your OpenAI API Key",
+    SubTips: "Or enter your OpenAI or Google API Key",
     Input: "access code",
     Confirm: "Confirm",
     Later: "Later",
@@ -70,20 +50,8 @@ const en: LocaleType = {
       newm: "Start a new chat with mask",
       next: "Next Chat",
       prev: "Previous Chat",
-      restart: "Restart a client",
       clear: "Clear Context",
       del: "Delete Chat",
-      save: "Save a current session chat",
-      load: "Load a session chat",
-      copymemoryai: "Copy a session of memory prompt ai",
-      updatemasks: "Update a session of memory prompt for a mask",
-      summarize: "Summarize the current session of this chat",
-      UI: {
-        MasksSuccess: "Successfully updated session of masks",
-        MasksFail: "Failed to update session of masks",
-        SummarizeSuccess: "Successfully summarize session of this chat",
-        SummarizeFail: "Failed to summarize session of this chat",
-      },      
     },
     InputActions: {
       Stop: "Stop",
@@ -97,6 +65,7 @@ const en: LocaleType = {
       Masks: "Masks",
       Clear: "Clear Context",
       Settings: "Settings",
+      UploadImage: "Upload Images",
     },
     Rename: "Rename Chat",
     Typing: "Typing…",
@@ -201,9 +170,6 @@ const en: LocaleType = {
       IsChecking: "Checking update...",
       FoundUpdate: (x: string) => `Found new version: ${x}`,
       GoToUpdate: "Update",
-      IsUpdating: "Updating...",
-      UpdateSuccessful: "A Version has been updated to the latest version",
-      UpdateFailed: "Update Failed",
     },
     SendKey: "Send Key",
     Theme: "Theme",
@@ -240,50 +206,11 @@ const en: LocaleType = {
           SubTitle:
             "Only applicable to the built-in CORS proxy for this project",
         },
-        AccessControl: {
-          Title: "Enable Overwrite Access Control",
-          SubTitle:
-            "Only applicable to the overwrite access control setting such as an access code",
-        },
-        LockClient: {
-          Title: "Enable Do Not Sync Current Data",
-          SubTitle: "Only sync data from other sources, not the current data",
-        },
+
         WebDav: {
-          Endpoint: {
-            Name: "WebDav Endpoint",
-            SubTitle: "Configure the WebDav Endpoint",
-          },
-          UserName: {
-            Name: "User Name",
-            SubTitle: "Configure the User Name",
-          },
-          Password: {
-            Name: "Password",
-            SubTitle: "Configure the Password",
-          },
-          FileName: {
-            Name: "File Name",
-            SubTitle:
-              "File Name, for example: backtrackz.json (must be a JSON file)",
-          },
-        },
-        GithubGist: {
-          GistID: {
-            Name: "Github Gist ID",
-            SubTitle:
-              "Your Gist ID location, for example: gist.github.com/H0llyW00dzZ/<gistid>/etc. copy then paste the <gistid> here.",
-          },
-          FileName: {
-            Name: "File Name",
-            SubTitle:
-              "File Name, for example: backtrackz.json (must be a JSON file)",
-          },
-          AccessToken: {
-            Name: "Access Token",
-            SubTitle:
-              "Make sure you have permission for syncing. Enable Private & Public there.",
-          },
+          Endpoint: "WebDAV Endpoint",
+          UserName: "User Name",
+          Password: "Password",
         },
 
         UpStash: {
@@ -291,14 +218,6 @@ const en: LocaleType = {
           UserName: "Backup Name",
           Password: "UpStash Redis REST Token",
         },
-
-        GoSync: {
-          Endpoint: "GoSync REST Url",
-          UserName: "Backup Name",
-          Password: "GoSync REST Token",
-          FileName: "File Name",
-        },
-
       },
 
       LocalState: "Local Data",
@@ -344,32 +263,15 @@ const en: LocaleType = {
       SubTitle:
         "Will compress if uncompressed messages length exceeds the value",
     },
-    Token: {
-      Title: "API Key",
-      SubTitle: "Use your key to ignore access code limit",
-      Placeholder: "OpenAI API Key",
-    },
 
     Usage: {
       Title: "Account Balance",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "unknown";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "unknown";
-        const usedFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(used);
-        return `Used this month ${usedFormatted}, Hard limit ${hardLimitusd}, Approved usage limit ${hardLimit}`;
+        return `Used this month $${used}, subscription $${total}`;
       },
       IsChecking: "Checking...",
       Check: "Check",
-      NoAccess: `Enter Session Key in API Key starting with prefix "sess-" to check balance.`,
-    },
-    AccessCode: {
-      Title: "Access Code",
-      SubTitle: "Access control enabled",
-      Placeholder: "Need Access Code",
-    },
-    Endpoint: {
-      Title: "Endpoint",
-      SubTitle: "Custom endpoint must start with http(s)://",
+      NoAccess: "Enter API Key to check balance",
     },
     Access: {
       AccessCode: {
@@ -414,9 +316,44 @@ const en: LocaleType = {
           SubTitle: "Check your api version from azure console",
         },
       },
+      Anthropic: {
+        ApiKey: {
+          Title: "Anthropic API Key",
+          SubTitle:
+            "Use a custom Anthropic Key to bypass password access restrictions",
+          Placeholder: "Anthropic API Key",
+        },
+
+        Endpoint: {
+          Title: "Endpoint Address",
+          SubTitle: "Example:",
+        },
+
+        ApiVerion: {
+          Title: "API Version (claude api version)",
+          SubTitle: "Select and input a specific API version",
+        },
+      },
       CustomModel: {
         Title: "Custom Models",
         SubTitle: "Custom model options, seperated by comma",
+      },
+      Google: {
+        ApiKey: {
+          Title: "API Key",
+          SubTitle: "Obtain your API Key from Google AI",
+          Placeholder: "Enter your Google AI Studio API Key",
+        },
+
+        Endpoint: {
+          Title: "Endpoint Address",
+          SubTitle: "Example:",
+        },
+
+        ApiVersion: {
+          Title: "API Version (specific to gemini-pro)",
+          SubTitle: "Select a specific API version",
+        },
       },
     },
 
@@ -443,36 +380,6 @@ const en: LocaleType = {
       SubTitle:
         "A larger value decreasing the likelihood to repeat the same line",
     },
-    NumberOfImages: {
-      Title: "Number Image Create",
-      SubTitle:
-        "A number of images to generate\nMust be between 1 and 10. For dall-e-3, only 1 is supported.",
-    },
-    QualityOfImages: {
-      Title: "Quality Image Create",
-      SubTitle:
-        "A quality of the image that will be generated\nThis Configuration is only supported for dall-e-3.",
-    },
-    SizeOfImages: {
-      Title: "Size Image",
-      SubTitle:
-        "A size of the generated images\nDALL·E-2 : Must be one of `256x256`, `512x512`, or `1024x1024`.\nDALL-E-3 : Must be one of `1024x1024`, `1792x1024`, or `1024x1792`.",
-    },
-    StyleOfImages: {
-      Title: "Style Image",
-      SubTitle:
-        "A style of the generated images\nMust be one of vivid or natural\nThis Configuration is only supported for dall-e-3",
-    },
-    SysFingerPrint: {
-      Title : "System Finger Print A.k.a Seeds",
-      SubTitle:
-      "A fingerprint represents the backend configuration that the model runs with.",
-    },
-    TextModeration: {
-      Title: "Text Moderation",
-      SubTitle:
-        "A Text Moderation to check whether content complies with OpenAI's usage policies.",
-    },
   },
   Store: {
     DefaultTopic: "New Conversation",
@@ -482,7 +389,7 @@ const en: LocaleType = {
       History: (content: string) =>
         "This is a summary of the chat history as a recap: " + content,
       Topic:
-        "Please generate a four to five word title summarizing our conversation without any lead-in, punctuation, quotation marks, periods, symbols, or additional text. Remove enclosing quotation marks.",
+        "Please generate a four to five word title summarizing our conversation without any lead-in, punctuation, quotation marks, periods, symbols, bold text, or additional text. Remove enclosing quotation marks.",
       Summarize:
         "Summarize the discussion briefly in 200 words or less to use as a prompt for future context.",
     },
@@ -501,26 +408,12 @@ const en: LocaleType = {
     Add: "Add a Prompt",
     Clear: "Context Cleared",
     Revert: "Revert",
-    ModelsDalle: (x: any) => `You are an AI Image explanation assistant based on request starting request from:\n "${x}"\n\n
-    - Your responses should be informative and logical.\n
-    - Keep your answers impersonal.\n
-    - You don't have to mention that I'm unable to directly display images since you are AI text-based model.\n
-    - You don't have to mention that I apologize, since you are a text-based AI model.\n
-    - Replying and end the conversation.\n
-    - Keep Follow Rules.`,
   },
   Plugin: {
     Name: "Plugin",
   },
   FineTuned: {
     Sysmessage: "You are an assistant that",
-  },
-  Changelog: {
-    Name: "Change Log",
-  },
-  PrivacyPage: {
-    Name: "Privacy",
-    Confirm: "Agree",
   },
   Mask: {
     Name: "Mask",
@@ -555,8 +448,6 @@ const en: LocaleType = {
       HideContext: {
         Title: "Hide Context Prompts",
         SubTitle: "Do not show in-context prompts in chat",
-        UnHide: "Show Context prompts in chat",
-        Hide: "Hide Context prompts in chat",
       },
       Share: {
         Title: "Share This Mask",
@@ -587,10 +478,13 @@ const en: LocaleType = {
     Config: "Config",
   },
   Exporter: {
+    Description: {
+      Title: "Only messages after clearing the context will be displayed",
+    },
     Model: "Model",
     Messages: "Messages",
     Topic: "Topic",
-    Time: "Date & Time",
+    Time: "Time",
   },
 
   URLCommand: {

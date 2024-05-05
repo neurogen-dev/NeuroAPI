@@ -51,7 +51,9 @@ import Locale, {
 import { copyToClipboard } from "../utils";
 import Link from "next/link";
 import {
+  Anthropic,
   Azure,
+  Google,
   OPENAI_BASE_URL,
   Path,
   RELEASE_URL,
@@ -267,7 +269,7 @@ function CheckButton() {
   const syncStore = useSyncStore();
 
   const couldCheck = useMemo(() => {
-    return syncStore.countSync();
+    return syncStore.cloudSync();
   }, [syncStore]);
 
   const [checkState, setCheckState] = useState<
@@ -294,8 +296,10 @@ function CheckButton() {
           <LoadingIcon />
         ) : checkState === "success" ? (
           <CloudSuccessIcon />
-        ) : (
+        ) : checkState === "failed" ? (
           <CloudFailIcon />
+        ) : (
+          <ConnectionIcon />
         )
       }
     ></IconButton>
@@ -373,43 +377,12 @@ function SyncConfigModal(props: { onClose?: () => void }) {
               ></input>
             </ListItem>
           ) : null}
-          <ListItem
-            title={Locale.Settings.Sync.Config.AccessControl.Title}
-            subTitle={Locale.Settings.Sync.Config.AccessControl.SubTitle}
-          >
-            <input
-              type="checkbox"
-              checked={syncStore.enableAccessControl}
-              onChange={(e) => {
-                syncStore.update(
-                  (config) =>
-                    (config.enableAccessControl = e.currentTarget.checked),
-                );
-              }}
-            ></input>
-          </ListItem>
-          <ListItem
-            title={Locale.Settings.Sync.Config.LockClient.Title}
-            subTitle={Locale.Settings.Sync.Config.LockClient.SubTitle}
-          >
-            <input
-              type="checkbox"
-              checked={syncStore.lockclient}
-              onChange={(e) => {
-                syncStore.update(
-                  (config) => (config.lockclient = e.currentTarget.checked),
-                );
-              }}
-            ></input>
-          </ListItem>
         </List>
 
         {syncStore.provider === ProviderType.WebDAV && (
           <>
             <List>
-              <ListItem
-                title={Locale.Settings.Sync.Config.WebDav.Endpoint.Name}
-              >
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.Endpoint}>
                 <input
                   type="text"
                   value={syncStore.webdav.endpoint}
@@ -422,9 +395,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                 ></input>
               </ListItem>
 
-              <ListItem
-                title={Locale.Settings.Sync.Config.WebDav.UserName.Name}
-              >
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.UserName}>
                 <input
                   type="text"
                   value={syncStore.webdav.username}
@@ -436,9 +407,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                   }}
                 ></input>
               </ListItem>
-              <ListItem
-                title={Locale.Settings.Sync.Config.WebDav.Password.Name}
-              >
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.Password}>
                 <PasswordInput
                   value={syncStore.webdav.password}
                   onChange={(e) => {
@@ -448,21 +417,6 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                     );
                   }}
                 ></PasswordInput>
-              </ListItem>
-              <ListItem
-                title={Locale.Settings.Sync.Config.WebDav.FileName.Name}
-                subTitle={Locale.Settings.Sync.Config.WebDav.FileName.SubTitle}
-              >
-                <input
-                  type="text"
-                  value={syncStore.webdav.filename}
-                  onChange={(e) => {
-                    syncStore.update(
-                      (config) =>
-                        (config.webdav.filename = e.currentTarget.value),
-                    );
-                  }}
-                ></input>
               </ListItem>
             </List>
           </>
@@ -508,68 +462,6 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             </ListItem>
           </List>
         )}
-        {syncStore.provider === ProviderType.GitHubGist && (
-          <>
-            <List>
-              <ListItem
-                title={Locale.Settings.Sync.Config.GithubGist.GistID.Name}
-                subTitle={
-                  Locale.Settings.Sync.Config.GithubGist.GistID.SubTitle
-                }
-              >
-                <input
-                  type="text"
-                  value={syncStore.githubGist.gistId}
-                  onChange={(e) => {
-                    syncStore.update(
-                      (config) =>
-                        (config.githubGist.gistId = e.currentTarget.value),
-                    );
-                  }}
-                ></input>
-              </ListItem>
-
-              <ListItem
-                title={Locale.Settings.Sync.Config.GithubGist.FileName.Name}
-                subTitle={
-                  Locale.Settings.Sync.Config.GithubGist.FileName.SubTitle
-                }
-              >
-                <input
-                  type="text"
-                  value={syncStore.githubGist.filename}
-                  onChange={(e) => {
-                    syncStore.update(
-                      (config) =>
-                        (config.githubGist.filename = e.currentTarget.value),
-                    );
-                  }}
-                ></input>
-              </ListItem>
-              <ListItem
-                title={Locale.Settings.Sync.Config.GithubGist.AccessToken.Name}
-                subTitle={
-                  Locale.Settings.Sync.Config.GithubGist.AccessToken.SubTitle
-                }
-              >
-                <PasswordInput
-                  value={syncStore.githubGist.token}
-                  onChange={(e) => {
-                    syncStore.update(
-                      (config) =>
-                        (config.githubGist.token = e.currentTarget.value),
-                    );
-                  }}
-                ></PasswordInput>
-              </ListItem>
-            </List>
-          </>
-        )}
-        {syncStore.provider === ProviderType.GoSync && (
-          <List>
-            <ListItem title={Locale.WIP}></ListItem>
-          </List>
-        )}
       </Modal>
     </div>
   );
@@ -581,7 +473,7 @@ function SyncItems() {
   const promptStore = usePromptStore();
   const maskStore = useMaskStore();
   const couldSync = useMemo(() => {
-    return syncStore.countSync();
+    return syncStore.cloudSync();
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
@@ -693,6 +585,7 @@ export function Settings() {
   const accessStore = useAccessStore();
   const shouldHideBalanceQuery = useMemo(() => {
     const isOpenAiUrl = accessStore.openaiUrl.includes(OPENAI_BASE_URL);
+
     return (
       accessStore.hideBalanceQuery ||
       isOpenAiUrl ||
@@ -745,6 +638,12 @@ export function Settings() {
         navigate(Path.Home);
       }
     };
+    if (clientConfig?.isApp) {
+      // Force to set custom endpoint to true if it's app
+      accessStore.update((state) => {
+        state.useCustomConfig = true;
+      });
+    }
     document.addEventListener("keydown", keydownEvent);
     return () => {
       document.removeEventListener("keydown", keydownEvent);
@@ -753,7 +652,7 @@ export function Settings() {
   }, []);
 
   const clientConfig = useMemo(() => getClientConfig(), []);
-  const showAccessCode = clientConfig?.isSysHasOpenaiApiKey && !clientConfig?.isApp;
+  const showAccessCode = enabledAccessControl && !clientConfig?.isApp;
 
   return (
     <ErrorBoundary>
@@ -795,7 +694,9 @@ export function Settings() {
             >
               <div
                 className={styles.avatar}
-                onClick={() => setShowEmojiPicker(true)}
+                onClick={() => {
+                  setShowEmojiPicker(!showEmojiPicker);
+                }}
               >
                 <Avatar avatar={config.avatar} />
               </div>
@@ -1019,21 +920,26 @@ export function Settings() {
 
           {!accessStore.hideUserApiKey && (
             <>
-              <ListItem
-                title={Locale.Settings.Access.CustomEndpoint.Title}
-                subTitle={Locale.Settings.Access.CustomEndpoint.SubTitle}
-              >
-                <input
-                  type="checkbox"
-                  checked={accessStore.useCustomConfig}
-                  onChange={(e) =>
-                    accessStore.update(
-                      (access) =>
-                        (access.useCustomConfig = e.currentTarget.checked),
-                    )
-                  }
-                ></input>
-              </ListItem>
+              {
+                // Conditionally render the following ListItem based on clientConfig.isApp
+                !clientConfig?.isApp && ( // only show if isApp is false
+                  <ListItem
+                    title={Locale.Settings.Access.CustomEndpoint.Title}
+                    subTitle={Locale.Settings.Access.CustomEndpoint.SubTitle}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={accessStore.useCustomConfig}
+                      onChange={(e) =>
+                        accessStore.update(
+                          (access) =>
+                            (access.useCustomConfig = e.currentTarget.checked),
+                        )
+                      }
+                    ></input>
+                  </ListItem>
+                )
+              }
               {accessStore.useCustomConfig && (
                 <>
                   <ListItem
@@ -1058,7 +964,7 @@ export function Settings() {
                     </Select>
                   </ListItem>
 
-                  {accessStore.provider === "OpenAI" ? (
+                  {accessStore.provider === ServiceProvider.OpenAI && (
                     <>
                       <ListItem
                         title={Locale.Settings.Access.OpenAI.Endpoint.Title}
@@ -1097,7 +1003,8 @@ export function Settings() {
                         />
                       </ListItem>
                     </>
-                  ) : (
+                  )}
+                  {accessStore.provider === ServiceProvider.Azure && (
                     <>
                       <ListItem
                         title={Locale.Settings.Access.Azure.Endpoint.Title}
@@ -1157,12 +1064,135 @@ export function Settings() {
                       </ListItem>
                     </>
                   )}
+                  {accessStore.provider === ServiceProvider.Google && (
+                    <>
+                      <ListItem
+                        title={Locale.Settings.Access.Google.Endpoint.Title}
+                        subTitle={
+                          Locale.Settings.Access.Google.Endpoint.SubTitle +
+                          Google.ExampleEndpoint
+                        }
+                      >
+                        <input
+                          type="text"
+                          value={accessStore.googleUrl}
+                          placeholder={Google.ExampleEndpoint}
+                          onChange={(e) =>
+                            accessStore.update(
+                              (access) =>
+                                (access.googleUrl = e.currentTarget.value),
+                            )
+                          }
+                        ></input>
+                      </ListItem>
+                      <ListItem
+                        title={Locale.Settings.Access.Google.ApiKey.Title}
+                        subTitle={Locale.Settings.Access.Google.ApiKey.SubTitle}
+                      >
+                        <PasswordInput
+                          value={accessStore.googleApiKey}
+                          type="text"
+                          placeholder={
+                            Locale.Settings.Access.Google.ApiKey.Placeholder
+                          }
+                          onChange={(e) => {
+                            accessStore.update(
+                              (access) =>
+                                (access.googleApiKey = e.currentTarget.value),
+                            );
+                          }}
+                        />
+                      </ListItem>
+                      <ListItem
+                        title={Locale.Settings.Access.Google.ApiVersion.Title}
+                        subTitle={
+                          Locale.Settings.Access.Google.ApiVersion.SubTitle
+                        }
+                      >
+                        <input
+                          type="text"
+                          value={accessStore.googleApiVersion}
+                          placeholder="2023-08-01-preview"
+                          onChange={(e) =>
+                            accessStore.update(
+                              (access) =>
+                                (access.googleApiVersion =
+                                  e.currentTarget.value),
+                            )
+                          }
+                        ></input>
+                      </ListItem>
+                    </>
+                  )}
+                  {accessStore.provider === ServiceProvider.Anthropic && (
+                    <>
+                      <ListItem
+                        title={Locale.Settings.Access.Anthropic.Endpoint.Title}
+                        subTitle={
+                          Locale.Settings.Access.Anthropic.Endpoint.SubTitle +
+                          Anthropic.ExampleEndpoint
+                        }
+                      >
+                        <input
+                          type="text"
+                          value={accessStore.anthropicUrl}
+                          placeholder={Anthropic.ExampleEndpoint}
+                          onChange={(e) =>
+                            accessStore.update(
+                              (access) =>
+                                (access.anthropicUrl = e.currentTarget.value),
+                            )
+                          }
+                        ></input>
+                      </ListItem>
+                      <ListItem
+                        title={Locale.Settings.Access.Anthropic.ApiKey.Title}
+                        subTitle={
+                          Locale.Settings.Access.Anthropic.ApiKey.SubTitle
+                        }
+                      >
+                        <PasswordInput
+                          value={accessStore.anthropicApiKey}
+                          type="text"
+                          placeholder={
+                            Locale.Settings.Access.Anthropic.ApiKey.Placeholder
+                          }
+                          onChange={(e) => {
+                            accessStore.update(
+                              (access) =>
+                                (access.anthropicApiKey =
+                                  e.currentTarget.value),
+                            );
+                          }}
+                        />
+                      </ListItem>
+                      <ListItem
+                        title={Locale.Settings.Access.Anthropic.ApiVerion.Title}
+                        subTitle={
+                          Locale.Settings.Access.Anthropic.ApiVerion.SubTitle
+                        }
+                      >
+                        <input
+                          type="text"
+                          value={accessStore.anthropicApiVersion}
+                          placeholder={Anthropic.Vision}
+                          onChange={(e) =>
+                            accessStore.update(
+                              (access) =>
+                                (access.anthropicApiVersion =
+                                  e.currentTarget.value),
+                            )
+                          }
+                        ></input>
+                      </ListItem>
+                    </>
+                  )}
                 </>
               )}
             </>
           )}
 
-          {!shouldHideBalanceQuery ? (
+          {!shouldHideBalanceQuery && !clientConfig?.isApp ? (
             <ListItem
               title={Locale.Settings.Usage.Title}
               subTitle={
@@ -1214,21 +1244,6 @@ export function Settings() {
               config.update((config) => (config.modelConfig = modelConfig));
             }}
           />
-          <ListItem
-            title={Locale.Settings.TextModeration.Title}
-            subTitle={Locale.Settings.TextModeration.SubTitle}
-          >
-            <input
-              type="checkbox"
-              checked={config.textmoderation}
-              onChange={(e) =>
-                updateConfig(
-                  (config) =>
-                    (config.textmoderation = e.currentTarget.checked),
-                )
-              }
-            ></input>
-          </ListItem>
         </List>
 
         {shouldShowPromptModal && (

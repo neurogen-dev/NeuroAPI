@@ -6,9 +6,9 @@ const MIRRORF_FILE_URL = "http://raw.fgit.ml/";
 
 const RAW_CN_URL = "PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh.json";
 const CN_URL = MIRRORF_FILE_URL + RAW_CN_URL;
-const RAW_EN_URL = "f/awesome-chatgpt-prompts/main/prompts.csv";
+const RAW_EN_URL = "neurogen-dev/NeuroAPI/old-portable/templates/IT.csvv";
 const EN_URL = MIRRORF_FILE_URL + RAW_EN_URL;
-const FILE = "./public/prompts.json";
+const FILE = "./prompts.json";
 
 const ignoreWords = ["涩涩", "魅魔"];
 

@@ -1,4 +1,4 @@
-import binary from "spark-md5";
+import md5 from "spark-md5";
 import { DEFAULT_MODELS } from "../constant";
 
 declare global {
@@ -15,10 +15,9 @@ declare global {
       VERCEL?: string;
       BUILD_MODE?: "standalone" | "export";
       BUILD_APP?: string; // is building desktop app
-      VERCEL_ANALYTICS?: string; // vercel web analytics
+
       HIDE_USER_API_KEY?: string; // disable user's api key input
       DISABLE_GPT4?: string; // allow user to use gpt-4 or not
-      DISABLE_CUSTOMMODELS?: boolean; // allow user to use custom models or not
       ENABLE_BALANCE_QUERY?: string; // allow user to query balance or not
       DISABLE_FAST_LINK?: string; // disallow parse settings from url or not
       CUSTOM_MODELS?: string; // to control custom models
@@ -27,6 +26,13 @@ declare global {
       AZURE_URL?: string; // https://{azure-url}/openai/deployments/{deploy-name}
       AZURE_API_KEY?: string;
       AZURE_API_VERSION?: string;
+
+      // google only
+      GOOGLE_API_KEY?: string;
+      GOOGLE_URL?: string;
+
+      // google tag manager
+      GTM_ID?: string;
     }
   }
 }
@@ -37,7 +43,7 @@ const ACCESS_CODES = (function getAccessCodes(): Set<string> {
   try {
     const codes = (code?.split(",") ?? [])
       .filter((v) => !!v)
-      .map((v) => binary.hash(v.trim()));
+      .map((v) => md5.hash(v.trim()));
     return new Set(codes);
   } catch (e) {
     return new Set();
@@ -51,19 +57,6 @@ export const getServerSideConfig = () => {
     );
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  const accessCodes = process.env.CODE?.split(",") ?? [];
-  const codes = new Set(accessCodes.map((code) => binary.hash(code.trim())));
-  const needCode = codes.size > 0;
-
-  const apiKeys = new Map<string, string>();
-  accessCodes.forEach((code, index) => {
-    const apiKeyIndex = index < (apiKey?.split(",")?.length ?? 0) ? index : 0;
-    const hashedCode = binary.hash(code.trim());
-    const apiKeyValue = (apiKey?.split(",")?.[apiKeyIndex]?.trim() ?? "")!;
-    apiKeys.set(hashedCode, apiKeyValue);
-  });
-
   const disableGPT4 = !!process.env.DISABLE_GPT4;
   let customModels = process.env.CUSTOM_MODELS ?? "";
 
@@ -75,6 +68,20 @@ export const getServerSideConfig = () => {
   }
 
   const isAzure = !!process.env.AZURE_URL;
+  const isGoogle = !!process.env.GOOGLE_API_KEY;
+  const isAnthropic = !!process.env.ANTHROPIC_API_KEY;
+
+  const apiKeyEnvVar = process.env.OPENAI_API_KEY ?? "";
+  const apiKeys = apiKeyEnvVar.split(",").map((v) => v.trim());
+  const randomIndex = Math.floor(Math.random() * apiKeys.length);
+  const apiKey = apiKeys[randomIndex];
+  console.log(
+    `[Server Config] using ${randomIndex + 1} of ${apiKeys.length} api key`,
+  );
+
+  const whiteWebDevEndpoints = (process.env.WHITE_WEBDEV_ENDPOINTS ?? "").split(
+    ",",
+  );
 
   return {
     baseUrl: process.env.BASE_URL,
@@ -86,16 +93,29 @@ export const getServerSideConfig = () => {
     azureApiKey: process.env.AZURE_API_KEY,
     azureApiVersion: process.env.AZURE_API_VERSION,
 
-    codes,
-    needCode,
+    isGoogle,
+    googleApiKey: process.env.GOOGLE_API_KEY,
+    googleUrl: process.env.GOOGLE_URL,
+
+    isAnthropic,
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    anthropicApiVersion: process.env.ANTHROPIC_API_VERSION,
+    anthropicUrl: process.env.ANTHROPIC_URL,
+
+    gtmId: process.env.GTM_ID,
+
+    needCode: ACCESS_CODES.size > 0,
+    code: process.env.CODE,
+    codes: ACCESS_CODES,
+
     proxyUrl: process.env.PROXY_URL,
     isVercel: !!process.env.VERCEL,
-    isVercelWebAnalytics: !!process.env.VERCEL_ANALYTICS,
+
     hideUserApiKey: !!process.env.HIDE_USER_API_KEY,
     disableGPT4,
     hideBalanceQuery: !process.env.ENABLE_BALANCE_QUERY,
     disableFastLink: !!process.env.DISABLE_FAST_LINK,
     customModels,
-    apiKeys,
+    whiteWebDevEndpoints,
   };
 };

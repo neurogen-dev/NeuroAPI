@@ -12,7 +12,7 @@ Cuando bifurca este proyecto desde Github y necesita crear un nuevo proyecto de 
 
 ![vercel-create-2](./images/vercel/vercel-create-2.jpg)
 
-1.  En Import Git Repository, busque NeuroGPT;
+1.  En Import Git Repository, busque chatgpt-next-web;
 2.  Seleccione el proyecto de la nueva bifurcación y haga clic en Importar.
 
 ![vercel-create-3](./images/vercel/vercel-create-3.jpg)

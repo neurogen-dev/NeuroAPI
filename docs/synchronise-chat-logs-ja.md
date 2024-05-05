@@ -1,7 +1,7 @@
 # UpStashを使用してチャットログを同期する
 ## 事前準備
 - GitHubアカウント
-- 自分自身でNeuroGPTのサーバーをセットアップしていること
+- 自分自身でNeuroAPI Chatのサーバーをセットアップしていること
 - [UpStash](https://upstash.com)
 
 ## 始める

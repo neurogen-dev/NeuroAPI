@@ -4,27 +4,8 @@ import { PartialLocaleType } from "./index";
 const id: PartialLocaleType = {
   WIP: "Coming Soon...",
   Error: {
-    Unauthorized: "Akses tidak diizinkan, silakan masukkan kode akses atau masukkan kunci API OpenAI Anda. di halaman [autentikasi](/#/auth) atau di halaman [Pengaturan](/#/settings).",
-    Content_Policy: {
-      Title:
-        "Permintaan Anda ditandai karena Pelanggaran Kebijakan Konten.",
-      SubTitle:
-        "Baca selengkapnya di sini: https://platform.openai.com/docs/guides/moderation/overview",
-      Reason: {
-        Title: "Alasan",
-        sexual: "Seksual",
-        hate: "Kebencian",
-        harassment: "Pelecehan",
-        "self-harm": "Melukai diri sendiri",
-        "sexual/minors": "Seksual/anak-anak",
-        "hate/threatening": "Kebencian/ancaman",
-        "violence/graphic": "Kekerasan/grafis",
-        "self-harm/intent": "Melukai diri sendiri/niat",
-        "self-harm/instructions": "Melukai diri sendiri/instruksi",
-        "harassment/threatening": "Pelecehan/ancaman",
-        violence: "Kekerasan",
-      },
-    },
+    Unauthorized:
+      "Akses tidak diizinkan, silakan masukkan kode akses atau masukkan kunci API OpenAI Anda. di halaman [autentikasi](/#/auth) atau di halaman [Pengaturan](/#/settings).",
   },
   Auth: {
     Title: "Diperlukan Kode Akses",
@@ -57,20 +38,8 @@ const id: PartialLocaleType = {
       newm: "Mulai Chat Baru dengan Masks",
       next: "Chat Selanjutnya",
       prev: "Chat Sebelumnya",
-      restart: "Restart klien",
       clear: "Bersihkan Percakapan",
       del: "Hapus Chat",
-      save: "Simpan Percakapan Sesi Saat Ini",
-      load: "Muat Percakapan Sesi",
-      copymemoryai: "Salin sesi memori prompt AI",
-      updatemasks: "Perbarui sesi memori prompt untuk sebuah Masks",
-      summarize: "Rangkum sesi obrolan saat ini",
-      UI: {
-        MasksSuccess: "Berhasil memperbarui sesi Masks",
-        MasksFail: "Gagal memperbarui sesi Masks",
-        SummarizeSuccess: "Berhasil merangkum sesi obrolan ini",
-        SummarizeFail: "Gagal merangkum sesi obrolan ini",
-      },
     },
     InputActions: {
       Stop: "Berhenti",
@@ -188,9 +157,6 @@ const id: PartialLocaleType = {
       IsChecking: "Memeriksa pembaruan...",
       FoundUpdate: (x: string) => `Versi terbaru ditemukan: ${x}`,
       GoToUpdate: "Perbarui Sekarang",
-      IsUpdating: "Memperbarui...",
-      UpdateSuccessful: "Versi telah diperbarui ke versi terbaru",
-      UpdateFailed: "Pembaruan Gagal",
     },
     AutoGenerateTitle: {
       Title: "Hasilkan Judul Otomatis",
@@ -220,61 +186,11 @@ const id: PartialLocaleType = {
           SubTitle: "Hanya berlaku untuk Proxy CORS bawaan untuk proyek ini",
         },
 
-        AccessControl: {
-          Title: "Aktifkan Kontrol Akses Timpa",
-          SubTitle:
-            "Hanya berlaku untuk pengaturan kontrol akses timpa seperti kode akses",
-        },
-        LockClient: {
-          Title: "Aktifkan Jangan Sinkronkan Data Saat Ini",
-          SubTitle:
-            "Hanya menyinkronkan data dari sumber lain, bukan data saat ini",
-        },
-
         WebDav: {
-          Endpoint: {
-            Name: "Titik Akhir WebDav",
-            SubTitle: "Konfigurasikan Titik Akhir WebDav",
-          },
-          UserName: {
-            Name: "Nama Pengguna",
-            SubTitle: "Konfigurasikan Nama Pengguna",
-          },
-          Password: {
-            Name: "Kata Sandi",
-            SubTitle: "Konfigurasikan Kata Sandi",
-          },
-          FileName: {
-            Name: "Nama File",
-            SubTitle:
-              "Nama File, misalnya: backtrackz.json (harus berupa file JSON)",
-          },
+          Endpoint: "Lokasi Titik Akhir WebDAV",
+          UserName: "User Pengguna",
+          Password: "Kata Sandi",
         },
-        GithubGist: {
-          GistID: {
-            Name: "Github Gist ID",
-            SubTitle:
-              "Lokasi ID Gist Anda, misalnya: gist.github.com/H0llyW00dzZ/<gistid>/dll. Salin <gistid> dan tempelkan di sini.",
-          },
-          FileName: {
-            Name: "Nama File",
-            SubTitle:
-              "Nama File, misalnya: backtrackz.json (harus berupa file JSON)",
-          },
-          AccessToken: {
-            Name: "Token Akses",
-            SubTitle:
-              "Pastikan Anda memiliki izin untuk sinkronisasi. Aktifkan Privat & Publik di sana.",
-          },
-        },
-
-        GoSync: {
-          Endpoint: "URL GoSync REST",
-          UserName: "Nama Backup",
-          Password: "Token GoSync REST",
-          FileName: "Nama File",
-        },
-
       },
     },
     SendKey: "Kirim",
@@ -322,32 +238,17 @@ const id: PartialLocaleType = {
       SubTitle:
         "Jika panjang pesan melebihi batas yang ditentukan, pesan tersebut akan dikompresi",
     },
-    Token: {
-      Title: "Kunci API",
-      SubTitle: "Gunakan kunci Anda untuk melewati batas kode akses",
-      Placeholder: "Kunci API OpenAI",
-    },
+
     Usage: {
       Title: "Saldo Akun",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "tidak diketahui";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "tidak diketahui";
-        const usedFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'USD' }).format(used);
-        return `Digunakan bulan ini ${usedFormatted}, Batas maksimum ${hardLimitusd}, Batas penggunaan yang disetujui ${hardLimit}`;
+        return `Digunakan bulan ini: ${used}, total langganan: ${total}`;
       },
       IsChecking: "Memeriksa...",
       Check: "Periksa",
-      NoAccess: `Masukkan Kunci Sesi pada Kunci API yang dimulai dengan awalan "sess-" untuk memeriksa saldo.`,
+      NoAccess: "Masukkan kunci API untuk memeriksa saldo",
     },
-    AccessCode: {
-      Title: "Kode Akses",
-      SubTitle: "Kontrol akses diaktifkan",
-      Placeholder: "Diperlukan kode akses",
-    },
-    Endpoint: {
-      Title: "Endpoint",
-      SubTitle: "Harus dimulai dengan http(s):// untuk endpoint kustom",
-    },
+
     Model: "Model",
     Temperature: {
       Title: "Suhu",
@@ -369,34 +270,6 @@ const id: PartialLocaleType = {
       Title: "Penalti Frekuensi",
       SubTitle:
         "Semakin tinggi nilai, semakin rendah kemungkinan penggunaan ulang baris yang sama",
-    },
-    NumberOfImages: {
-      Title: "Buat Jumlah Gambar",
-      SubTitle:
-        "Sejumlah gambar yang akan dihasilkan\nHarus di antara 1 dan 10. Untuk dall-e-3, hanya 1 yang didukung.",
-    },
-    QualityOfImages: {
-      Title: "Buat Kualitas Gambar",
-      SubTitle:
-        "Kualitas gambar yang akan dihasilkan\nKonfigurasi ini hanya didukung untuk dall-e-3.",
-    },
-    SizeOfImages: {
-      Title: "Ukuran Gambar",
-      SubTitle:
-        "Ukuran gambar yang dihasilkan\nDALL·E-2: Harus menjadi salah satu dari `256x256`, `512x512`, atau `1024x1024`.\nDALL-E-3: Harus menjadi salah satu dari `1024x1024`, `1792x1024`, atau `1024x1792`.",
-    },
-    StyleOfImages: {
-      Title: "Gaya Gambar",
-      SubTitle:
-        "Gaya gambar yang dihasilkan\nHarus menjadi salah satu dari cerah atau alami\nKonfigurasi ini hanya didukung untuk dall-e-3",
-    },
-    SysFingerPrint: {
-      Title: "Sidik Jari Sistem alias Benih",
-      SubTitle: "Sebuah sidik jari mewakili konfigurasi backend yang digunakan oleh model.",
-    },
-    TextModeration: {
-      Title: "Moderasi Teks",
-      SubTitle: "Moderasi Teks untuk memeriksa apakah konten sesuai dengan kebijakan penggunaan OpenAI.",
     },
   },
   Store: {
@@ -427,23 +300,12 @@ const id: PartialLocaleType = {
     Add: "Tambahkan Promp",
     Clear: "Bersihkan Konteks",
     Revert: "Kembali ke Posisi Sebelumnya",
-    ModelsDalle: (x: any) => `Anda adalah asisten AI penjelasan Gambar berdasarkan permintaan dimulai dari:\n "${x}"\n\n
-    - Respon Anda harus informatif dan logis.\n
-    - Pertahankan jawaban Anda tanpa pribadi.\n
-    - Anda tidak perlu menyebutkan bahwa saya tidak dapat langsung menampilkan gambar karena Anda adalah model berbasis teks AI.\n
-    - Anda tidak perlu menyebutkan bahwa saya minta maaf, karena Anda adalah model AI berbasis teks.\n
-    - Balas dan akhiri percakapan.\n
-    - Patuhi Aturan.`,
   },
   Plugin: {
     Name: "Plugin",
   },
   FineTuned: {
     Sysmessage: "Anda adalah asisten yang",
-  },
-  PrivacyPage: {
-    Name: "Privasi",
-    Confirm: "Setuju",
   },
   Mask: {
     Name: "Masks",
@@ -479,8 +341,6 @@ const id: PartialLocaleType = {
       HideContext: {
         Title: "Sembunyikan Prompt Konteks",
         SubTitle: "Tidak menampilkan prompt konteks dalam obrolan",
-        UnHide: "Tampilkan Prompt konteks dalam obrolan",
-        Hide: "Sembunyikan Prompt konteks dalam obrolan",
       },
       Share: {
         Title: "Bagikan Masks Ini",
@@ -508,6 +368,9 @@ const id: PartialLocaleType = {
     Edit: "Edit",
   },
   Exporter: {
+    Description: {
+      Title: "Hanya pesan setelah menghapus konteks yang akan ditampilkan"
+    },  
     Model: "Model",
     Messages: "Pesan",
     Topic: "Topik",
