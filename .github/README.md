@@ -25,12 +25,6 @@
 
 ---
 
-## Лицензия
-
-MIT License
-
-[Оформить доступ](https://neuroapi.host)
-
 ---
 
 ### English Version
@@ -62,8 +56,5 @@ MIT License
 
 ---
 
-## License
-
-MIT License
 
 [Get Access](https://neuroapi.host)
