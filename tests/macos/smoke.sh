@@ -69,7 +69,8 @@ export NEUROAPI_AGENTS_MOCK_KEYCHAIN_STATE="$MOCK_KEYCHAIN_STATE"
 mkdir -p "$HOME" "$NEUROAPI_AGENTS_CODEX_HOME"
 printf 'keep\n' >"$NEUROAPI_AGENTS_CODEX_HOME/user-owned.txt"
 
-/bin/bash "$REPO_ROOT/scripts/macos/install.sh" >"$TMP_ROOT/install.out" 2>"$TMP_ROOT/install.err"
+/bin/bash -x "$REPO_ROOT/scripts/macos/install.sh" \
+  >"$TMP_ROOT/install.out" 2>"$TMP_ROOT/install.err"
 
 grep -Fq 'add-generic-password' "$SECURITY_LOG"
 grep -Fq -- '-w' "$SECURITY_LOG"
