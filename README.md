@@ -1,59 +1,136 @@
-# NeuroAPI Agents
+# NeuroAPI: Codex CLI и Claude Code через российский AI API
 
-Русскоязычный публичный репозиторий для безопасного подключения NeuroAPI к Codex CLI и Claude Code.
+[![Проверка установщиков](https://github.com/neurogen-dev/NeuroAPI/actions/workflows/validate.yml/badge.svg?branch=agents)](https://github.com/neurogen-dev/NeuroAPI/actions/workflows/validate.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-22c55e.svg)](LICENSE)
+[![NeuroAPI](https://img.shields.io/badge/NeuroAPI-neuroapi.host-06b6d4.svg)](https://neuroapi.host)
 
-Смысл репозитория простой: пользователь сам вводит ключ в терминале во время запуска, ключ не хранится в открытом виде, а дальше конфигурация собирается автоматически для текущего пользователя.
+Открытые установщики для подключения [Codex CLI](https://developers.openai.com/codex/cli/) и [Claude Code](https://code.claude.com/docs/en/overview) к [NeuroAPI](https://neuroapi.host) на Windows и macOS.
 
-Если вам нужен прямой старт, откройте официальный сайт NeuroAPI:
+NeuroAPI — российский AI API-сервис: единый доступ к моделям OpenAI, Anthropic Claude, Google Gemini, DeepSeek, генерации изображений и видео с оплатой в рублях. Проект работает от российского ООО, инфраструктура сервиса размещена в РФ. Актуальные модели и цены всегда проверяйте в [живом каталоге](https://neuroapi.host/price).
 
-[neuroapi.host](https://neuroapi.host)
+[English version](README.en.md)
 
-Что уже лежит в репозитории:
+## Установка в один запуск
 
-- Windows-обвязка для setup/uninstall и PowerShell-реализация в `scripts/windows/`;
-- macOS-обвязка для setup/uninstall и shell-реализация в `scripts/macos/`;
-- статическая проверка публикации в `tests/` и GitHub Actions workflow;
-- публичные документы по безопасности, ручной настройке и troubleshooting;
-- исследовательский ledger с решениями и планом внедрения.
+Сначала установите сам [Codex CLI](https://developers.openai.com/codex/cli/) и/или [Claude Code](https://code.claude.com/docs/en/installation), затем создайте API-ключ в [кабинете NeuroAPI](https://neuroapi.host/login?redirect=/dashboard/tokens).
 
-Что здесь должно быть безопасным:
+### Windows
 
-- ключ вводится вручную в интерактивном терминале;
-- Windows хранит секрет только через DPAPI для текущего пользователя;
-- macOS хранит секрет только в login Keychain текущего пользователя;
-- публичные конфиги не перезаписывают пользовательские настройки целиком;
-- секреты не печатаются в лог, README или артефакты CI;
-- валидация проверяет только структуру, фикстуры и границы хранения.
+1. [Скачайте ZIP с установщиками](https://github.com/neurogen-dev/NeuroAPI/archive/refs/heads/agents.zip) и распакуйте его.
+2. Дважды щёлкните `setup-windows.bat`.
+3. Вставьте API-ключ в скрытый запрос PowerShell.
+4. Откройте новый терминал и запустите:
 
-Что репозиторий покрывает:
+```powershell
+codex-neuroapi
+claude-neuroapi
+```
 
-- базовую модель установки для Codex CLI;
-- базовую модель установки для Claude Code;
-- безопасную схему секретов;
-- ручную установку;
-- устранение типовых ошибок;
-- статическую проверку публикации.
+Права администратора не нужны. BAT-файл не принимает ключ через аргументы командной строки.
 
-Важно:
+### macOS
 
-- это публичная витрина и документация для аудита;
-- реальные установочные скрипты должны оставаться bounded и installer-owned;
-- версии моделей и шлюзов могут меняться, поэтому конфигурацию надо сверять по официальной документации и `/debug-config` для Codex и `/status` для Claude Code.
+1. [Скачайте ZIP с установщиками](https://github.com/neurogen-dev/NeuroAPI/archive/refs/heads/agents.zip) и распакуйте его.
+2. Откройте Terminal в распакованной папке.
+3. Запустите:
 
-## Быстрый сценарий
+```bash
+chmod +x setup-macos.command
+./setup-macos.command
+```
 
-1. Пользователь запускает локальный setup-файл или команду.
-2. Терминал запрашивает API key.
-3. Ключ сохраняется только в защищённом хранилище текущего пользователя.
-4. Скрипт создаёт отдельный профиль Codex CLI и отдельный settings-файл Claude Code.
-5. Пользователь проверяет результат командами `/debug-config` и `/status`.
+4. Вставьте API-ключ в защищённый запрос macOS Keychain.
+5. Запустите:
 
-## Проверка и аудит
+```bash
+~/.local/bin/codex-neuroapi
+~/.local/bin/claude-neuroapi
+```
 
-- документация по безопасности: [docs/security.md](docs/security.md)
-- ручная настройка: [docs/manual-setup.md](docs/manual-setup.md)
-- troubleshooting: [docs/troubleshooting.md](docs/troubleshooting.md)
+Скрипт не использует `sudo` и не редактирует shell profile. Если `~/.local/bin` уже входит в `PATH`, достаточно команд `codex-neuroapi` и `claude-neuroapi`.
 
-## English
+## Что именно делает установщик
 
-See [README.en.md](README.en.md) for the short English overview.
+| Действие | Windows | macOS |
+|---|---|---|
+| Запрашивает ключ | `Read-Host -AsSecureString` | защищённый prompt `/usr/bin/security` |
+| Хранит ключ | DPAPI, текущий пользователь и компьютер | login Keychain текущего пользователя |
+| Codex | отдельный `~/.codex/neuroapi-host.config.toml` | отдельный `~/.codex/neuroapi-host.config.toml` |
+| Claude Code | отдельный installer-owned JSON через `--settings` | отдельный installer-owned JSON через `--settings` |
+| Получает ключ | command-backed auth helper | `apiKeyHelper` / Keychain helper |
+| Существующие конфиги | не перезаписываются | не перезаписываются |
+
+Установщик не вызывает API и не отправляет ключ в сеть. Сеть используется уже Codex CLI или Claude Code при ваших запросах к `https://neuroapi.host`.
+
+## Почему ключ не лежит в конфиге
+
+- ключ не принимается аргументом BAT/shell-команды;
+- ключ не сохраняется в `.env`, TOML, JSON или репозитории;
+- Windows шифрует значение через DPAPI без отдельного сохранённого master key;
+- macOS сохраняет значение штатной командой Keychain с интерактивным `-w`;
+- helpers печатают только токен в stdout в момент, когда его запрашивает клиент.
+
+Это защищает от случайной публикации ключа, но не от вредоносной программы, уже работающей от имени того же пользователя. Полная модель угроз: [docs/security.md](docs/security.md).
+
+## Что будет создано
+
+Windows:
+
+- `%LOCALAPPDATA%\NeuroAPIAgents\` — helper, Claude settings, DPAPI-ciphertext и launchers;
+- `%USERPROFILE%\.codex\neuroapi-host.config.toml` — отдельный профиль Codex;
+- `%LOCALAPPDATA%\NeuroAPIAgents\bin` — одна запись в пользовательском `PATH`.
+
+macOS:
+
+- `~/.local/share/neuroapi-agents/` — helper и Claude settings;
+- `~/.codex/neuroapi-host.config.toml` — отдельный профиль Codex;
+- `~/.local/bin/codex-neuroapi` и `~/.local/bin/claude-neuroapi`;
+- Keychain item `host.neuroapi.agents.api-key`.
+
+Каждый удаляемый файл имеет узкий ownership-маркер. Если путь уже занят чужим файлом, установка завершится с ошибкой вместо перезаписи.
+
+## Проверка подключения
+
+Codex CLI:
+
+1. Запустите `codex-neuroapi`.
+2. Выполните `/debug-config`.
+3. Проверьте профиль `neuroapi-host`, provider `neuroapi` и `https://neuroapi.host/v1`.
+
+Claude Code:
+
+1. Запустите `claude-neuroapi`.
+2. Выполните `/status`.
+3. Проверьте base URL `https://neuroapi.host` и credential source `apiKeyHelper`.
+
+Примеры используют `gpt-5.6-sol` и `claude-sonnet-4-5`. ID моделей меняются: при `model not found` возьмите точное имя из [каталога NeuroAPI](https://neuroapi.host/price) или `GET /v1/models`.
+
+## Удаление и замена ключа
+
+- Чтобы заменить ключ, повторно запустите setup-файл — защищённое значение обновится.
+- Windows: `uninstall-windows.bat`.
+- macOS: `./uninstall-macos.command`.
+
+Uninstaller удаляет только installer-owned файлы и локально сохранённый ключ. Удалённый ключ через этот пакет восстановить нельзя.
+
+## Документация
+
+- [Модель безопасности](docs/security.md)
+- [Ручная настройка и созданные файлы](docs/manual-setup.md)
+- [Решение проблем](docs/troubleshooting.md)
+- [Codex через NeuroAPI](https://neuroapi.host/codex-api)
+- [Claude Code через NeuroAPI](https://neuroapi.host/claude-code)
+- [OpenAI-совместимый API](https://neuroapi.host/openai-compatible-api)
+- [Модели и цены](https://neuroapi.host/price)
+
+## Проверяемость
+
+GitHub Actions выполняет:
+
+- PowerShell syntax + Windows DPAPI smoke test с тестовым токеном;
+- Bash syntax + macOS smoke test с mock Keychain;
+- ShellCheck;
+- JSON/TOML parse checks;
+- поиск случайно добавленных секретов и небезопасных способов передачи ключа.
+
+Реальный пользовательский ключ никогда не нужен CI.

@@ -1,18 +1,49 @@
-name: validate
+name: Validate public installers
 
 on:
   push:
+    branches:
+      - agents
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neuroapi-agents-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   static:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    name: Static safety checks
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate repository docs
+      - name: Validate repository contract
         shell: pwsh
         run: ./tests/static/validate.ps1
+      - name: ShellCheck
+        run: |
+          shellcheck setup-macos.command uninstall-macos.command scripts/macos/*.sh tests/macos/*.sh
+
+  windows:
+    name: Windows DPAPI smoke
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PowerShell syntax
+        shell: powershell
+        run: .\tests\windows\syntax.ps1
+      - name: Run isolated installer smoke
+        shell: powershell
+        run: .\tests\windows\smoke.ps1
+
+  macos:
+    name: macOS Keychain-command smoke
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shell syntax
+        run: /bin/bash ./tests/macos/syntax.sh
+      - name: Run isolated installer smoke with mock Keychain
+        run: /bin/bash ./tests/macos/smoke.sh

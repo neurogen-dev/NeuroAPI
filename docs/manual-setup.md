@@ -1,31 +1,83 @@
-# Manual setup
+# Что настраивают установщики
 
-If you do not want to use the one-click wrapper yet, the safe manual setup is:
+Эта страница нужна для аудита и ручного восстановления. Рекомендуемый путь — root setup-файл для вашей ОС.
 
 ## Codex CLI
 
-1. Install Codex CLI using the official method.
-2. Create a dedicated user-level profile for NeuroAPI.
-3. Enter the API key only into the interactive prompt or secure helper.
-4. Keep the provider isolated from your personal/default config.
-5. Confirm the result with `codex --profile <name> /debug-config`.
+Создаётся отдельный user-level profile:
+
+- Windows: `%USERPROFILE%\.codex\neuroapi-host.config.toml`;
+- macOS: `~/.codex/neuroapi-host.config.toml`.
+
+Основная конфигурация:
+
+```toml
+model = "gpt-5.6-sol"
+model_provider = "neuroapi"
+
+[model_providers.neuroapi]
+name = "NeuroAPI"
+base_url = "https://neuroapi.host/v1"
+wire_api = "responses"
+
+[model_providers.neuroapi.auth]
+command = "/absolute/path/to/installer-owned-helper"
+timeout_ms = 5000
+refresh_interval_ms = 300000
+```
+
+На Windows `command` — `powershell.exe`, а helper и DPAPI secret передаются отдельными элементами `args`.
+
+Запуск: `codex --profile neuroapi-host`. Проверка: `/debug-config`.
+
+Project `.codex/config.toml` не подходит для provider/auth redirect: актуальный Codex игнорирует там `model_provider` и `model_providers` по соображениям безопасности.
 
 ## Claude Code
 
-1. Install Claude Code using the official method.
-2. Create an isolated settings file for NeuroAPI.
-3. Store the key through the documented helper path.
-4. Point the CLI at the dedicated settings file.
-5. Confirm the result with `claude /status`.
+Существующий `~/.claude/settings.json` не меняется. Launcher передаёт отдельный installer-owned JSON через `claude --settings <file>`.
 
-## What not to do
+```json
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "apiKeyHelper": "/absolute/path/to/installer-owned-helper",
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://neuroapi.host",
+    "ANTHROPIC_MODEL": "claude-sonnet-4-5"
+  }
+}
+```
 
-- do not pass the key on the command line;
-- do not paste the key into a tracked file;
-- do not overwrite your existing Codex or Claude Code profile;
-- do not use a shared machine-level secret store for a personal setup;
-- do not rely on a model name copied from an old post without checking current docs.
+Проверка: `/status`.
 
-## Practical baseline
+## Пути Windows
 
-Use the official NeuroAPI endpoint and a current supported model name, then verify the active configuration before first use. If the model or gateway name has changed, update the profile rather than keeping a stale preset.
+- state: `%LOCALAPPDATA%\NeuroAPIAgents`;
+- ciphertext: `%LOCALAPPDATA%\NeuroAPIAgents\secret\api-key.dpapi`;
+- helper: `%LOCALAPPDATA%\NeuroAPIAgents\bin\get-neuroapi-key.ps1`;
+- Claude settings: `%LOCALAPPDATA%\NeuroAPIAgents\config\claude-settings.json`;
+- launchers: `%LOCALAPPDATA%\NeuroAPIAgents\bin`;
+- Codex profile: `%USERPROFILE%\.codex\neuroapi-host.config.toml`.
+
+Setup добавляет только launcher directory в пользовательский `PATH`.
+
+## Пути macOS
+
+- state: `~/.local/share/neuroapi-agents`;
+- helper: `~/.local/share/neuroapi-agents/bin/get-neuroapi-key.sh`;
+- Claude settings: `~/.local/share/neuroapi-agents/config/claude-settings.json`;
+- launchers: `~/.local/bin/codex-neuroapi`, `~/.local/bin/claude-neuroapi`;
+- Codex profile: `~/.codex/neuroapi-host.config.toml`;
+- Keychain service: `host.neuroapi.agents.api-key`.
+
+Setup не меняет `.zprofile`, `.zshrc`, `.bash_profile` или системный `PATH`.
+
+## Модели
+
+`gpt-5.6-sol` и `claude-sonnet-4-5` — текущие defaults этого репозитория, а не бессрочная гарантия каталога. Точный доступ зависит от опубликованных моделей и вашего ключа. Проверяйте [каталог](https://neuroapi.host/price) или `GET https://neuroapi.host/v1/models` со своим ключом.
+
+## Официальные контракты
+
+- [Codex custom model providers](https://developers.openai.com/codex/config-advanced/#custom-model-providers)
+- [Codex configuration reference](https://developers.openai.com/codex/config-reference/)
+- [Claude Code gateway connection](https://code.claude.com/docs/en/llm-gateway-connect)
+- [Claude Code settings](https://code.claude.com/docs/en/settings)

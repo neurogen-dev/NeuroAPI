@@ -1,48 +1,74 @@
-# Security model
+# Модель безопасности установщиков
 
-This repository documents the safe setup path for NeuroAPI with Codex CLI and Claude Code.
+## Цель
 
-## Core rule
+Установщики снижают риск случайно положить API-ключ NeuroAPI в Git, `.env`, TOML, JSON, историю shell или аргументы процесса. Они не превращают скомпрометированный компьютер в доверенную среду.
 
-The user types the API key into the terminal during setup. The repository never needs to ship the key in plaintext, a command argument, or a checked-in environment file.
+## Поток ключа
 
-## Windows
+Windows:
 
-- store the secret with DPAPI under the current user context;
-- do not write a reusable plaintext secret file;
-- do not reuse another user's profile or machine context;
-- keep installer-owned files separate from existing Codex or Claude settings.
+1. `Read-Host -AsSecureString` получает ключ без обычной строки в setup-скрипте.
+2. `ConvertFrom-SecureString` без `-Key` создаёт DPAPI-ciphertext для текущего пользователя и компьютера.
+3. Codex/Claude вызывают короткий helper.
+4. Helper расшифровывает значение в своём процессе, печатает только токен в stdout и очищает BSTR.
 
-## macOS
+macOS:
 
-- store the secret in the current user's login Keychain;
-- do not echo the secret in the shell;
-- do not place the secret into a repo file or a shared environment export;
-- keep installer-owned files separate from existing settings.
+1. Перед записью setup отказывается перезаписывать совпавший Keychain item без
+   installer-owned marker.
+2. Setup вызывает `/usr/bin/security add-generic-password ... -w`, причём `-w` стоит последним.
+3. Штатная утилита Keychain сама показывает prompt; shell-скрипт не получает ключ в переменную и не передаёт его аргументом.
+4. Helper выполняет `security find-generic-password ... -w`, которое печатает только password value.
 
-## Configuration boundaries
+## Что защищено
 
-The setup should create isolated files for:
+- случайный commit или upload конфигурации;
+- чтение секретов из обычных JSON/TOML/.env файлов;
+- история команд с ключом;
+- просмотр аргументов setup-процесса;
+- перезапись существующего профиля Codex или launcher без ownership-маркера;
+- широкое удаление чужих файлов uninstall-скриптом.
 
-- a Codex CLI profile;
-- a Claude Code settings file;
-- optional helper launchers owned by the installer.
+## Что не защищено
 
-It should not:
+- вредоносный процесс с правами того же пользователя;
+- захват памяти процесса helper, Codex CLI или Claude Code;
+- подмена самих бинарников `codex` или `claude` в `PATH`;
+- компрометация ОС, браузера, GitHub-аккаунта или NeuroAPI-аккаунта;
+- утечка данных, которые пользователь сам отправляет модели в запросе;
+- уязвимости сторонних Codex CLI, Claude Code, PowerShell, Keychain или DPAPI.
 
-- overwrite existing user-wide settings;
-- modify unrelated shell startup files;
-- depend on a plaintext `.env` file;
-- print token values in verification output.
+Любой API-клиент должен получить plaintext-токен перед HTTP-запросом. Защищённое хранилище уменьшает время и места постоянного хранения, но не устраняет этот runtime boundary.
 
-## Validation boundaries
+## Сетевое поведение
 
-The public repository should validate:
+Setup и uninstall не вызывают NeuroAPI и не валидируют ключ по сети. После установки запросы отправляют официальные клиенты:
 
-- file syntax;
-- fixture structure;
-- absence of obvious secret patterns;
-- idempotent installer-owned paths;
-- non-overwrite behavior.
+- Codex custom provider: `https://neuroapi.host/v1`;
+- Claude Code gateway: `https://neuroapi.host`.
 
-The public repository should not validate with real secrets or real provider calls in CI.
+## Границы файлов
+
+Windows удаляет рекурсивно только точный `%LOCALAPPDATA%\NeuroAPIAgents`, если внутри есть корректный marker. Профиль в `%USERPROFILE%\.codex` удаляется отдельно и только со своим sibling-marker.
+
+macOS удаляет рекурсивно только точный `~/.local/share/neuroapi-agents` с корректным marker. Профиль и два launcher удаляются отдельно, каждый только при наличии своего marker. Keychain item удаляется только при наличии отдельного marker внутри installer-owned state.
+
+Custom paths доступны только test mode и не используются публичными wrappers.
+
+## Почему используются helpers
+
+- Codex официально поддерживает `[model_providers.<id>.auth]` с командой, печатающей bearer token в stdout.
+- Claude Code официально поддерживает `apiKeyHelper`.
+- Поэтому секрет не требуется сохранять в user/project config.
+
+## Проверка исходников
+
+Перед запуском:
+
+1. скачайте ZIP именно из `neurogen-dev/NeuroAPI`;
+2. изучите root wrapper и файлы в `scripts/windows` или `scripts/macos`;
+3. проверьте GitHub Actions для нужного commit;
+4. не запускайте копию из неизвестного mirror.
+
+Для сообщения об уязвимости используйте [SECURITY.md](../SECURITY.md).

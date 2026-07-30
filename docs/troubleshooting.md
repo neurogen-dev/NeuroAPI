@@ -1,37 +1,57 @@
-# Troubleshooting
+# Решение проблем
 
-## Codex CLI does not pick up the NeuroAPI profile
+## `codex-neuroapi` или `claude-neuroapi` не найдены
 
-- verify that you are using the intended profile name;
-- run `/debug-config` and inspect the effective provider block;
-- check that the helper can read the current user's secret store;
-- make sure the profile was created in the user-level config, not the project config.
+Windows: откройте новый терминал после установки. Проверьте наличие `%LOCALAPPDATA%\NeuroAPIAgents\bin` в пользовательском `PATH`.
 
-## Claude Code ignores the NeuroAPI settings file
+macOS: используйте полный путь `~/.local/bin/codex-neuroapi`. Установщик намеренно не редактирует shell profile.
 
-- verify the settings file path you passed to the CLI;
-- run `/status` and confirm the base URL and credential source;
-- ensure the secret helper prints only the token and nothing else;
-- confirm that an old global config is not taking precedence.
+## Codex не видит provider
 
-## Secret seems to be saved in plaintext
+Запустите именно `codex-neuroapi`, затем `/debug-config`. Проверьте:
 
-- stop and remove the generated file;
-- confirm the setup was run in test mode or interactive mode;
-- re-run the setup and verify the storage backend is DPAPI or Keychain only;
-- inspect the repository for accidental secret fixtures before publishing.
+- profile `neuroapi-host`;
+- provider `neuroapi`;
+- base URL `https://neuroapi.host/v1`;
+- `wire_api = "responses"`.
 
-## I changed my key
+Если `~/.codex/neuroapi-host.config.toml` существовал до установки без ownership-marker, setup должен отказать, а не перезаписать его.
 
-- update the stored secret in the current user's secure store;
-- re-run the profile generation step;
-- verify again with `/debug-config` and `/status`.
+## Claude Code использует другой URL или credential
 
-## Still stuck
+Запустите именно `claude-neuroapi`, затем `/status`. Launcher передаёт isolated settings через `--settings`, имеющий приоритет над user/project settings для совпадающих ключей.
 
-Document:
+## `401` или неверный ключ
 
-- operating system;
-- Codex CLI or Claude Code;
-- the command you ran;
-- the exact point where the configuration diverged from the expected one.
+Повторно запустите setup-файл и введите новый ключ. Не вставляйте ключ в issue или screenshot.
+
+Windows DPAPI-ciphertext можно расшифровать только в подходящем user/machine context. После переноса на другой компьютер запустите setup заново.
+
+macOS может показать системный запрос доступа к Keychain. Проверьте, что запускается `/usr/bin/security`, и подтвердите доступ только для ожидаемого локального процесса.
+
+## `model not found`
+
+Defaults установщика могут отстать от живого каталога. Проверьте [модели и цены](https://neuroapi.host/price) либо `GET /v1/models`, затем обновите репозиторий. Не заменяйте модель на случайное имя: Codex дополнительно требует Responses-совместимость.
+
+## macOS блокирует `.command`
+
+Убедитесь, что файл скачан из `neurogen-dev/NeuroAPI`. Выполните:
+
+```bash
+chmod +x setup-macos.command
+./setup-macos.command
+```
+
+Если Gatekeeper всё ещё блокирует запуск, откройте файл через Finder → правый клик → Open. Не отключайте Gatekeeper глобально.
+
+## Установка отказывается перезаписывать файл
+
+Это защитный механизм. Переместите или переименуйте конфликтующий user-owned файл вручную после проверки. Не создавайте ownership-marker самостоятельно.
+
+## Удаление отменено
+
+Windows и macOS требуют точное подтверждение `DELETE`. Это предотвращает случайное удаление локально сохранённого ключа.
+
+## Сообщить об ошибке
+
+Обычные ошибки можно описать в GitHub Issues без API-ключа. Уязвимости и credential-handling проблемы отправляйте по [SECURITY.md](../SECURITY.md).

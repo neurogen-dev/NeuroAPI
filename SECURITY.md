@@ -1,43 +1,19 @@
-# Security Policy
+# Security policy
 
-## Supported versions
+Do not open a public issue containing an API key, decrypted credential, personal data, or an exploit that would expose other users.
 
-Only the current public documentation branch is supported.
+Report credential handling, unsafe overwrite, command injection, or destructive uninstall findings to `support@neuroapi.host` with the subject `SECURITY: NeuroAPI GitHub installer`.
 
-## Secret handling model
+Include:
 
-This repository is built around a narrow security posture:
+- affected operating system and version;
+- affected file and commit;
+- minimal reproduction steps without a real key;
+- expected and actual behavior;
+- whether public disclosure is already known.
 
-- the user enters the API key manually at setup time;
-- the key is never accepted through a command-line argument;
-- the key is never stored in plaintext files;
-- Windows uses DPAPI for the current user;
-- macOS uses the login Keychain for the current user;
-- installer-owned files are the only files that may be written or removed by setup and uninstall flows.
+We do not ask for a real API key to reproduce an installer issue.
 
-## Threat model
+The supported branch is the current GitHub default branch (`agents`). Legacy application branches are preserved for history but are not covered by this installer security policy.
 
-In scope:
-
-- accidental plaintext storage;
-- logging of secret values;
-- overwriting an existing Codex or Claude Code configuration;
-- leaking a secret through generated examples or CI logs;
-- unsafe PATH registration or uninstall scope.
-
-Out of scope:
-
-- compromise of the operating system;
-- compromise of the user's shell profile outside installer-owned boundaries;
-- vendor-side provider outages or model drift.
-
-## Responsible disclosure
-
-If you find a secret-handling issue, a configuration overwrite path, or a validation gap that could expose credentials, report it privately to NeuroAPI before public disclosure.
-
-Please include:
-
-- affected file or command;
-- operating system;
-- whether the issue involves plaintext storage, logs, PATH changes, or uninstall behavior;
-- the exact reproduction steps.
+See [docs/security.md](docs/security.md) for the threat model and explicit limitations.
