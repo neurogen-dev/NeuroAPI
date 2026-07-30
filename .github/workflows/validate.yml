@@ -18,7 +18,7 @@ jobs:
     name: Static safety checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate repository contract
         shell: pwsh
         run: ./tests/static/validate.ps1
@@ -30,7 +30,7 @@ jobs:
     name: Windows DPAPI smoke
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate PowerShell syntax
         shell: powershell
         run: .\tests\windows\syntax.ps1
@@ -42,7 +42,7 @@ jobs:
     name: macOS Keychain-command smoke
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate shell syntax
         run: /bin/bash ./tests/macos/syntax.sh
       - name: Run isolated installer smoke with mock Keychain
