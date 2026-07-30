@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
 unset NEUROAPI_AGENTS_TEST_MODE
 unset NEUROAPI_AGENTS_STATE_ROOT
 unset NEUROAPI_AGENTS_CODEX_HOME

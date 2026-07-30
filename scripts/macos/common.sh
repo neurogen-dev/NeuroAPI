@@ -4,6 +4,7 @@ set -euo pipefail
 OWNER_MARKER_TEXT='neuroapi-agents:v1'
 PROFILE_FILE_NAME='neuroapi-host.config.toml'
 PROFILE_MARKER_FILE_NAME='.neuroapi-host.config.toml.neuroapi-agents-owned'
+# shellcheck disable=SC2034 # Read by scripts that source this shared file.
 KEYCHAIN_SERVICE='host.neuroapi.agents.api-key'
 KEYCHAIN_MARKER_FILE_NAME='.keychain-item.neuroapi-agents-owned'
 

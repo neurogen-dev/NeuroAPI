@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
 # shellcheck source=scripts/macos/common.sh
 . "$SCRIPT_DIR/common.sh"
 
@@ -78,7 +78,7 @@ write_marker "$PROFILE_MARKER_PATH"
 
 rm -f -- "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -create json "$CLAUDE_SETTINGS_PATH"
-/usr/bin/plutil -insert '$schema' \
+/usr/bin/plutil -insert "\$schema" \
   -string 'https://json.schemastore.org/claude-code-settings.json' \
   "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert apiKeyHelper -string "$HELPER_PATH" "$CLAUDE_SETTINGS_PATH"

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-REPO_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
+REPO_ROOT="$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)"
 
 /bin/bash -n "$REPO_ROOT/setup-macos.command"
 /bin/bash -n "$REPO_ROOT/uninstall-macos.command"

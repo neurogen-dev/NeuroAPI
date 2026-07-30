@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-REPO_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
+REPO_ROOT="$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)"
 TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/neuroapi-agents-test.XXXXXX")"
 MOCK_SECURITY="$TMP_ROOT/security"
 SECURITY_LOG="$TMP_ROOT/security.log"
@@ -10,6 +10,22 @@ MOCK_KEYCHAIN_STATE="$TMP_ROOT/keychain-present"
 cleanup() {
   rm -rf -- "$TMP_ROOT"
 }
+
+report_error() {
+  local status="$1"
+  local line="$2"
+  printf 'macOS smoke failed at line %s with status %s.\n' "$line" "$status" >&2
+  if [[ -f "$TMP_ROOT/install.err" ]]; then
+    printf '%s\n' '--- installer stderr ---' >&2
+    sed -n '1,120p' "$TMP_ROOT/install.err" >&2
+  fi
+  if [[ -f "$SECURITY_LOG" ]]; then
+    printf '%s\n' '--- mock Keychain calls ---' >&2
+    sed -n '1,120p' "$SECURITY_LOG" >&2
+  fi
+}
+
+trap 'report_error "$?" "$LINENO"' ERR
 trap cleanup EXIT
 
 cat >"$MOCK_SECURITY" <<'EOF'
@@ -57,8 +73,14 @@ printf 'keep\n' >"$NEUROAPI_AGENTS_CODEX_HOME/user-owned.txt"
 
 grep -Fq 'add-generic-password' "$SECURITY_LOG"
 grep -Fq -- '-w' "$SECURITY_LOG"
-! grep -Fq 'test-neuroapi-token' "$TMP_ROOT/install.out"
-! grep -Fq 'test-neuroapi-token' "$TMP_ROOT/install.err"
+if grep -Fq 'test-neuroapi-token' "$TMP_ROOT/install.out"; then
+  printf 'Installer stdout exposed the dummy token.\n' >&2
+  exit 1
+fi
+if grep -Fq 'test-neuroapi-token' "$TMP_ROOT/install.err"; then
+  printf 'Installer stderr exposed the dummy token.\n' >&2
+  exit 1
+fi
 [[ -f "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml" ]]
 [[ -f "$NEUROAPI_AGENTS_STATE_ROOT/config/claude-settings.json" ]]
 [[ -x "$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh" ]]
