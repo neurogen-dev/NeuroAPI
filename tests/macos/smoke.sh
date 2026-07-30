@@ -17,7 +17,7 @@ report_error() {
   printf 'macOS smoke failed at line %s with status %s.\n' "$line" "$status" >&2
   if [[ -f "$TMP_ROOT/install.err" ]]; then
     printf '%s\n' '--- installer stderr ---' >&2
-    sed -n '1,120p' "$TMP_ROOT/install.err" >&2
+    tail -n 160 "$TMP_ROOT/install.err" >&2
   fi
   if [[ -f "$SECURITY_LOG" ]]; then
     printf '%s\n' '--- mock Keychain calls ---' >&2
