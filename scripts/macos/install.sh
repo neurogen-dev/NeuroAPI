@@ -77,18 +77,19 @@ EOF
 write_marker "$PROFILE_MARKER_PATH"
 
 rm -f -- "$CLAUDE_SETTINGS_PATH"
-/usr/bin/plutil -create json "$CLAUDE_SETTINGS_PATH"
+/usr/bin/plutil -create xml1 "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert "\$schema" \
   -string 'https://json.schemastore.org/claude-code-settings.json' \
   "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert apiKeyHelper -string "$HELPER_PATH" "$CLAUDE_SETTINGS_PATH"
-/usr/bin/plutil -insert env -json '{}' "$CLAUDE_SETTINGS_PATH"
+/usr/bin/plutil -insert env -dictionary "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert env.ANTHROPIC_BASE_URL \
   -string 'https://neuroapi.host' \
   "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert env.ANTHROPIC_MODEL \
   -string 'claude-sonnet-4-5' \
   "$CLAUDE_SETTINGS_PATH"
+/usr/bin/plutil -convert json "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -lint "$CLAUDE_SETTINGS_PATH" >/dev/null
 
 cat >"$LAUNCHER_ROOT/codex-neuroapi" <<'EOF'
