@@ -90,7 +90,6 @@ rm -f -- "$CLAUDE_SETTINGS_PATH"
   -string 'claude-sonnet-4-5' \
   "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -convert json "$CLAUDE_SETTINGS_PATH"
-/usr/bin/plutil -lint "$CLAUDE_SETTINGS_PATH" >/dev/null
 
 cat >"$LAUNCHER_ROOT/codex-neuroapi" <<'EOF'
 #!/bin/bash

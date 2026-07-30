@@ -91,7 +91,8 @@ fi
 helper_output="$("$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh")"
 [[ "$helper_output" == 'test-neuroapi-token' ]]
 
-/usr/bin/plutil -lint "$NEUROAPI_AGENTS_STATE_ROOT/config/claude-settings.json" >/dev/null
+python3 -c 'import json,pathlib,sys; json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))' \
+  "$NEUROAPI_AGENTS_STATE_ROOT/config/claude-settings.json"
 python3 -c 'import pathlib,sys,tomllib; tomllib.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))' \
   "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml"
 /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>/dev/null
