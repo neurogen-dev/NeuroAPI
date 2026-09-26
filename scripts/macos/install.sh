@@ -15,7 +15,7 @@ assert_launcher_owned_or_missing 'codex-neuroapi'
 assert_launcher_owned_or_missing 'claude-neuroapi'
 
 STATE_ROOT="$(state_root)"
-CODEX_HOME="$(codex_home)"
+PROFILE_CONFIG_ROOT="$(codex_home)"
 LAUNCHER_ROOT="$(launcher_root)"
 PROFILE_PATH="$(profile_path)"
 PROFILE_MARKER_PATH="$(profile_marker_path)"
@@ -38,7 +38,7 @@ if "$SECURITY_BIN" find-generic-password \
   exit 1
 fi
 
-mkdir -p "$STATE_ROOT/bin" "$STATE_ROOT/config" "$CODEX_HOME" "$LAUNCHER_ROOT"
+mkdir -p "$STATE_ROOT/bin" "$STATE_ROOT/config" "$PROFILE_CONFIG_ROOT" "$LAUNCHER_ROOT"
 write_marker "$(state_marker_path)"
 
 if ! is_test_mode; then
@@ -66,8 +66,9 @@ model_provider = "neuroapi"
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1"
+base_url = "https://neuroapi.host/v1/codex"
 wire_api = "responses"
+supports_websockets = true
 
 [model_providers.neuroapi.auth]
 command = "$ESCAPED_HELPER_PATH"

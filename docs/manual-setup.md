@@ -4,10 +4,12 @@
 
 ## Codex CLI
 
-Создаётся отдельный user-level profile:
+Нужен актуальный Codex с profile-v2: `codex --help` описывает `--profile` как загрузку `<name>.config.toml`. Создаётся отдельный user-level profile:
 
 - Windows: `%USERPROFILE%\.codex\neuroapi-host.config.toml`;
 - macOS: `~/.codex/neuroapi-host.config.toml`.
+
+Если `CODEX_HOME` уже задан, обе платформы используют `<CODEX_HOME>/neuroapi-host.config.toml` вместо стандартного пути. Setup не изменяет `CODEX_HOME`; используйте одинаковое значение при установке, запуске и удалении. Доступ к ключу по-прежнему идёт через прежний helper.
 
 Основная конфигурация:
 
@@ -17,8 +19,9 @@ model_provider = "neuroapi"
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1"
+base_url = "https://neuroapi.host/v1/codex"
 wire_api = "responses"
+supports_websockets = true
 
 [model_providers.neuroapi.auth]
 command = "/absolute/path/to/installer-owned-helper"
@@ -31,6 +34,12 @@ refresh_interval_ms = 300000
 Запуск: `codex --profile neuroapi-host`. Проверка: `/debug-config`.
 
 Project `.codex/config.toml` не подходит для provider/auth redirect: актуальный Codex игнорирует там `model_provider` и `model_providers` по соображениям безопасности.
+
+## HTTP/SSE для диагностики
+
+Если соединение WebSocket блокируется вашей сетью, в секции `[model_providers.neuroapi]` созданного профиля замените `supports_websockets = true` на `supports_websockets = false`. Base URL остаётся `https://neuroapi.host/v1/codex`, auth helper и key storage не меняются. При повторном запуске setup управляемый профиль снова получит настройку по умолчанию `true`.
+
+Если сервер ещё не предоставляет `/v1/codex`, не распространяйте эту версию установщика: сначала требуется согласованный серверный выпуск. Возврат к общему `/v1` не решает несовпадение формата каталога при command-backed auth.
 
 ## Claude Code
 

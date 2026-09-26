@@ -4,6 +4,14 @@ Public, auditable one-click setup for routing local Codex CLI and Claude Code se
 
 [Русская версия](README.md)
 
+## Release compatibility
+
+This version configures `https://neuroapi.host/v1/codex` with `supports_websockets = true`. Publish or distribute it **only after the server profile is deployed** and authenticated `/v1/codex/models` plus HTTP/WebSocket `/v1/codex/responses` checks pass. Local implementation is not production evidence. Setup deliberately does not call the API to validate credentials.
+
+An existing `CODEX_HOME` selects the profile directory without being modified. Keep its value consistent for setup, launch and uninstall.
+
+Use a current Codex release whose `--help` describes `--profile` as loading `<name>.config.toml`. Update older clients that expect `[profiles.name]` in the main configuration. For WebSocket troubleshooting, temporarily set `supports_websockets = false` in the generated profile, keeping `/v1/codex` and its credential helper.
+
 ## Quick start
 
 Install [Codex CLI](https://developers.openai.com/codex/cli/) and/or [Claude Code](https://code.claude.com/docs/en/installation), then create a key in the [NeuroAPI dashboard](https://neuroapi.host/login?redirect=/dashboard/tokens).
@@ -37,7 +45,7 @@ This prevents accidental plaintext disclosure. It does not protect a key from ma
 
 ## Verification
 
-- In `codex-neuroapi`, run `/debug-config` and confirm the `neuroapi-host` profile and `https://neuroapi.host/v1`.
+- In `codex-neuroapi`, run `/debug-config` and confirm the `neuroapi-host` profile and `https://neuroapi.host/v1/codex`.
 - In `claude-neuroapi`, run `/status` and confirm `https://neuroapi.host` plus `apiKeyHelper`.
 - Check current model IDs and pricing at [neuroapi.host/price](https://neuroapi.host/price).
 

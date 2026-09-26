@@ -22,6 +22,9 @@ jobs:
       - name: Validate repository contract
         shell: pwsh
         run: ./tests/static/validate.ps1
+      - name: Validate Windows profile template without credentials
+        shell: pwsh
+        run: ./tests/static/windows-profile.ps1
       - name: ShellCheck
         run: |
           shellcheck setup-macos.command uninstall-macos.command scripts/macos/*.sh tests/macos/*.sh

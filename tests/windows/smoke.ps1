@@ -45,6 +45,12 @@ try {
     Assert-True (Test-Path -LiteralPath $secretPath) 'DPAPI secret was not created.'
     Assert-True (Test-Path -LiteralPath $helperPath) 'Credential helper was not installed.'
     Assert-True (Test-Path -LiteralPath $settingsPath) 'Claude settings were not created.'
+    $profileBefore = Get-Content -LiteralPath $profilePath -Raw
+    Assert-True ($profileBefore -match '(?m)^base_url = "https://neuroapi.host/v1/codex"\r?$') 'Wrong Codex base URL.'
+    Assert-True ($profileBefore -match '(?m)^supports_websockets = true\r?$') 'Codex WebSocket support is missing.'
+    Assert-True ($profileBefore -notmatch 'test-neuroapi-token|experimental_bearer_token|env_key|http_headers') 'Credential leaked into Codex configuration.'
+    Assert-True ((Get-Content -LiteralPath $settingsPath -Raw) -notmatch 'test-neuroapi-token') 'Credential leaked into Claude configuration.'
+
     Assert-True (
         (Get-Content -LiteralPath $secretPath -Raw) -notmatch 'test-neuroapi-token'
     ) 'The key was stored in plaintext.'
@@ -84,8 +90,8 @@ try {
             Write-Warning 'Skipping TOML parse because local Python is older than 3.11.'
         } else {
             Assert-True ($LASTEXITCODE -eq 0) 'Unable to determine the local Python version.'
-            & $pythonExecutable @pythonPrefix -c 'import sys,tomllib; tomllib.load(open(sys.argv[1],''rb''))' $profilePath
-            Assert-True ($LASTEXITCODE -eq 0) 'Generated Codex profile is not valid TOML.'
+            & $pythonExecutable @pythonPrefix "$repoRoot/tests/static/profile_contract.py" $profilePath windows $helperPath $secretPath
+            Assert-True ($LASTEXITCODE -eq 0) 'Generated Codex profile violates the profile contract.'
         }
     }
 
@@ -94,6 +100,8 @@ try {
         -StateRoot $stateRoot `
         -CodexHome $codexHome `
         -NoPathUpdate | Out-Null
+
+    Assert-True ((Get-Content -LiteralPath $profilePath -Raw) -ceq $profileBefore) 'Reinstall changed the generated Codex profile.'
 
     & "$repoRoot\scripts\windows\uninstall.ps1" `
         -TestMode `

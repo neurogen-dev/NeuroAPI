@@ -82,8 +82,9 @@ model_provider = "neuroapi"
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1"
+base_url = "https://neuroapi.host/v1/codex"
 wire_api = "responses"
+supports_websockets = true
 
 [model_providers.neuroapi.auth]
 command = "powershell.exe"

@@ -10,6 +10,14 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 [English version](README.en.md)
 
+## Совместимость версии
+
+Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`. Выпускайте и распространяйте установщик **только после публикации серверного профиля**: должны работать авторизованный `GET /v1/codex/models` в формате Codex и `/v1/codex/responses` по HTTP и WebSocket. Подготовленный код не доказывает доступность этих адресов в production; setup намеренно не вызывает API для проверки ключа.
+
+Уже заданный `CODEX_HOME` учитывается для профиля и не изменяется; сохраняйте одинаковое значение при установке, запуске и удалении.
+
+Нужен актуальный Codex с отдельными profile-файлами: `codex --help` должен описывать `--profile` как загрузку `<name>.config.toml`. Старые версии с `[profiles.name]` в общем конфиге обновите перед установкой. Для диагностики WebSocket можно временно поставить `supports_websockets = false` в созданном профиле, сохранив `/v1/codex` и credential helper. Подробнее — [решение проблем](docs/troubleshooting.md).
+
 ## Установка в один запуск
 
 Сначала установите сам [Codex CLI](https://developers.openai.com/codex/cli/) и/или [Claude Code](https://code.claude.com/docs/en/installation), затем создайте API-ключ в [кабинете NeuroAPI](https://neuroapi.host/login?redirect=/dashboard/tokens).
@@ -95,7 +103,7 @@ Codex CLI:
 
 1. Запустите `codex-neuroapi`.
 2. Выполните `/debug-config`.
-3. Проверьте профиль `neuroapi-host`, provider `neuroapi` и `https://neuroapi.host/v1`.
+3. Проверьте профиль `neuroapi-host`, provider `neuroapi` и `https://neuroapi.host/v1/codex`.
 
 Claude Code:
 

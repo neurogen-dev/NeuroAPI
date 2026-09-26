@@ -6,3 +6,5 @@
 - Do not overwrite unrelated Codex, Claude Code, shell, or PATH configuration. Update and uninstall only files marked as installer-owned.
 - Keep Windows PowerShell 5.1 compatibility and macOS system Bash compatibility.
 - Validate script syntax, generated TOML/JSON, idempotency, secret handling, and uninstall boundaries before publishing.
+
+- Codex uses the user-level profile-v2 file and `/v1/codex` with WebSocket enabled. Publish installers only after authenticated server catalog and HTTP/WebSocket release checks; HTTP fallback keeps the same profile URL.

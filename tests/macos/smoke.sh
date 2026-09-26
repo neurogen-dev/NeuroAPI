@@ -2,7 +2,14 @@
 set -euo pipefail
 
 REPO_ROOT="$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)"
+PYTHON_BIN="${NEUROAPI_AGENTS_TEST_PYTHON:-python3}"
+"$PYTHON_BIN" -c 'import tomllib'
 TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/neuroapi-agents-test.XXXXXX")"
+# Resolve synthetic values through the same pure helper used by setup/uninstall.
+# shellcheck source=scripts/macos/common.sh
+. "$REPO_ROOT/scripts/macos/common.sh"
+[[ "$(resolve_codex_config_root '/tmp/custom profile' '/tmp/user')" == '/tmp/custom profile' ]]
+[[ "$(resolve_codex_config_root '' '/tmp/user')" == '/tmp/user/.codex' ]]
 MOCK_SECURITY="$TMP_ROOT/security"
 SECURITY_LOG="$TMP_ROOT/security.log"
 MOCK_KEYCHAIN_STATE="$TMP_ROOT/keychain-present"
@@ -57,8 +64,6 @@ esac
 EOF
 chmod 700 "$MOCK_SECURITY"
 
-export HOME="$TMP_ROOT/home"
-export USER='neuroapi-test'
 export NEUROAPI_AGENTS_TEST_MODE=1
 export NEUROAPI_AGENTS_STATE_ROOT="$TMP_ROOT/state"
 export NEUROAPI_AGENTS_CODEX_HOME="$TMP_ROOT/codex"
@@ -66,7 +71,7 @@ export NEUROAPI_AGENTS_BIN_ROOT="$TMP_ROOT/bin"
 export NEUROAPI_AGENTS_SECURITY_BIN="$MOCK_SECURITY"
 export NEUROAPI_AGENTS_SECURITY_LOG="$SECURITY_LOG"
 export NEUROAPI_AGENTS_MOCK_KEYCHAIN_STATE="$MOCK_KEYCHAIN_STATE"
-mkdir -p "$HOME" "$NEUROAPI_AGENTS_CODEX_HOME"
+mkdir -p "$NEUROAPI_AGENTS_CODEX_HOME"
 printf 'keep\n' >"$NEUROAPI_AGENTS_CODEX_HOME/user-owned.txt"
 
 /bin/bash -x "$REPO_ROOT/scripts/macos/install.sh" \
@@ -91,11 +96,29 @@ fi
 helper_output="$("$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh")"
 [[ "$helper_output" == 'test-neuroapi-token' ]]
 
-python3 -c 'import json,pathlib,sys; json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))' \
+"$PYTHON_BIN" -c 'import json,pathlib,sys; json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))' \
   "$NEUROAPI_AGENTS_STATE_ROOT/config/claude-settings.json"
-python3 -c 'import pathlib,sys,tomllib; tomllib.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))' \
-  "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml"
+"$PYTHON_BIN" "$REPO_ROOT/tests/static/profile_contract.py" \
+  "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml" macos \
+  "$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh"
+if grep -R -Fq 'test-neuroapi-token' "$NEUROAPI_AGENTS_CODEX_HOME" "$NEUROAPI_AGENTS_STATE_ROOT" "$NEUROAPI_AGENTS_BIN_ROOT"; then
+  printf 'Generated configuration or launchers exposed the dummy token.\n' >&2
+  exit 1
+fi
+mkdir -p "$TMP_ROOT/mock-bin"
+cat >"$TMP_ROOT/mock-bin/codex" <<'EOF'
+#!/bin/bash
+set -euo pipefail
+printf '%s\0' "$@" >"$NEUROAPI_AGENTS_TEST_ARGV"
+EOF
+chmod 700 "$TMP_ROOT/mock-bin/codex"
+NEUROAPI_AGENTS_TEST_ARGV="$TMP_ROOT/codex-argv" PATH="$TMP_ROOT/mock-bin:$PATH" \
+  "$NEUROAPI_AGENTS_BIN_ROOT/codex-neuroapi" 'prompt with spaces'
+"$PYTHON_BIN" -c 'import pathlib,sys; assert pathlib.Path(sys.argv[1]).read_bytes().split(b"\0") == [b"--profile", b"neuroapi-host", b"prompt with spaces", b""]' "$TMP_ROOT/codex-argv"
+
+cp "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml" "$TMP_ROOT/profile-before.toml"
 /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>/dev/null
+cmp "$TMP_ROOT/profile-before.toml" "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml"
 /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >/dev/null
 
 [[ ! -e "$NEUROAPI_AGENTS_STATE_ROOT" ]]

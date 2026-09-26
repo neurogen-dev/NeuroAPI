@@ -12,10 +12,21 @@ macOS: используйте полный путь `~/.local/bin/codex-neuroapi
 
 - profile `neuroapi-host`;
 - provider `neuroapi`;
-- base URL `https://neuroapi.host/v1`;
-- `wire_api = "responses"`.
+- base URL `https://neuroapi.host/v1/codex`;
+- `wire_api = "responses"`;
+- `supports_websockets = true` (или `false` для диагностики HTTP/SSE).
 
 Если `~/.codex/neuroapi-host.config.toml` существовал до установки без ownership-marker, setup должен отказать, а не перезаписать его.
+
+## WebSocket не подключается
+
+В `[model_providers.neuroapi]` файла `neuroapi-host.config.toml` временно установите `supports_websockets = false`, оставив base URL `/v1/codex`. Перезапустите `codex-neuroapi` и проверьте короткий запрос по HTTP/SSE. Не переносите ключ в TOML и не меняйте helper. Повторная установка восстановит `true`.
+
+`404` на `/v1/codex/models` или `/v1/codex/responses` может означать, что серверное обновление ещё не опубликовано. Эта версия установщика должна распространяться только после проверки обоих адресов и WebSocket на сервере. Один fallback на HTTP не создаёт отсутствующий endpoint.
+
+## Codex сообщает, что профиль не найден
+
+Обновите Codex CLI. В `codex --help` описание `--profile` должно указывать на отдельный `<name>.config.toml`, а не на старую таблицу `[profiles.name]`. Проверьте профиль и ownership-marker в путях из [ручной настройки](manual-setup.md). Если у вас задан `CODEX_HOME`, установщик и uninstaller используют его для Codex-профиля, не меняя переменную. Запускайте setup, launcher и uninstall с одинаковым значением: изменение переменной не переносит ранее установленный профиль.
 
 ## Claude Code использует другой URL или credential
 
