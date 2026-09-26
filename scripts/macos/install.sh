@@ -15,7 +15,7 @@ assert_launcher_owned_or_missing 'codex-neuroapi'
 assert_launcher_owned_or_missing 'claude-neuroapi'
 
 STATE_ROOT="$(state_root)"
-CODEX_HOME="$(codex_home)"
+PROFILE_CONFIG_ROOT="$(codex_home)"
 LAUNCHER_ROOT="$(launcher_root)"
 PROFILE_PATH="$(profile_path)"
 PROFILE_MARKER_PATH="$(profile_marker_path)"
@@ -38,7 +38,7 @@ if "$SECURITY_BIN" find-generic-password \
   exit 1
 fi
 
-mkdir -p "$STATE_ROOT/bin" "$STATE_ROOT/config" "$CODEX_HOME" "$LAUNCHER_ROOT"
+mkdir -p "$STATE_ROOT/bin" "$STATE_ROOT/config" "$PROFILE_CONFIG_ROOT" "$LAUNCHER_ROOT"
 write_marker "$(state_marker_path)"
 
 if ! is_test_mode; then
@@ -57,17 +57,21 @@ write_marker "$(keychain_marker_path)"
 
 cp "$SCRIPT_DIR/get-neuroapi-key.sh" "$HELPER_PATH"
 chmod 700 "$HELPER_PATH"
+cp "$SCRIPT_DIR/launch-managed.sh" "$STATE_ROOT/bin/launch-managed.sh"
+cp "$SCRIPT_DIR/catalog-validator.js" "$STATE_ROOT/bin/catalog-validator.js"
+chmod 700 "$STATE_ROOT/bin/launch-managed.sh"
+chmod 600 "$STATE_ROOT/bin/catalog-validator.js"
 
 ESCAPED_HELPER_PATH="$(toml_escape "$HELPER_PATH")"
 cat >"$PROFILE_PATH" <<EOF
 # Managed by the NeuroAPI Agents installer.
-model = "gpt-5.6-sol"
 model_provider = "neuroapi"
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1"
+base_url = "https://neuroapi.host/v1/codex"
 wire_api = "responses"
+supports_websockets = true
 
 [model_providers.neuroapi.auth]
 command = "$ESCAPED_HELPER_PATH"
@@ -84,24 +88,17 @@ rm -f -- "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert apiKeyHelper -string "$HELPER_PATH" "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert env -dictionary "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -insert env.ANTHROPIC_BASE_URL \
-  -string 'https://neuroapi.host' \
-  "$CLAUDE_SETTINGS_PATH"
-/usr/bin/plutil -insert env.ANTHROPIC_MODEL \
-  -string 'claude-sonnet-4-5' \
+  -string 'https://neuroapi.host/v1/claude-code' \
   "$CLAUDE_SETTINGS_PATH"
 /usr/bin/plutil -convert json "$CLAUDE_SETTINGS_PATH"
 
-cat >"$LAUNCHER_ROOT/codex-neuroapi" <<'EOF'
-#!/bin/bash
-set -euo pipefail
-exec codex --profile neuroapi-host "$@"
-EOF
-
-cat >"$LAUNCHER_ROOT/claude-neuroapi" <<EOF
-#!/bin/bash
-set -euo pipefail
-exec claude --settings "$CLAUDE_SETTINGS_PATH" "\$@"
-EOF
+for client in codex claude; do
+  {
+    printf '#!/bin/bash\nset -euo pipefail\nexec /bin/bash '
+    printf '%q ' "$STATE_ROOT/bin/launch-managed.sh" "$client"
+    printf '"$@"\n'
+  } >"$LAUNCHER_ROOT/$client-neuroapi"
+done
 
 chmod 700 "$LAUNCHER_ROOT/codex-neuroapi" "$LAUNCHER_ROOT/claude-neuroapi"
 write_marker "$(launcher_marker_path 'codex-neuroapi')"

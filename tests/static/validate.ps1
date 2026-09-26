@@ -47,7 +47,8 @@ $requiredFiles = @(
     'scripts/macos/uninstall.sh',
     'docs/security.md',
     'docs/manual-setup.md',
-    'docs/troubleshooting.md'
+    'docs/troubleshooting.md',
+    'tests/static/profile_contract.py'
 )
 foreach ($file in $requiredFiles) {
     if (-not (Test-Path -LiteralPath (Join-Path $repoRoot $file) -PathType Leaf)) {
@@ -83,6 +84,22 @@ Assert-NotMatches $macSetup '(?i)(api_key|token|secret)=' `
 Assert-NotMatches $macSetup '\|\s*"\$SECURITY_BIN"\s+add-generic-password' `
     'macOS setup must not pipe a key into the Keychain command.'
 
+foreach ($setup in @($windowsSetup, $macSetup)) {
+    Assert-Contains $setup 'base_url = "https://neuroapi.host/v1/codex"' `
+        'Codex must use the profile-specific API and catalog.'
+    Assert-Contains $setup 'supports_websockets = true' `
+        'Codex must enable the supported Responses WebSocket transport.'
+    Assert-Contains $setup '[model_providers.neuroapi.auth]' `
+        'Codex must retain command-backed authentication.'
+    Assert-NotMatches $setup '(?i)experimental_bearer_token|env_key|http_headers' `
+        'Setup must not introduce a second credential source.'
+}
+Assert-NotMatches $macSetup '(?m)^CODEX_HOME=' `
+    'Setup must not repurpose the Codex environment variable.'
+$macSmoke = Read-RepoFile 'tests/macos/smoke.sh'
+Assert-NotMatches $macSmoke '(?m)^(export\s+)?(HOME|CODEX_HOME)=' `
+    'Tests must use dedicated installer test paths, not override user home variables.'
+
 $macWrapper = Read-RepoFile 'setup-macos.command'
 Assert-NotMatches $macWrapper '"\$@"' `
     'The macOS setup wrapper must not forward command-line arguments.'
@@ -108,7 +125,7 @@ $denyPatterns = @(
 )
 
 $textExtensions = @(
-    '.ps1', '.sh', '.command', '.bat', '.md', '.json', '.toml', '.txt', '.yml', '.yaml'
+    '.py', '.js', '.ps1', '.sh', '.command', '.bat', '.md', '.json', '.toml', '.txt', '.yml', '.yaml'
 )
 $textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
     Where-Object {

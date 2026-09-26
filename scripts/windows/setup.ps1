@@ -7,6 +7,7 @@ param(
 )
 
 . "$PSScriptRoot\common.ps1"
+. "$PSScriptRoot\managed-catalog.ps1"
 
 if ($env:OS -ne 'Windows_NT') {
     throw 'This installer must run on Windows.'
@@ -61,6 +62,7 @@ $helperPath = [System.IO.Path]::Combine($binRoot, 'get-neuroapi-key.ps1')
 $claudeSettingsPath = [System.IO.Path]::Combine($configRoot, 'claude-settings.json')
 
 Ensure-Directory -Path $StateRoot
+Set-NeuroAPIPrivateDirectory -Path $StateRoot
 Write-OwnerMarker -Path (Get-StateMarkerPath -StateRoot $StateRoot)
 Ensure-Directory -Path $binRoot
 Ensure-Directory -Path $configRoot
@@ -71,19 +73,21 @@ $ciphertext = ConvertFrom-SecureString -SecureString $secureKey
 Write-Utf8NoBom -Path $secretPath -Content $ciphertext
 $secureKey.Clear()
 
-Copy-Item -LiteralPath "$PSScriptRoot\get-neuroapi-key.ps1" -Destination $helperPath -Force
+foreach ($scriptName in @('get-neuroapi-key.ps1', 'common.ps1', 'managed-catalog.ps1', 'launch-neuroapi.ps1')) {
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot $scriptName) -Destination (Join-Path $binRoot $scriptName) -Force
+}
 
 $tomlHelperPath = ConvertTo-TomlBasicString -Value $helperPath
 $tomlSecretPath = ConvertTo-TomlBasicString -Value $secretPath
 $profile = @"
 # Managed by the NeuroAPI Agents installer.
-model = "gpt-5.6-sol"
 model_provider = "neuroapi"
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1"
+base_url = "https://neuroapi.host/v1/codex"
 wire_api = "responses"
+supports_websockets = true
 
 [model_providers.neuroapi.auth]
 command = "powershell.exe"
@@ -100,19 +104,24 @@ $claudeSettings = [ordered]@{
     '$schema' = 'https://json.schemastore.org/claude-code-settings.json'
     apiKeyHelper = $helperCommand
     env = [ordered]@{
-        ANTHROPIC_BASE_URL = 'https://neuroapi.host'
-        ANTHROPIC_MODEL = 'claude-sonnet-4-5'
+        ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'
     }
 } | ConvertTo-Json -Depth 5
 Write-Utf8NoBom -Path $claudeSettingsPath -Content $claudeSettings
 
 $codexLauncher = @"
 @echo off
-codex --profile neuroapi-host %*
+setlocal
+set "PSModulePath="
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0launch-neuroapi.ps1" codex %*
+exit /b %errorlevel%
 "@
 $claudeLauncher = @"
 @echo off
-claude --settings "$claudeSettingsPath" %*
+setlocal
+set "PSModulePath="
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0launch-neuroapi.ps1" claude %*
+exit /b %errorlevel%
 "@
 Write-Utf8NoBom -Path ([System.IO.Path]::Combine($binRoot, 'codex-neuroapi.cmd')) -Content $codexLauncher
 Write-Utf8NoBom -Path ([System.IO.Path]::Combine($binRoot, 'claude-neuroapi.cmd')) -Content $claudeLauncher

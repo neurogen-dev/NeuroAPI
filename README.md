@@ -10,6 +10,14 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 [English version](README.en.md)
 
+## Совместимость версии
+
+Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`, а профиль Claude Code — с `https://neuroapi.host/v1/claude-code`. Выпускайте и распространяйте установщик **только после публикации серверных профилей**: должны пройти авторизованные проверки `GET /v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `GET /v1/claude-code/client-settings` и Claude Messages/count_tokens. Подготовленный код не доказывает доступность этих адресов в production; setup намеренно не вызывает API для проверки ключа.
+
+Уже заданный `CODEX_HOME` учитывается для профиля и не изменяется; сохраняйте одинаковое значение при установке, запуске и удалении.
+
+Нужен актуальный Codex с отдельными profile-файлами: `codex --help` должен описывать `--profile` как загрузку `<name>.config.toml`. Старые версии с `[profiles.name]` в общем конфиге обновите перед установкой. Для диагностики WebSocket можно временно поставить `supports_websockets = false` в созданном профиле, сохранив `/v1/codex` и credential helper. Подробнее — [решение проблем](docs/troubleshooting.md).
+
 ## Установка в один запуск
 
 Сначала установите сам [Codex CLI](https://developers.openai.com/codex/cli/) и/или [Claude Code](https://code.claude.com/docs/en/installation), затем создайте API-ключ в [кабинете NeuroAPI](https://neuroapi.host/login?redirect=/dashboard/tokens).
@@ -60,7 +68,7 @@ chmod +x setup-macos.command
 | Получает ключ | command-backed auth helper | `apiKeyHelper` / Keychain helper |
 | Существующие конфиги | не перезаписываются | не перезаписываются |
 
-Установщик не вызывает API и не отправляет ключ в сеть. Сеть используется уже Codex CLI или Claude Code при ваших запросах к `https://neuroapi.host`.
+Установщик не вызывает API и не отправляет ключ в сеть. При запуске `codex-neuroapi` или `claude-neuroapi` запускатель получает актуальный каталог с `https://neuroapi.host`, затем клиент использует API при ваших запросах.
 
 ## Почему ключ не лежит в конфиге
 
@@ -68,7 +76,7 @@ chmod +x setup-macos.command
 - ключ не сохраняется в `.env`, TOML, JSON или репозитории;
 - Windows шифрует значение через DPAPI без отдельного сохранённого master key;
 - macOS сохраняет значение штатной командой Keychain с интерактивным `-w`;
-- helpers печатают только токен в stdout в момент, когда его запрашивает клиент.
+- helpers печатают только токен в stdout по запросу launcher или клиента.
 
 Это защищает от случайной публикации ключа, но не от вредоносной программы, уже работающей от имени того же пользователя. Полная модель угроз: [docs/security.md](docs/security.md).
 
@@ -95,15 +103,17 @@ Codex CLI:
 
 1. Запустите `codex-neuroapi`.
 2. Выполните `/debug-config`.
-3. Проверьте профиль `neuroapi-host`, provider `neuroapi` и `https://neuroapi.host/v1`.
+3. Проверьте профиль `neuroapi-host`, provider `neuroapi` и `https://neuroapi.host/v1/codex`.
 
 Claude Code:
 
 1. Запустите `claude-neuroapi`.
 2. Выполните `/status`.
-3. Проверьте base URL `https://neuroapi.host` и credential source `apiKeyHelper`.
+3. Проверьте base URL `https://neuroapi.host/v1/claude-code` и credential source `apiKeyHelper`.
 
-Примеры используют `gpt-5.6-sol` и `claude-sonnet-4-5`. ID моделей меняются: при `model not found` возьмите точное имя из [каталога NeuroAPI](https://neuroapi.host/price) или `GET /v1/models`.
+При каждом запуске launcher получает актуальный список для вашего обычного ключа NeuroAPI. Codex использует отдельный каталог, Claude Code — настроенное меню; фиксированных моделей в установщике нет. Нужны Codex 0.147.0+ и Claude Code 2.1.280+. При ошибке обновления или пустом списке запуск останавливается, не возвращаясь к старым моделям. Подробности и ограничения managed-политик: [ручная настройка](docs/manual-setup.md).
+
+Рекомендуемый серверный набор на 26.09.2026: Codex — GPT-6 Sol, Astra и Luna; Claude Code — **Opus 5.5** (`claude-opus-5-5`, приоритетный), Sonnet 5, Haiku 4.5 и Fable 5.1. Opus 5.5 выбирается после публикации модели на сервисе и появления доступа у ключа; до этого используется следующая доступная рекомендация. Официальный ID: [Anthropic](https://www.anthropic.com/claude/opus).
 
 ## Удаление и замена ключа
 

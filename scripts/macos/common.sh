@@ -20,11 +20,21 @@ state_root() {
   fi
 }
 
+resolve_codex_config_root() {
+  local configured_root="$1"
+  local user_root="$2"
+  if [[ -n "$configured_root" ]]; then
+    printf '%s\n' "$configured_root"
+  else
+    printf '%s\n' "$user_root/.codex"
+  fi
+}
+
 codex_home() {
   if is_test_mode && [[ -n "${NEUROAPI_AGENTS_CODEX_HOME:-}" ]]; then
     printf '%s\n' "$NEUROAPI_AGENTS_CODEX_HOME"
   else
-    printf '%s\n' "$HOME/.codex"
+    resolve_codex_config_root "${CODEX_HOME:-}" "$HOME"
   fi
 }
 

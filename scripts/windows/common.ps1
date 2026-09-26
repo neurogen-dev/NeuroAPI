@@ -12,11 +12,22 @@ function Get-DefaultStateRoot {
     return [System.IO.Path]::Combine($env:LOCALAPPDATA, 'NeuroAPIAgents')
 }
 
-function Get-DefaultCodexHome {
-    if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) {
+function Resolve-CodexConfigRoot {
+    param(
+        [AllowNull()][string]$ConfiguredRoot,
+        [AllowNull()][string]$UserRoot
+    )
+    if (-not [string]::IsNullOrWhiteSpace($ConfiguredRoot)) {
+        return $ConfiguredRoot
+    }
+    if ([string]::IsNullOrWhiteSpace($UserRoot)) {
         throw 'USERPROFILE is not available.'
     }
-    return [System.IO.Path]::Combine($env:USERPROFILE, '.codex')
+    return [System.IO.Path]::Combine($UserRoot, '.codex')
+}
+
+function Get-DefaultCodexHome {
+    return Resolve-CodexConfigRoot -ConfiguredRoot $env:CODEX_HOME -UserRoot $env:USERPROFILE
 }
 
 function Get-FullPath {

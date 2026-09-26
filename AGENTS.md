@@ -6,3 +6,6 @@
 - Do not overwrite unrelated Codex, Claude Code, shell, or PATH configuration. Update and uninstall only files marked as installer-owned.
 - Keep Windows PowerShell 5.1 compatibility and macOS system Bash compatibility.
 - Validate script syntax, generated TOML/JSON, idempotency, secret handling, and uninstall boundaries before publishing.
+
+- Codex uses the user-level profile-v2 file and `/v1/codex` with WebSocket enabled. Publish installers only after authenticated server catalog and HTTP/WebSocket release checks; HTTP fallback keeps the same profile URL.
+- Managed launchers fetch and validate fresh key-scoped catalogs into private per-launch snapshots; never fall back to stale/bundled lists or accept executable server settings. Claude's explicit base URL is `/v1/claude-code`. Keep ordinary keys, preserve unrelated configuration, and document managed-policy/explicit-override boundaries.
