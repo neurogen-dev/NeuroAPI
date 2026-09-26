@@ -24,6 +24,7 @@ $withoutKnownVariables = $template.Replace('$tomlHelperPath', '').Replace('$toml
 if ($withoutKnownVariables.Contains('$') -or $withoutKnownVariables.Contains('`')) {
     throw 'Unexpected executable interpolation in the profile template.'
 }
+if ($template -match '(?m)^model =') { throw 'Bundled Codex model default is forbidden.' }
 $profile = $template.Replace('$tomlHelperPath', (ConvertTo-TomlBasicString -Value $helperPath)).Replace(
     '$tomlSecretPath', (ConvertTo-TomlBasicString -Value $secretPath)
 )

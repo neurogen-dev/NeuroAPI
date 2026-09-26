@@ -6,7 +6,7 @@ Public, auditable one-click setup for routing local Codex CLI and Claude Code se
 
 ## Release compatibility
 
-This version configures `https://neuroapi.host/v1/codex` with `supports_websockets = true`. Publish or distribute it **only after the server profile is deployed** and authenticated `/v1/codex/models` plus HTTP/WebSocket `/v1/codex/responses` checks pass. Local implementation is not production evidence. Setup deliberately does not call the API to validate credentials.
+This version configures `https://neuroapi.host/v1/codex` with `supports_websockets = true`, and `https://neuroapi.host/v1/claude-code` for Claude Code. Publish or distribute it **only after the server profiles are deployed** and authenticated `/v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `/v1/claude-code/client-settings`, and Claude Messages/count_tokens checks pass. Local implementation is not production evidence. Setup deliberately does not call the API to validate credentials; launchers fetch the current catalog before starting a client.
 
 An existing `CODEX_HOME` selects the profile directory without being modified. Keep its value consistent for setup, launch and uninstall.
 
@@ -46,10 +46,10 @@ This prevents accidental plaintext disclosure. It does not protect a key from ma
 ## Verification
 
 - In `codex-neuroapi`, run `/debug-config` and confirm the `neuroapi-host` profile and `https://neuroapi.host/v1/codex`.
-- In `claude-neuroapi`, run `/status` and confirm `https://neuroapi.host` plus `apiKeyHelper`.
+- In `claude-neuroapi`, run `/status` and confirm `https://neuroapi.host/v1/claude-code` plus `apiKeyHelper`.
 - Check current model IDs and pricing at [neuroapi.host/price](https://neuroapi.host/price).
 
-The installer defaults are examples and may drift with provider catalogs.
+Each launcher fetches a fresh catalog scoped to the ordinary NeuroAPI key. Codex uses a private `model_catalog_json`; Claude receives a configured picker. There are no hardcoded default models. Codex 0.147.0+ and Claude Code 2.1.280+ are required. Invalid, empty or unavailable catalogs stop launch instead of restoring stale lists. Organization policies and deliberate CLI overrides retain their documented precedence; these launchers do not support host-managed provider mode.
 
 ## More
 

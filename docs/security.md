@@ -10,7 +10,7 @@ Windows:
 
 1. `Read-Host -AsSecureString` получает ключ без обычной строки в setup-скрипте.
 2. `ConvertFrom-SecureString` без `-Key` создаёт DPAPI-ciphertext для текущего пользователя и компьютера.
-3. Codex/Claude вызывают короткий helper.
+3. Launcher и Codex/Claude вызывают короткий helper для своих авторизованных запросов.
 4. Helper расшифровывает значение в своём процессе, печатает только токен в stdout и очищает BSTR.
 
 macOS:
@@ -43,10 +43,12 @@ macOS:
 
 ## Сетевое поведение
 
-Setup и uninstall не вызывают NeuroAPI и не валидируют ключ по сети. После установки запросы отправляют официальные клиенты:
+Setup и uninstall не вызывают NeuroAPI. Каждый launcher сначала получает актуальный каталог через HTTPS с сохранённым ключом: фиксированный адрес, запрет redirects, ограничение времени и размера ответа. Ключ остаётся в памяти/анонимных pipes, не передаётся в argv и не сохраняется в каталоге. Отражение ключа в ответе проверяется до записи, включая JSON escaping. Произвольные hooks, команды и настройки сервера не принимаются.
 
-- Codex custom provider: `https://neuroapi.host/v1`;
-- Claude Code gateway: `https://neuroapi.host`.
+- Codex custom provider: `https://neuroapi.host/v1/codex`;
+- Claude Code gateway: `https://neuroapi.host/v1/claude-code`.
+
+Проверенные данные записываются в приватный отдельный каталог на время одного запуска, затем удаляются. Параллельные запуски не делят изменяемый snapshot. Ошибка загрузки не включает старый каталог. Чужие provider/auth overrides нейтрализуются только в дочернем процессе и его локальных settings; настройки пользователя на диске не переписываются. Host-managed provider mode отклоняется, а не обходится.
 
 ## Границы файлов
 

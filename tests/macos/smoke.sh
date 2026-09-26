@@ -105,16 +105,7 @@ if grep -R -Fq 'test-neuroapi-token' "$NEUROAPI_AGENTS_CODEX_HOME" "$NEUROAPI_AG
   printf 'Generated configuration or launchers exposed the dummy token.\n' >&2
   exit 1
 fi
-mkdir -p "$TMP_ROOT/mock-bin"
-cat >"$TMP_ROOT/mock-bin/codex" <<'EOF'
-#!/bin/bash
-set -euo pipefail
-printf '%s\0' "$@" >"$NEUROAPI_AGENTS_TEST_ARGV"
-EOF
-chmod 700 "$TMP_ROOT/mock-bin/codex"
-NEUROAPI_AGENTS_TEST_ARGV="$TMP_ROOT/codex-argv" PATH="$TMP_ROOT/mock-bin:$PATH" \
-  "$NEUROAPI_AGENTS_BIN_ROOT/codex-neuroapi" 'prompt with spaces'
-"$PYTHON_BIN" -c 'import pathlib,sys; assert pathlib.Path(sys.argv[1]).read_bytes().split(b"\0") == [b"--profile", b"neuroapi-host", b"prompt with spaces", b""]' "$TMP_ROOT/codex-argv"
+"$PYTHON_BIN" "$REPO_ROOT/tests/macos/catalog_smoke.py" "$NEUROAPI_AGENTS_STATE_ROOT" "$NEUROAPI_AGENTS_BIN_ROOT"
 
 cp "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml" "$TMP_ROOT/profile-before.toml"
 /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>/dev/null

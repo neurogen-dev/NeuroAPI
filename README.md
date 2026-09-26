@@ -12,7 +12,7 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 ## Совместимость версии
 
-Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`. Выпускайте и распространяйте установщик **только после публикации серверного профиля**: должны работать авторизованный `GET /v1/codex/models` в формате Codex и `/v1/codex/responses` по HTTP и WebSocket. Подготовленный код не доказывает доступность этих адресов в production; setup намеренно не вызывает API для проверки ключа.
+Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`, а профиль Claude Code — с `https://neuroapi.host/v1/claude-code`. Выпускайте и распространяйте установщик **только после публикации серверных профилей**: должны пройти авторизованные проверки `GET /v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `GET /v1/claude-code/client-settings` и Claude Messages/count_tokens. Подготовленный код не доказывает доступность этих адресов в production; setup намеренно не вызывает API для проверки ключа.
 
 Уже заданный `CODEX_HOME` учитывается для профиля и не изменяется; сохраняйте одинаковое значение при установке, запуске и удалении.
 
@@ -68,7 +68,7 @@ chmod +x setup-macos.command
 | Получает ключ | command-backed auth helper | `apiKeyHelper` / Keychain helper |
 | Существующие конфиги | не перезаписываются | не перезаписываются |
 
-Установщик не вызывает API и не отправляет ключ в сеть. Сеть используется уже Codex CLI или Claude Code при ваших запросах к `https://neuroapi.host`.
+Установщик не вызывает API и не отправляет ключ в сеть. При запуске `codex-neuroapi` или `claude-neuroapi` запускатель получает актуальный каталог с `https://neuroapi.host`, затем клиент использует API при ваших запросах.
 
 ## Почему ключ не лежит в конфиге
 
@@ -76,7 +76,7 @@ chmod +x setup-macos.command
 - ключ не сохраняется в `.env`, TOML, JSON или репозитории;
 - Windows шифрует значение через DPAPI без отдельного сохранённого master key;
 - macOS сохраняет значение штатной командой Keychain с интерактивным `-w`;
-- helpers печатают только токен в stdout в момент, когда его запрашивает клиент.
+- helpers печатают только токен в stdout по запросу launcher или клиента.
 
 Это защищает от случайной публикации ключа, но не от вредоносной программы, уже работающей от имени того же пользователя. Полная модель угроз: [docs/security.md](docs/security.md).
 
@@ -109,9 +109,9 @@ Claude Code:
 
 1. Запустите `claude-neuroapi`.
 2. Выполните `/status`.
-3. Проверьте base URL `https://neuroapi.host` и credential source `apiKeyHelper`.
+3. Проверьте base URL `https://neuroapi.host/v1/claude-code` и credential source `apiKeyHelper`.
 
-Примеры используют `gpt-5.6-sol` и `claude-sonnet-4-5`. ID моделей меняются: при `model not found` возьмите точное имя из [каталога NeuroAPI](https://neuroapi.host/price) или `GET /v1/models`.
+При каждом запуске launcher получает актуальный список для вашего обычного ключа NeuroAPI. Codex использует отдельный каталог, Claude Code — настроенное меню; фиксированных моделей в установщике нет. Нужны Codex 0.147.0+ и Claude Code 2.1.280+. При ошибке обновления или пустом списке запуск останавливается, не возвращаясь к старым моделям. Подробности и ограничения managed-политик: [ручная настройка](docs/manual-setup.md).
 
 ## Удаление и замена ключа
 

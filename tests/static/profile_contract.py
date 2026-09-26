@@ -6,7 +6,7 @@ import tomllib
 profile_path, platform, helper_path, *secret_paths = sys.argv[1:]
 raw = pathlib.Path(profile_path).read_text(encoding="utf-8")
 profile = tomllib.loads(raw)
-assert profile["model"] == "gpt-5.6-sol"
+assert "model" not in profile  # The authenticated startup catalog supplies it.
 assert profile["model_provider"] == "neuroapi"
 provider = profile["model_providers"]["neuroapi"]
 assert provider["base_url"] == "https://neuroapi.host/v1/codex"

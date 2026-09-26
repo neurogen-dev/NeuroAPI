@@ -125,7 +125,7 @@ $denyPatterns = @(
 )
 
 $textExtensions = @(
-    '.py', '.ps1', '.sh', '.command', '.bat', '.md', '.json', '.toml', '.txt', '.yml', '.yaml'
+    '.py', '.js', '.ps1', '.sh', '.command', '.bat', '.md', '.json', '.toml', '.txt', '.yml', '.yaml'
 )
 $textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
     Where-Object {
