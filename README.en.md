@@ -51,6 +51,8 @@ This prevents accidental plaintext disclosure. It does not protect a key from ma
 
 Each launcher fetches a fresh catalog scoped to the ordinary NeuroAPI key. Codex uses a private `model_catalog_json`; Claude receives a configured picker. There are no hardcoded default models. Codex 0.147.0+ and Claude Code 2.1.280+ are required. Invalid, empty or unavailable catalogs stop launch instead of restoring stale lists. Organization policies and deliberate CLI overrides retain their documented precedence; these launchers do not support host-managed provider mode.
 
+Recommended server selection as of 2026-09-26: GPT-6 Sol, Astra and Luna for Codex; **Opus 5.5** (`claude-opus-5-5`, preferred), Sonnet 5, Haiku 4.5 and Fable 5.1 for Claude Code. Opus 5.5 becomes the default after publication and key eligibility; otherwise the next available recommendation is selected. Official ID: [Anthropic](https://www.anthropic.com/claude/opus).
+
 ## More
 
 - [Security model](docs/security.md)

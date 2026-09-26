@@ -28,10 +28,10 @@ def catalog(slug="test-model"):
     return {"models": [model(slug)], "default_model": slug}
 
 
-def claude_catalog(slug="claude-sonnet-test"):
+def claude_catalog(slug="claude-opus-5-5"):
     return dict(model=slug, availableModels=[slug], enforceAvailableModels=True, fallbackModel=[],
                 modelPicker={"options": [{"model": slug, "label": "Test"}], "replaceBuiltInOptions": True},
-                env={"ANTHROPIC_DEFAULT_SONNET_MODEL": slug})
+                env={"ANTHROPIC_DEFAULT_OPUS_MODEL": slug})
 
 
 with tempfile.TemporaryDirectory(prefix="neuroapi-catalog-test-") as temp:
@@ -156,7 +156,6 @@ sys.exit(int(os.environ.get('TEST_CHILD_EXIT', '0')))
         run(claude_catalog(), client="claude", CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=host_unmanaged)
     hidden = claude_catalog()
     hidden['availableModels'].append('claude-opus-4.8')
-    hidden['env']['ANTHROPIC_DEFAULT_OPUS_MODEL'] = 'claude-opus-4.8'
     run(hidden, client="claude")
     wrong_family = claude_catalog()
     wrong_family['env']['ANTHROPIC_DEFAULT_FABLE_MODEL'] = wrong_family['model']

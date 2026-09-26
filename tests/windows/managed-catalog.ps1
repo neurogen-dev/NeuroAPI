@@ -34,10 +34,10 @@ function New-TestCodexCatalog {
 }
 function New-TestClaudeCatalog {
     return @{
-        model = 'claude-sonnet-test'; availableModels = @('claude-sonnet-test', 'claude-haiku-test', 'claude-opus-5', 'claude-opus-4.8')
+        model = 'claude-opus-5-5'; availableModels = @('claude-opus-5-5', 'claude-sonnet-5', 'claude-haiku-4-5', 'claude-opus-5', 'claude-opus-4.8')
         enforceAvailableModels = $true; fallbackModel = @()
-        modelPicker = @{ options = @(@{ model = 'claude-sonnet-test'; label = 'Sonnet' }, @{ model = 'claude-haiku-test' }); replaceBuiltInOptions = $true }
-        env = @{ ANTHROPIC_DEFAULT_SONNET_MODEL = 'claude-sonnet-test'; ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-haiku-test' }
+        modelPicker = @{ options = @(@{ model = 'claude-opus-5-5'; label = 'Opus 5.5' }, @{ model = 'claude-sonnet-5'; label = 'Sonnet 5' }, @{ model = 'claude-haiku-4-5' }); replaceBuiltInOptions = $true }
+        env = @{ ANTHROPIC_DEFAULT_OPUS_MODEL = 'claude-opus-5-5'; ANTHROPIC_DEFAULT_SONNET_MODEL = 'claude-sonnet-5'; ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-haiku-4-5' }
     } | ConvertTo-Json -Depth 8 -Compress
 }
 
@@ -51,7 +51,7 @@ Assert-Catalog ($claude.env.ANTHROPIC_CUSTOM_HEADERS -ceq '' -and $claude.env.AN
 Assert-Catalog ($claude.env.ANTHROPIC_MODEL -ceq $claude.model) 'Merged model override can bypass default.'
 Assert-Catalog (-not $claude.env.Contains('UNSAFE_ENV')) 'Unreviewed environment was copied.'
 Assert-Catalog (-not $claude.env.Contains('ANTHROPIC_DEFAULT_FABLE_MODEL')) 'Missing Fable was invented.'
-Assert-Catalog ($claude.availableModels.Count -eq 4 -and $claude.modelPicker.options.Count -eq 2) 'Compatibility aliases must remain available but hidden.'
+Assert-Catalog ($claude.availableModels.Count -eq 5 -and $claude.modelPicker.options.Count -eq 3) 'Compatibility aliases must remain available but hidden.'
 Assert-Catalog ($claude.fallbackModel.Count -eq 0) 'Inherited fallback was not disabled.'
 foreach ($bad in @('{', '{}', '{"models":[],"default_model":"model-one"}', '{"models":[{"slug":"model-one","display_name":"one"}],"default_model":"missing"}', '{"models":[{"slug":"bad model","display_name":"one"}],"default_model":"bad model"}')) {
     Assert-CatalogFailure { ConvertFrom-NeuroAPICatalog codex $bad '' }
@@ -79,7 +79,7 @@ foreach ($mutation in @(
     { param($x) $x.model = 'claude-opus-5' },
     { param($x) $x.fallbackModel = @('not-allowed') },
     { param($x) $x.modelPicker.options[0].model = 'not-allowed' },
-    { param($x) $x.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-sonnet-test' },
+    { param($x) $x.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-sonnet-5' },
     { param($x) $x.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = '' }
 )) {
     $payload = New-TestClaudeCatalog | ConvertFrom-Json
@@ -221,14 +221,14 @@ try {
             $script:snapshots += $entry
             $settings = Get-Content -LiteralPath $entry -Raw | ConvertFrom-Json
             Assert-Catalog ($settings.apiKeyHelper -match 'get-neuroapi-key.ps1') 'Local helper absent.'
-            Assert-Catalog ($settings.model -ceq 'claude-sonnet-test') 'Managed model missing.'
+            Assert-Catalog ($settings.model -ceq 'claude-opus-5-5') 'Managed model missing.'
             Assert-Catalog ($settings.env.ANTHROPIC_CUSTOM_HEADERS -ceq '' -and $settings.env.CLAUDE_CODE_USE_ANTHROPIC_AWS -ceq '') 'Merged settings can override endpoint or auth.'
-            Assert-Catalog ($settings.env.ANTHROPIC_MODEL -ceq 'claude-sonnet-test') 'Merged settings can override model.'
+            Assert-Catalog ($settings.env.ANTHROPIC_MODEL -ceq 'claude-opus-5-5') 'Merged settings can override model.'
             Assert-Catalog ([string]::IsNullOrEmpty($env:ANTHROPIC_CUSTOM_HEADERS) -and [string]::IsNullOrEmpty($env:CLAUDE_CODE_USE_ANTHROPIC_AWS)) 'Inherited auth/provider override survived.'
             Assert-Catalog ($env:CLAUDE_CODE_USE_TEST_TOOL -ceq 'keep') 'Unrelated tool switch was cleared.'
             Assert-Catalog ([string]::IsNullOrEmpty($env:ANTHROPIC_SMALL_FAST_MODEL)) 'Inherited fast model overrides catalog.'
             Assert-Catalog ([string]::IsNullOrEmpty($env:ANTHROPIC_DEFAULT_FABLE_MODEL)) 'Missing family inherited.'
-            Assert-Catalog ($env:ANTHROPIC_DEFAULT_HAIKU_MODEL -ceq 'claude-haiku-test') 'Concrete family missing.'
+            Assert-Catalog ($env:ANTHROPIC_DEFAULT_HAIKU_MODEL -ceq 'claude-haiku-4-5') 'Concrete family missing.'
             Assert-Catalog ($env:ANTHROPIC_BASE_URL -ceq 'https://neuroapi.host/v1/claude-code') 'Claude endpoint missing.'
         }
         $script:NeuroAPIChildExitCode = 37
