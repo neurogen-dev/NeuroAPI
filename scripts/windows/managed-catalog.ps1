@@ -266,8 +266,15 @@ function ConvertFrom-NeuroAPICatalog {
             $key = 'ANTHROPIC_DEFAULT_' + $family + '_MODEL'
             $value = Get-NeuroAPIProperty $environment $key
             if ($null -ne $value) {
-                if (-not (Test-NeuroAPIModelId $value) -or -not $allowed.Contains($value) -or
-                    $value -notmatch ('^claude-' + $family.ToLowerInvariant() + '(?:[.\-]|$)')) { throw 'Invalid model family' }
+                if (-not (Test-NeuroAPIModelId $value) -or -not $allowed.Contains($value)) { throw 'Invalid model family' }
+                if ($family -eq 'HAIKU') {
+                    # Claude Code uses this alias for background calls. The
+                    # target must be a recommended Claude model, not a hidden
+                    # compatibility-only entry from availableModels.
+                    if (-not $seen.Contains($value) -or $value -notmatch '^claude-(haiku|sonnet|opus|fable)(?:[.\-]|$)') { throw 'Invalid background model' }
+                } elseif ($value -notmatch ('^claude-' + $family.ToLowerInvariant() + '(?:[.\-]|$)')) {
+                    throw 'Invalid model family'
+                }
                 $safeEnv[$key] = $value
             }
         }

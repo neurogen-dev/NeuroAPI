@@ -55,6 +55,8 @@ Each launcher fetches a fresh catalog scoped to the ordinary NeuroAPI key. Codex
 
 Recommended server selection: GPT-6 Sol, Astra and Luna for Codex; **Opus 5.5** (`claude-opus-5-5`, preferred), Sonnet 5.5, Sonnet 5 and Fable 5.1 for Claude Code. An entry appears only when its published model, tariff and compatible upstream route are available to the key. Existing administrator catalog settings override source defaults.
 
+Claude Code also uses the `haiku` alias for background work. If no recommended Haiku is available, the server maps that alias to an eligible Sonnet or the default model. These requests are billed for the actual selected model and may cost more than Haiku.
+
 ## More
 
 - [Security model](docs/security.md)

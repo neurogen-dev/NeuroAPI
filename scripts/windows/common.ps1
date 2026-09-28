@@ -345,7 +345,10 @@ function Install-NeuroAPICodex {
             if ($archive.Entries.Count -gt 128) { throw 'Пакет Codex содержит слишком много файлов.' }
             $total = [long]0
             foreach ($entry in $archive.Entries) {
-                $name = $entry.FullName
+                # Windows-created ZIPs can use backslashes. Normalize before
+                # validating so either separator is subject to the same
+                # traversal and extraction-root checks.
+                $name = $entry.FullName.Replace('\', '/')
                 if ($name -cnotmatch '^[A-Za-z0-9._/-]+$' -or $name -match '(^|/)\.\.(/|$)' -or
                     $name.StartsWith('/') -or $name.Contains('//')) { throw 'Пакет Codex содержит небезопасный путь.' }
                 if ($name.EndsWith('/')) { continue }

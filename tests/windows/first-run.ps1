@@ -130,6 +130,17 @@ try {
     Assert-True (Test-Path -LiteralPath (Join-Path $installRoot 'bin/codex.cmd')) 'Codex command launcher was not created.'
     $nativePath = Join-Path $installRoot 'native-codex/codex.exe'
     $beforeUpdate = Get-Content -LiteralPath $nativePath -Raw
+    $unsafeZip = Join-Path $tempRoot 'unsafe-bundle.zip'
+    Copy-Item -LiteralPath $bundleZip -Destination $unsafeZip
+    $unsafeArchive = [IO.Compression.ZipFile]::Open($unsafeZip, [IO.Compression.ZipArchiveMode]::Update)
+    try { [void]$unsafeArchive.CreateEntry('..\escape.txt') } finally { $unsafeArchive.Dispose() }
+    $script:BundleZip = $unsafeZip
+    $script:BundleDigest = (Get-FileHash -LiteralPath $unsafeZip -Algorithm SHA256).Hash.ToLowerInvariant()
+    $unsafeRejected = $false
+    try { Install-NeuroAPICodex -StateRoot $installRoot } catch { $unsafeRejected = $true }
+    Assert-True ($unsafeRejected -and -not (Test-Path -LiteralPath (Join-Path $tempRoot 'escape.txt'))) 'Backslash traversal ZIP entry was accepted.'
+    Assert-True ((Get-Content -LiteralPath $nativePath -Raw) -ceq $beforeUpdate) 'Unsafe ZIP changed the installed Codex bundle.'
+    $script:BundleZip = $bundleZip
     $script:BundleDigest = ('0' * 64)
     $updateRejected = $false
     try { Install-NeuroAPICodex -StateRoot $installRoot } catch { $updateRejected = $true }

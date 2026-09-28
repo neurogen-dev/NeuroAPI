@@ -157,6 +157,16 @@ sys.exit(int(os.environ.get('TEST_CHILD_EXIT', '0')))
     assert first["path"] != second["path"]
     run(catalog(), user_args=['--model', 'explicit-user-model'])
     run(claude_catalog(), client="claude")
+    sonnet_background = claude_catalog()
+    sonnet_background['availableModels'].append('claude-sonnet-5-5')
+    sonnet_background['modelPicker']['options'].append({'model': 'claude-sonnet-5-5'})
+    sonnet_background['env']['ANTHROPIC_DEFAULT_SONNET_MODEL'] = 'claude-sonnet-5-5'
+    sonnet_background['env']['ANTHROPIC_DEFAULT_HAIKU_MODEL'] = 'claude-sonnet-5-5'
+    sonnet_result = run(sonnet_background, client="claude")
+    assert sonnet_result['payload']['env']['ANTHROPIC_DEFAULT_HAIKU_MODEL'] == 'claude-sonnet-5-5'
+    default_background = claude_catalog()
+    default_background['env']['ANTHROPIC_DEFAULT_HAIKU_MODEL'] = default_background['model']
+    run(default_background, client="claude")
     security_log = Path(os.environ['NEUROAPI_AGENTS_SECURITY_LOG'])
     for host_managed in ['1', 'true', 'yes', 'on', ' TRUE ', '\tOn\n', ' YeS ', ' 1 ']:
         before = security_log.read_bytes()
@@ -171,6 +181,10 @@ sys.exit(int(os.environ.get('TEST_CHILD_EXIT', '0')))
     wrong_family = claude_catalog()
     wrong_family['env']['ANTHROPIC_DEFAULT_FABLE_MODEL'] = wrong_family['model']
     run(wrong_family, client="claude", success=False)
+    hidden_background = claude_catalog()
+    hidden_background['availableModels'].append('claude-sonnet-5-5')
+    hidden_background['env']['ANTHROPIC_DEFAULT_HAIKU_MODEL'] = 'claude-sonnet-5-5'
+    run(hidden_background, client="claude", success=False)
     hidden_default = dict(hidden, model='claude-opus-4.8')
     run(hidden_default, client="claude", success=False)
     hidden_codex = catalog()

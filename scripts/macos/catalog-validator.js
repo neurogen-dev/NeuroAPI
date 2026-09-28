@@ -87,7 +87,14 @@ function validateClaude(data) {
   Object.keys(data.env).forEach(function (key) {
     requireValue(modelID(data.env[key]) && seen[data.env[key]])
     var family = key.slice('ANTHROPIC_DEFAULT_'.length, -'_MODEL'.length).toLowerCase()
-    requireValue(new RegExp('^claude-' + family + '(?:[-.]|$)').test(data.env[key]))
+    if (family === 'haiku') {
+      // Claude Code also uses the Haiku alias for background calls. The
+      // server may route it to an eligible recommended Sonnet or default.
+      requireValue(options[data.env[key]] === true)
+      requireValue(/^claude-(?:haiku|sonnet|opus|fable)(?:[-.]|$)/.test(data.env[key]))
+    } else {
+      requireValue(new RegExp('^claude-' + family + '(?:[-.]|$)').test(data.env[key]))
+    }
   })
 }
 function run(args) {
