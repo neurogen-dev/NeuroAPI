@@ -25,6 +25,12 @@ $CodexHome = Get-FullPath -Path $CodexHome
 $defaultStateRoot = Get-FullPath -Path (Get-DefaultStateRoot)
 $defaultCodexHome = Get-FullPath -Path (Get-DefaultCodexHome)
 
+if ($TestMode -and (
+    [string]::Equals($StateRoot, $defaultStateRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+    [string]::Equals($CodexHome, $defaultCodexHome, [System.StringComparison]::OrdinalIgnoreCase)
+)) {
+    throw 'Test mode requires isolated StateRoot and CodexHome paths.'
+}
 if (-not $TestMode) {
     if (-not [string]::Equals($StateRoot, $defaultStateRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw 'A custom StateRoot is allowed only in test mode.'
@@ -54,12 +60,26 @@ if ($secureKey.Length -eq 0) {
     throw 'The NeuroAPI API key cannot be empty.'
 }
 
+if (-not $TestMode) {
+    # Both checks are read-only. A rejected key or broken client leaves existing
+    # credentials and configuration untouched.
+    Assert-NeuroAPIKeyCatalogs -SecureKey $secureKey
+}
+
 $binRoot = [System.IO.Path]::Combine($StateRoot, 'bin')
 $configRoot = [System.IO.Path]::Combine($StateRoot, 'config')
 $secretRoot = [System.IO.Path]::Combine($StateRoot, 'secret')
 $secretPath = [System.IO.Path]::Combine($secretRoot, 'api-key.dpapi')
 $helperPath = [System.IO.Path]::Combine($binRoot, 'get-neuroapi-key.ps1')
 $claudeSettingsPath = [System.IO.Path]::Combine($configRoot, 'claude-settings.json')
+
+if (-not $TestMode) {
+    Ensure-Directory -Path $StateRoot
+    Set-NeuroAPIPrivateDirectory -Path $StateRoot
+    Write-OwnerMarker -Path (Get-StateMarkerPath -StateRoot $StateRoot)
+    Ensure-Directory -Path $binRoot
+    $installedClients = @(Ensure-NeuroAPIClients -StateRoot $StateRoot)
+}
 
 Ensure-Directory -Path $StateRoot
 Set-NeuroAPIPrivateDirectory -Path $StateRoot
@@ -135,7 +155,10 @@ Write-Utf8NoBom -Path ([System.IO.Path]::Combine($binRoot, 'codex-neuroapi.cmd')
 Write-Utf8NoBom -Path ([System.IO.Path]::Combine($binRoot, 'claude-neuroapi.cmd')) -Content $claudeLauncher
 
 if (-not $TestMode -and -not $NoPathUpdate) {
-    Add-UserPathEntry -Entry $binRoot
+    Add-OwnedUserPathEntry -Entry $binRoot -StateRoot $StateRoot
+    if ($installedClients -contains 'claude') {
+        Add-OwnedUserPathEntry -Entry (Join-Path $env:USERPROFILE '.local/bin') -StateRoot $StateRoot
+    }
 }
 
 Write-Host ''
@@ -143,9 +166,3 @@ Write-Host 'NeuroAPI setup is complete.'
 Write-Host "Codex launcher:  $binRoot\codex-neuroapi.cmd"
 Write-Host "Claude launcher: $binRoot\claude-neuroapi.cmd"
 Write-Host 'Open a new terminal, then run codex-neuroapi or claude-neuroapi.'
-if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
-    Write-Warning 'Codex CLI is not installed or is not on PATH.'
-}
-if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-    Write-Warning 'Claude Code is not installed or is not on PATH.'
-}

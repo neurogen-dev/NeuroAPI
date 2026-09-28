@@ -17,6 +17,15 @@ LAUNCHER_ROOT="$(launcher_root)"
 SECURITY_BIN="$(security_bin)"
 CURRENT_USER="$(current_user)"
 KEYCHAIN_ITEM_IS_OWNED=0
+SERVICE_POINTER="$STATE_ROOT/config/keychain-service"
+SERVICE_TO_DELETE="$KEYCHAIN_SERVICE"
+if [[ -e "$SERVICE_POINTER" ]]; then
+  IFS= read -r SERVICE_TO_DELETE <"$SERVICE_POINTER"
+  if [[ ! "$SERVICE_TO_DELETE" =~ ^host\.neuroapi\.agents\.api-key\.[a-f0-9]{32}$ ]]; then
+    printf 'Invalid NeuroAPI Keychain service pointer; refusing to remove it.\n' >&2
+    exit 1
+  fi
+fi
 
 if ! is_test_mode; then
   printf 'This removes the NeuroAPI launchers and the API key from macOS Keychain.\n'
@@ -68,7 +77,7 @@ fi
 if [[ "$KEYCHAIN_ITEM_IS_OWNED" == '1' ]]; then
   if ! "$SECURITY_BIN" delete-generic-password \
     -a "$CURRENT_USER" \
-    -s "$KEYCHAIN_SERVICE" >/dev/null 2>&1; then
+    -s "$SERVICE_TO_DELETE" >/dev/null 2>&1; then
     printf 'No installer-owned NeuroAPI Keychain item was found, or it was already removed.\n'
   fi
 else

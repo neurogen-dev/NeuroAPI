@@ -254,7 +254,11 @@ function ConvertFrom-NeuroAPICatalog {
             $safe
         }
         if (-not $seen.Contains($model)) { throw 'Default model hidden from picker' }
-        $safeEnv = [ordered]@{ ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'; ANTHROPIC_MODEL = $model }
+        $safeEnv = [ordered]@{
+            ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'
+            ANTHROPIC_MODEL = $model
+            CLAUDE_CODE_MAX_OUTPUT_TOKENS = '4096'
+        }
         foreach ($name in (Get-NeuroAPIClaudeEnvironmentOverrides)) { $safeEnv[$name] = '' }
         $environment = Get-NeuroAPIProperty $data 'env'
         Assert-NeuroAPIKeys $environment @('ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_FABLE_MODEL')
@@ -283,14 +287,18 @@ function ConvertFrom-NeuroAPICatalog {
 
 function Get-NeuroAPIClientCommand {
     param([string]$Client)
+    $stateRoot = Split-Path -Parent $PSScriptRoot
+    $nativeCodex = Join-Path $stateRoot 'native-codex/codex.exe'
+    $candidate = if ($Client -eq 'codex') { $nativeCodex } else { Join-Path $env:USERPROFILE '.local/bin/claude.exe' }
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
     $command = Get-Command $Client -CommandType Application, ExternalScript -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($null -eq $command) { throw 'Установите Codex CLI или Claude Code и откройте новый терминал.' }
-    return $command.Source
+    if ($null -ne $command) { return $command.Source }
+    throw 'Установите Codex CLI или Claude Code и откройте новый терминал.'
 }
 
 function Assert-NeuroAPIClientVersion {
     param([string]$Client, [string]$Command)
-    $minimum = if ($Client -eq 'codex') { [version]'0.147.0' } else { [version]'2.1.280' }
+    $minimum = if ($Client -eq 'codex') { [version]'0.158.0' } else { [version]'2.1.284' }
     try {
         $global:LASTEXITCODE = 0
         $output = @(& $Command --version 2>&1) -join ' '

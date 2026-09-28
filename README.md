@@ -12,7 +12,7 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 ## Совместимость версии
 
-Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`, а профиль Claude Code — с `https://neuroapi.host/v1/claude-code`. Codex-профиль отключает hosted web search, multi-agent, goals, apps и browser use: эти инструменты новейший клиент отправляет даже в простых задачах, а NeuroAPI пока не гарантирует их провайдерское исполнение. Локальные команды, чтение и редактирование файлов работают. Выпускайте и распространяйте установщик **только после публикации серверных профилей**: должны пройти авторизованные проверки `GET /v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `GET /v1/claude-code/client-settings` и Claude Messages/count_tokens. Подготовленный код не доказывает доступность этих адресов в production; setup намеренно не вызывает API для проверки ключа.
+Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`, а профиль Claude Code — с `https://neuroapi.host/v1/claude-code`. Codex-профиль отключает hosted web search, multi-agent, goals, apps и browser use: эти инструменты новейший клиент отправляет даже в простых задачах, а NeuroAPI пока не гарантирует их провайдерское исполнение. Локальные команды, чтение и редактирование файлов работают. Установщик проверяет доступ ключа к обоим каталогам без платной генерации. Генерацию через HTTP/WebSocket Responses и Claude Messages/count_tokens проверяйте после серверного релиза.
 
 Уже заданный `CODEX_HOME` учитывается для профиля и не изменяется; сохраняйте одинаковое значение при установке, запуске и удалении.
 
@@ -20,7 +20,7 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 ## Установка в один запуск
 
-Сначала установите сам [Codex CLI](https://developers.openai.com/codex/cli/) и/или [Claude Code](https://code.claude.com/docs/en/installation), затем создайте API-ключ в [кабинете NeuroAPI](https://neuroapi.host/login?redirect=/dashboard/tokens).
+Создайте API-ключ в [кабинете NeuroAPI](https://neuroapi.host/login?redirect=/dashboard/tokens). Если Codex CLI или Claude Code отсутствуют либо устарели, установщик загрузит актуальные версии из [официального источника Codex](https://developers.openai.com/codex/cli/) и [официального источника Claude Code](https://code.claude.com/docs/en/setup).
 
 ### Windows
 
@@ -68,7 +68,7 @@ chmod +x setup-macos.command
 | Получает ключ | command-backed auth helper | `apiKeyHelper` / Keychain helper |
 | Существующие конфиги | не перезаписываются | не перезаписываются |
 
-Установщик не вызывает API и не отправляет ключ в сеть. При запуске `codex-neuroapi` или `claude-neuroapi` запускатель получает актуальный каталог с `https://neuroapi.host`, затем клиент использует API при ваших запросах.
+Установщик отправляет ключ только в NeuroAPI для проверки доступных моделей; платной генерации при настройке нет. При запуске `codex-neuroapi` или `claude-neuroapi` запускатель вновь получает актуальный каталог с `https://neuroapi.host`, затем клиент использует API при ваших запросах.
 
 ## Почему ключ не лежит в конфиге
 
@@ -111,9 +111,9 @@ Claude Code:
 2. Выполните `/status`.
 3. Проверьте base URL `https://neuroapi.host/v1/claude-code` и credential source `apiKeyHelper`.
 
-При каждом запуске launcher получает актуальный список для вашего обычного ключа NeuroAPI. Codex использует отдельный каталог, Claude Code — настроенное меню; фиксированных моделей в установщике нет. Нужны Codex 0.147.0+ и Claude Code 2.1.280+. При ошибке обновления или пустом списке запуск останавливается, не возвращаясь к старым моделям. Подробности и ограничения managed-политик: [ручная настройка](docs/manual-setup.md).
+При каждом запуске launcher получает актуальный список для вашего обычного ключа NeuroAPI. Codex использует отдельный каталог, Claude Code — настроенное меню; фиксированных моделей в установщике нет. Проверенные минимумы: Codex 0.158.0 и Claude Code 2.1.284. Для Claude Code установщик задаёт начальный лимит вывода 4096 токенов, чтобы запросы с большим стандартным лимитом не резервировали избыточную квоту. При ошибке обновления или пустом списке запуск останавливается, не возвращаясь к старым моделям. Подробности и ограничения managed-политик: [ручная настройка](docs/manual-setup.md).
 
-Рекомендуемый серверный набор на 26.09.2026: Codex — GPT-6 Sol, Astra и Luna; Claude Code — **Opus 5.5** (`claude-opus-5-5`, приоритетный), Sonnet 5, Haiku 4.5 и Fable 5.1. Opus 5.5 выбирается после публикации модели на сервисе и появления доступа у ключа; до этого используется следующая доступная рекомендация. Официальный ID: [Anthropic](https://www.anthropic.com/claude/opus).
+Рекомендуемый серверный набор: Codex — GPT-6 Sol, Astra и Luna; Claude Code — **Opus 5.5** (`claude-opus-5-5`, приоритетный), Sonnet 5.5, Sonnet 5 и Fable 5.1. Модель появляется в меню только после публикации на сервисе и появления совместимого маршрута для тарифа и ключа. Если администратор сохранил собственный список, он имеет приоритет над рекомендуемым набором.
 
 ## Удаление и замена ключа
 

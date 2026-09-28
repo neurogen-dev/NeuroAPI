@@ -63,7 +63,7 @@ sys.stdout.write('\\n' + os.environ.get('TEST_STATUS', '200'))
     client_source = '''#!/usr/bin/env python3
 import json, os, pathlib, stat, sys, time
 if sys.argv[1:] == ['--version']:
-    print(os.environ.get('TEST_VERSION', 'codex-cli 0.147.0' if pathlib.Path(sys.argv[0]).name == 'codex' else '2.1.280 (Claude Code)'))
+    print(os.environ.get('TEST_VERSION', 'codex-cli 0.158.0' if pathlib.Path(sys.argv[0]).name == 'codex' else '2.1.284 (Claude Code)'))
     sys.exit(0)
 a = sys.argv[1:]
 if pathlib.Path(sys.argv[0]).name == 'codex':
@@ -77,6 +77,7 @@ else:
     path = pathlib.Path(a[a.index('--settings') + 1])
     payload = json.loads(path.read_text())
     assert payload['env']['ANTHROPIC_BASE_URL'] == 'https://neuroapi.host/v1/claude-code'
+    assert payload['env']['CLAUDE_CODE_MAX_OUTPUT_TOKENS'] == '4096'
     assert 'apiKeyHelper' in payload and 'test-neuroapi-token' not in path.read_text()
     neutralized = ['ANTHROPIC_SMALL_FAST_MODEL', 'CLAUDE_CODE_SUBAGENT_MODEL', 'ANTHROPIC_DEFAULT_MODEL',
                    'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_API_KEY', 'CLAUDE_CODE_OAUTH_TOKEN',
@@ -141,6 +142,16 @@ sys.exit(int(os.environ.get('TEST_CHILD_EXIT', '0')))
         return marker.exists()
 
     first = run(catalog())
+    verify_payload = root / 'verify-catalog.json'
+    verify_payload.write_text(json.dumps(catalog()))
+    verify_scratch = root / 'verify-private'
+    verify_scratch.mkdir()
+    verified = subprocess.run([str(launchers / 'codex-neuroapi'), '--verify'],
+                              env=dict(base_env, TMPDIR=str(verify_scratch), TEST_PAYLOAD=str(verify_payload),
+                                       TEST_FETCH_MARKER=str(root / 'verify-fetch')),
+                              text=True, capture_output=True, timeout=30)
+    assert verified.returncode == 0 and verified.stdout == 'Каталог codex проверен.\n', verified.stderr
+    assert not list(verify_scratch.iterdir()), 'Verify left a private snapshot'
     second = run(catalog("changed-model"))
     assert second["payload"]["models"][0]["slug"] == "changed-model"
     assert first["path"] != second["path"]
@@ -178,8 +189,8 @@ sys.exit(int(os.environ.get('TEST_CHILD_EXIT', '0')))
     run(json.dumps(echoed).replace("test-neuroapi-token", "test-neuroapi-\\u0074oken"), success=False)
     run(catalog(), success=False, TEST_STATUS="302")
     run(catalog(), success=False, TEST_FETCH_FAIL="403")
-    assert not run(catalog(), success=False, TEST_VERSION="codex-cli 0.146.9")
-    assert not run(claude_catalog(), client="claude", success=False, TEST_VERSION="2.1.279 (Claude Code)")
+    assert not run(catalog(), success=False, TEST_VERSION="codex-cli 0.157.9")
+    assert not run(claude_catalog(), client="claude", success=False, TEST_VERSION="2.1.283 (Claude Code)")
     for invalid in [dict(claude_catalog(), apiKeyHelper="bad"), dict(claude_catalog(), availableModels=[]),
                     dict(claude_catalog(), env={"ANTHROPIC_AUTH_TOKEN":"evil"}),
                     dict(claude_catalog(), fallbackModel=["other"]), dict(claude_catalog(), model="missing")]:
