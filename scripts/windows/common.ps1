@@ -424,9 +424,7 @@ function Ensure-NeuroAPIClients {
         catch { $install += $client }
     }
     if ($install.Count -gt 0) {
-        $answer = Read-Host ('Установить или обновить Codex CLI и Claude Code из официальных источников? (' + ($install -join ', ') + ') [Y/n]')
-        if ($answer -match '^(n|no|н|нет)$') { throw 'Установите отсутствующие клиенты и повторите настройку NeuroAPI.' }
-        if (-not [string]::IsNullOrWhiteSpace($answer) -and $answer -notmatch '^(y|yes|д|да)$') { throw 'Установка клиентов отменена.' }
+        Write-Host ('Устанавливаю или обновляю из официальных источников: ' + ($install -join ', ') + '.')
         foreach ($client in $install) {
             try {
                 if ($client -eq 'codex') { Install-NeuroAPICodex -StateRoot $StateRoot }

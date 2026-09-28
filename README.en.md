@@ -1,6 +1,6 @@
 # NeuroAPI for Codex CLI and Claude Code
 
-Public, auditable one-click setup for routing local Codex CLI and Claude Code sessions through [NeuroAPI](https://neuroapi.host) on Windows and macOS.
+Public, auditable guided setup for routing local Codex CLI and Claude Code sessions through [NeuroAPI](https://neuroapi.host) on Windows and macOS. It configures the terminal launchers `codex-neuroapi` and `claude-neuroapi`; it does not configure or validate the Claude Desktop Code or Codex Desktop GUIs.
 
 [Русская версия](README.md)
 
@@ -16,6 +16,8 @@ Use a current Codex release whose `--help` describes `--profile` as loading `<na
 
 Create a key in the [NeuroAPI dashboard](https://neuroapi.host/login?redirect=/dashboard/tokens). Setup installs or updates missing/old Codex CLI and Claude Code from their [official Codex](https://developers.openai.com/codex/cli/) and [official Claude Code](https://code.claude.com/docs/en/setup) sources.
 
+The ZIP link points to the published `agents` branch. Changes in an open pull request reach that archive only after the pull request is merged into `agents`.
+
 Windows:
 
 1. [Download the agents ZIP](https://github.com/neurogen-dev/NeuroAPI/archive/refs/heads/agents.zip).
@@ -26,7 +28,7 @@ Windows:
 macOS:
 
 1. Download and extract the same ZIP.
-2. Run `chmod +x setup-macos.command && ./setup-macos.command`.
+2. In the extracted directory, run `bash setup-macos.command`.
 3. Paste the key into the macOS Keychain prompt.
 4. Run `~/.local/bin/codex-neuroapi` or `~/.local/bin/claude-neuroapi`.
 

@@ -40,6 +40,9 @@ jobs:
       - name: Run isolated installer smoke
         shell: powershell
         run: .\tests\windows\smoke.ps1
+      - name: Verify first-run client installation and upgrades
+        shell: powershell
+        run: .\tests\windows\first-run.ps1
       - name: Install and launch official clients
         shell: powershell
         run: .\tests\windows\native-clients.ps1

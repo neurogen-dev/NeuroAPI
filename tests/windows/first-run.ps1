@@ -26,7 +26,7 @@ try {
     function Assert-NeuroAPIClientReady { param([string]$Client, [string]$Command) if ($Command -eq 'old') { throw 'Outdated client' }; if (-not $Command) { throw 'Missing client' } }
     function Install-NeuroAPICodex { param([string]$StateRoot) $script:Installs.codex++; $script:KnownClients.codex = 'new-codex' }
     function Install-NeuroAPIClaude { param([string]$StateRoot) $script:Installs.claude++; $script:KnownClients.claude = 'new-claude' }
-    function Read-Host { param([string]$Prompt) return '' }
+    function Read-Host { param([string]$Prompt) throw 'Native client installation must not request another confirmation.' }
 
     $installed = @(Ensure-NeuroAPIClients -StateRoot $tempRoot)
     Assert-True ($installed.Count -eq 2 -and $script:Installs.codex -eq 1 -and $script:Installs.claude -eq 1) 'Both missing clients were not installed exactly once.'

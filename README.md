@@ -6,6 +6,8 @@
 
 Открытые установщики для подключения [Codex CLI](https://developers.openai.com/codex/cli/) и [Claude Code](https://code.claude.com/docs/en/overview) к [NeuroAPI](https://neuroapi.host) на Windows и macOS.
 
+Пакет настраивает **клиенты в терминале** через команды `codex-neuroapi` и `claude-neuroapi`. Настройки Claude Desktop Code и Codex Desktop этим установщиком не изменяются; работу этих GUI с NeuroAPI он не подтверждает.
+
 NeuroAPI — российский AI API-сервис: единый доступ к моделям OpenAI, Anthropic Claude, Google Gemini, DeepSeek, генерации изображений и видео с оплатой в рублях. Проект работает от российского ООО, инфраструктура сервиса размещена в РФ. Актуальные модели и цены всегда проверяйте в [живом каталоге](https://neuroapi.host/price).
 
 [English version](README.en.md)
@@ -21,6 +23,8 @@ NeuroAPI — российский AI API-сервис: единый доступ
 ## Установка в один запуск
 
 Создайте API-ключ в [кабинете NeuroAPI](https://neuroapi.host/login?redirect=/dashboard/tokens). Если Codex CLI или Claude Code отсутствуют либо устарели, установщик загрузит актуальные версии из [официального источника Codex](https://developers.openai.com/codex/cli/) и [официального источника Claude Code](https://code.claude.com/docs/en/setup).
+
+Ссылка на ZIP ведёт в опубликованную ветку `agents`. Изменения открытого PR появятся в этом архиве только после слияния в `agents`.
 
 ### Windows
 
@@ -40,11 +44,10 @@ claude-neuroapi
 
 1. [Скачайте ZIP с установщиками](https://github.com/neurogen-dev/NeuroAPI/archive/refs/heads/agents.zip) и распакуйте его.
 2. Откройте Terminal в распакованной папке.
-3. Запустите:
+3. Запустите одну команду:
 
 ```bash
-chmod +x setup-macos.command
-./setup-macos.command
+bash setup-macos.command
 ```
 
 4. Вставьте API-ключ в защищённый запрос macOS Keychain.
