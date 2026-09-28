@@ -130,13 +130,15 @@ try {
     foreach ($failurePoint in @('claude-settings.json', 'api-key.dpapi')) {
         $env:NEUROAPI_AGENTS_TEST_FAIL_AFTER = $failurePoint
         $rotationFailed = $false
+        $rotationError = ''
         try {
             & "$repoRoot\scripts\windows\setup.ps1" `
                 -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate | Out-Null
         } catch {
-            $rotationFailed = $_.Exception.Message -match 'Simulated setup transaction failure'
+            $rotationError = $_.Exception.Message
+            $rotationFailed = $rotationError -match 'Simulated setup transaction failure'
         }
-        Assert-True $rotationFailed "Injected failure after $failurePoint was ignored."
+        Assert-True $rotationFailed "Injected failure after $failurePoint did not restore cleanly: $rotationError"
         foreach ($path in $tracked) {
             Assert-True ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ceq $beforeHashes[$path]) "Failed rotation changed $path."
         }
