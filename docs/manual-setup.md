@@ -15,6 +15,13 @@
 
 ```toml
 model_provider = "neuroapi"
+web_search = "disabled"
+
+[features]
+multi_agent = false
+goals = false
+apps = false
+browser_use = false
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
@@ -29,6 +36,8 @@ refresh_interval_ms = 300000
 ```
 
 На Windows `command` — `powershell.exe`, а helper и DPAPI secret передаются отдельными элементами `args`.
+
+Codex 0.158.0 по умолчанию добавляет к каждому запросу hosted `web_search` и namespace-инструмент для multi-agent, даже при локальном чтении файла. NeuroAPI не объявляет эти инструменты как поддерживаемые для Codex-профиля: они требуют отдельного провайдерского контракта и тарификации. Профиль отключает только эти возможности, а чтение, правка и запуск команд остаются доступны. Возвращать их вручную в профиле можно лишь после отдельной проверки поддержки сервером.
 
 Запуск: `codex-neuroapi`. Перед каждым запуском launcher получает `/v1/codex/models` с обычным ключом NeuroAPI, проверяет ответ и передаёт приватный файл через `model_catalog_json` вместе с доступной моделью по умолчанию. Файл удаляется после завершения клиента. Проверка: `/debug-config` и `/model`.
 

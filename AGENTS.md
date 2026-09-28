@@ -8,4 +8,5 @@
 - Validate script syntax, generated TOML/JSON, idempotency, secret handling, and uninstall boundaries before publishing.
 
 - Codex uses the user-level profile-v2 file and `/v1/codex` with WebSocket enabled. Publish installers only after authenticated server catalog and HTTP/WebSocket release checks; HTTP fallback keeps the same profile URL.
+- Keep unsupported hosted Codex tools (`web_search`, multi-agent namespace, goals, apps and browser use) disabled in this profile until the server can execute and bill them safely; local file and shell tools must remain available.
 - Managed launchers fetch and validate fresh key-scoped catalogs into private per-launch snapshots; never fall back to stale/bundled lists or accept executable server settings. Claude's explicit base URL is `/v1/claude-code`. Keep ordinary keys, preserve unrelated configuration, and document managed-policy/explicit-override boundaries.

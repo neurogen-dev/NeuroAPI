@@ -12,7 +12,7 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 ## Совместимость версии
 
-Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`, а профиль Claude Code — с `https://neuroapi.host/v1/claude-code`. Выпускайте и распространяйте установщик **только после публикации серверных профилей**: должны пройти авторизованные проверки `GET /v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `GET /v1/claude-code/client-settings` и Claude Messages/count_tokens. Подготовленный код не доказывает доступность этих адресов в production; setup намеренно не вызывает API для проверки ключа.
+Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`, а профиль Claude Code — с `https://neuroapi.host/v1/claude-code`. Codex-профиль отключает hosted web search, multi-agent, goals, apps и browser use: эти инструменты новейший клиент отправляет даже в простых задачах, а NeuroAPI пока не гарантирует их провайдерское исполнение. Локальные команды, чтение и редактирование файлов работают. Выпускайте и распространяйте установщик **только после публикации серверных профилей**: должны пройти авторизованные проверки `GET /v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `GET /v1/claude-code/client-settings` и Claude Messages/count_tokens. Подготовленный код не доказывает доступность этих адресов в production; setup намеренно не вызывает API для проверки ключа.
 
 Уже заданный `CODEX_HOME` учитывается для профиля и не изменяется; сохраняйте одинаковое значение при установке, запуске и удалении.
 

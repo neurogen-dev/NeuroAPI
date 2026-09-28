@@ -89,6 +89,10 @@ foreach ($setup in @($windowsSetup, $macSetup)) {
         'Codex must use the profile-specific API and catalog.'
     Assert-Contains $setup 'supports_websockets = true' `
         'Codex must enable the supported Responses WebSocket transport.'
+    Assert-Contains $setup 'web_search = "disabled"' `
+        'Codex must omit unsupported hosted web search from ordinary requests.'
+    Assert-Contains $setup 'multi_agent = false' `
+        'Codex must omit unsupported namespace tools from ordinary requests.'
     Assert-Contains $setup '[model_providers.neuroapi.auth]' `
         'Codex must retain command-backed authentication.'
     Assert-NotMatches $setup '(?i)experimental_bearer_token|env_key|http_headers' `

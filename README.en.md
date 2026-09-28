@@ -6,7 +6,7 @@ Public, auditable one-click setup for routing local Codex CLI and Claude Code se
 
 ## Release compatibility
 
-This version configures `https://neuroapi.host/v1/codex` with `supports_websockets = true`, and `https://neuroapi.host/v1/claude-code` for Claude Code. Publish or distribute it **only after the server profiles are deployed** and authenticated `/v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `/v1/claude-code/client-settings`, and Claude Messages/count_tokens checks pass. Local implementation is not production evidence. Setup deliberately does not call the API to validate credentials; launchers fetch the current catalog before starting a client.
+This version configures `https://neuroapi.host/v1/codex` with `supports_websockets = true`, and `https://neuroapi.host/v1/claude-code` for Claude Code. The Codex profile disables hosted web search, multi-agent, goals, apps, and browser use because the current client includes these tools even in simple local tasks, while NeuroAPI does not guarantee their upstream execution. Local shell and file tools remain available. Publish or distribute it **only after the server profiles are deployed** and authenticated `/v1/codex/models`, HTTP/WebSocket `/v1/codex/responses`, `/v1/claude-code/client-settings`, and Claude Messages/count_tokens checks pass. Local implementation is not production evidence. Setup deliberately does not call the API to validate credentials; launchers fetch the current catalog before starting a client.
 
 An existing `CODEX_HOME` selects the profile directory without being modified. Keep its value consistent for setup, launch and uninstall.
 

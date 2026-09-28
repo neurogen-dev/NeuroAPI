@@ -82,6 +82,14 @@ $tomlSecretPath = ConvertTo-TomlBasicString -Value $secretPath
 $profile = @"
 # Managed by the NeuroAPI Agents installer.
 model_provider = "neuroapi"
+web_search = "disabled"
+
+# These Codex-hosted tools are not part of the NeuroAPI Responses contract.
+[features]
+multi_agent = false
+goals = false
+apps = false
+browser_use = false
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
