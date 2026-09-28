@@ -117,6 +117,43 @@ try {
 
     Assert-True ((Get-Content -LiteralPath $profilePath -Raw) -ceq $profileBefore) 'Reinstall changed the generated Codex profile.'
 
+    # A failed key rotation must restore every installer-owned file, including
+    # the exact previous DPAPI ciphertext, even after the new key was written.
+    $tracked = @($secretPath, $profilePath, $profileMarker, $settingsPath)
+    foreach ($file in @('get-neuroapi-key.ps1', 'common.ps1', 'managed-catalog.ps1', 'launch-neuroapi.ps1',
+        'codex-neuroapi.cmd', 'claude-neuroapi.cmd')) {
+        $tracked += (Join-Path (Join-Path $stateRoot 'bin') $file)
+    }
+    $beforeHashes = @{}
+    foreach ($path in $tracked) { $beforeHashes[$path] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash }
+    $env:NEUROAPI_AGENTS_TEST_TOKEN = 'rotated-test-token'
+    foreach ($failurePoint in @('claude-settings.json', 'api-key.dpapi')) {
+        $env:NEUROAPI_AGENTS_TEST_FAIL_AFTER = $failurePoint
+        $rotationFailed = $false
+        try {
+            & "$repoRoot\scripts\windows\setup.ps1" `
+                -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate | Out-Null
+        } catch {
+            $rotationFailed = $_.Exception.Message -match 'Simulated setup transaction failure'
+        }
+        Assert-True $rotationFailed "Injected failure after $failurePoint was ignored."
+        foreach ($path in $tracked) {
+            Assert-True ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ceq $beforeHashes[$path]) "Failed rotation changed $path."
+        }
+        $restoredKey = & powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $helperPath -SecretPath $secretPath
+        Assert-True ($restoredKey -ceq 'test-neuroapi-token') 'Failed rotation lost the previous DPAPI key.'
+        $residue = @(Get-ChildItem -LiteralPath $stateRoot, $codexHome -Recurse -Force | Where-Object {
+            $_.Name -match '^(setup-stage-)|\.(new|backup)\.[a-f0-9]{32}$'
+        })
+        Assert-True ($residue.Count -eq 0) 'Failed rotation left stage or backup files.'
+    }
+    $env:NEUROAPI_AGENTS_TEST_FAIL_AFTER = $null
+    & "$repoRoot\scripts\windows\setup.ps1" `
+        -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate | Out-Null
+    $rotatedKey = & powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $helperPath -SecretPath $secretPath
+    Assert-True ($rotatedKey -ceq 'rotated-test-token') 'Successful retry did not install the replacement key.'
+    $env:NEUROAPI_AGENTS_TEST_TOKEN = $null
+
     & "$repoRoot\scripts\windows\uninstall.ps1" `
         -TestMode `
         -StateRoot $stateRoot `
