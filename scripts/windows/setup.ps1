@@ -96,6 +96,7 @@ $promoted = New-Object System.Collections.ArrayList
 $pendingFiles = New-Object System.Collections.ArrayList
 $backupFiles = New-Object System.Collections.ArrayList
 $rollbackFailed = $false
+$rollbackDiagnostics = New-Object System.Collections.ArrayList
 try {
     Ensure-Directory -Path $stageRoot
     Set-NeuroAPIPrivateDirectory -Path $stageRoot
@@ -221,9 +222,13 @@ exit /b %errorlevel%
             }
         } catch {
             $rollbackFailed = $true
+            [void]$rollbackDiagnostics.Add($_.Exception.GetType().Name + ': ' + $_.Exception.Message)
         }
     }
-    if ($rollbackFailed) { throw 'Не удалось полностью восстановить прежнюю настройку NeuroAPI; сохраните резервные DPAPI-файлы и обратитесь в поддержку.' }
+    if ($rollbackFailed) {
+        if ($TestMode) { throw ('Setup rollback failed: ' + ($rollbackDiagnostics -join ' | ')) }
+        throw 'Не удалось полностью восстановить прежнюю настройку NeuroAPI; сохраните резервные DPAPI-файлы и обратитесь в поддержку.'
+    }
     throw $originalError
 } finally {
     $secureKey.Clear()
