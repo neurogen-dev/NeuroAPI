@@ -145,7 +145,7 @@ try {
         $restoredKey = & powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $helperPath -SecretPath $secretPath
         Assert-True ($restoredKey -ceq 'test-neuroapi-token') 'Failed rotation lost the previous DPAPI key.'
         $residue = @(Get-ChildItem -LiteralPath $stateRoot, $codexHome -Recurse -Force | Where-Object {
-            $_.Name -match '^(setup-stage-)|\.(new|backup)\.[a-f0-9]{32}$'
+            $_.Name -match '^(setup-stage-)|\.(new|backup|discard)\.[a-f0-9]{32}$'
         })
         Assert-True ($residue.Count -eq 0) 'Failed rotation left stage or backup files.'
     }

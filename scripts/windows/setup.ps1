@@ -213,7 +213,11 @@ exit /b %errorlevel%
         try {
             if ($entry.Existed) {
                 if (Test-Path -LiteralPath $entry.Target) {
-                    [IO.File]::Replace($entry.Backup, $entry.Target, $null)
+                    # Windows PowerShell 5/.NET Framework requires a concrete
+                    # destination backup path here; null is rejected.
+                    $discard = $entry.Target + '.discard.' + $transactionId
+                    [IO.File]::Replace($entry.Backup, $entry.Target, $discard)
+                    [IO.File]::Delete($discard)
                 } else {
                     [IO.File]::Move($entry.Backup, $entry.Target)
                 }
@@ -238,6 +242,10 @@ exit /b %errorlevel%
     if (-not $rollbackFailed) {
         foreach ($backup in $backupFiles) {
             if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force -ErrorAction SilentlyContinue }
+        }
+        foreach ($entry in $promoted) {
+            $discard = $entry.Target + '.discard.' + $transactionId
+            if (Test-Path -LiteralPath $discard) { Remove-Item -LiteralPath $discard -Force -ErrorAction SilentlyContinue }
         }
     }
     if (Test-Path -LiteralPath $stageRoot) { Remove-Item -LiteralPath $stageRoot -Recurse -Force -ErrorAction SilentlyContinue }
