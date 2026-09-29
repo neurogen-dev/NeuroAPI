@@ -14,7 +14,7 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 ## Совместимость версии
 
-Эта версия создаёт профиль Codex с `https://codex.neuroapi.host/v1` и `supports_websockets = true`, а профиль Claude Code — с `https://claude.neuroapi.host`. Codex-профиль отключает hosted web search, multi-agent, goals, apps и browser use: эти инструменты новейший клиент отправляет даже в простых задачах, а NeuroAPI пока не гарантирует их провайдерское исполнение. Локальные команды, чтение и редактирование файлов работают. Установщик проверяет доступ ключа к обоим каталогам без платной генерации. Генерацию через HTTP/WebSocket Responses и Claude Messages/count_tokens проверяйте после серверного релиза.
+Эта версия создаёт профиль Codex с `https://codex.neuroapi.host/v1` и `supports_websockets = true`, а профиль Claude Code — с `https://claude.neuroapi.host`. Codex-профиль отключает hosted web search, multi-agent, goals, apps и browser use: эти инструменты новейший клиент отправляет даже в простых задачах, а NeuroAPI пока не гарантирует их провайдерское исполнение. Локальные команды, чтение и редактирование файлов работают. Установщик проверяет доступ ключа к обоим каталогам без платной генерации. После установки отправьте короткий реальный запрос и проверьте его в [истории использования NeuroAPI](https://neuroapi.host/dashboard/logs): проверка каталога сама по себе не подтверждает генерацию.
 
 Уже заданный `CODEX_HOME` учитывается для профиля и не изменяется; сохраняйте одинаковое значение при установке, запуске и удалении.
 
@@ -61,6 +61,10 @@ bash setup-macos.command
 ```
 
 Скрипт не использует `sudo` и не редактирует shell profile. Если `~/.local/bin` уже входит в `PATH`, достаточно команд `codex-neuroapi` и `claude-neuroapi`.
+
+**Claude Desktop устанавливается отдельно.** Установщик не меняет закрытые настройки приложения: включите Developer Mode и укажите NeuroAPI в штатной форме Configure Third-Party Inference по [инструкции для Claude Desktop](https://neuroapi.host/docs/claude-desktop). Для Codex Desktop при установке ответьте «да» на отдельный вопрос, затем перезапустите приложение и создайте новую локальную задачу.
+
+Если вы уже пробовали подключиться и получали ошибки, сначала пройдите [восстановление старой настройки](docs/reconnect-after-update.md). Оно сохраняет ваши проекты и помогает найти старый URL, профиль или источник ключа.
 
 ## Что именно делает установщик
 
@@ -138,11 +142,12 @@ Uninstaller удаляет только installer-owned файлы и локал
 
 - [Модель безопасности](docs/security.md)
 - [Ручная настройка и созданные файлы](docs/manual-setup.md)
+- [Как переподключиться после неудачной старой настройки](docs/reconnect-after-update.md)
 - [Решение проблем](docs/troubleshooting.md)
 - [Codex через NeuroAPI](https://neuroapi.host/codex-api)
 - [Claude Code через NeuroAPI](https://neuroapi.host/claude-code)
 - [Codex Desktop](https://neuroapi.host/docs/codex-desktop)
-- [Claude Desktop Code](https://neuroapi.host/docs/claude-desktop)
+- [Claude Desktop](https://neuroapi.host/docs/claude-desktop)
 - [OpenAI-совместимый API](https://neuroapi.host/openai-compatible-api)
 - [Модели и цены](https://neuroapi.host/price)
 

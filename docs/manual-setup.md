@@ -1,6 +1,77 @@
 # Что настраивают установщики
 
-Эта страница нужна для аудита и ручного восстановления. Рекомендуемый путь — root setup-файл для вашей ОС.
+Эта страница объясняет как выполнить настройку вручную и какие файлы создаёт автоматический установщик. Самый простой путь — [setup-файл для вашей ОС](../README.md#установка-в-один-запуск). Если старая настройка уже не работала, начните с [пошагового восстановления](reconnect-after-update.md).
+
+## Адреса и ключ
+
+Используйте обычный API-ключ из [кабинета NeuroAPI](https://neuroapi.host/login?redirect=/dashboard/tokens). Скопируйте его целиком, включая префикс `sk-`; не добавляйте `Bearer ` в поле ключа. Отдельный ключ для Codex и Claude не нужен; доступные модели зависят от ключа, тарифа и текущих маршрутов.
+
+| Клиент | Базовый адрес |
+|---|---|
+| Codex CLI и Codex Desktop (Responses API) | `https://codex.neuroapi.host/v1` |
+| Claude Code и Claude Desktop (Anthropic API) | `https://claude.neuroapi.host` |
+| Другие OpenAI-совместимые приложения | `https://neuroapi.host/v1` |
+
+Не добавляйте `/responses` к базовому адресу Codex или `/v1/messages` к базовому адресу Claude: клиенты добавляют путь запроса сами. Уточните точный ID модели в [каталоге](https://neuroapi.host/price); название в старой сохранённой сессии может устареть.
+
+## Вручную без установщика: временный ключ в терминале
+
+Ниже приведён способ проверить подключение без изменения постоянных настроек ОС. Переменная среды доступна только этому терминалу и запущенным из него программам; не записывайте ключ в TOML, JSON, shell profile или историю команд. После закрытия терминала ввод потребуется повторить. Для постоянной настройки с защищённым хранением ключа используйте установщик или собственный credential helper.
+
+macOS (Terminal):
+
+```bash
+printf 'Вставьте ключ NeuroAPI и нажмите Enter: '
+read -r -s NEUROAPI_API_KEY
+printf '\n'
+export NEUROAPI_API_KEY
+```
+
+Windows (PowerShell):
+
+```powershell
+$secure = Read-Host 'Ключ NeuroAPI' -AsSecureString
+$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try { $env:NEUROAPI_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
+finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
+Remove-Variable secure, ptr
+```
+
+Для Codex создайте файл `~/.codex/neuroapi-manual.config.toml` (Windows: `%USERPROFILE%\.codex\neuroapi-manual.config.toml`):
+
+```toml
+model = "gpt-6-sol" # замените на модель, доступную вашему ключу
+model_provider = "neuroapi_manual"
+web_search = "disabled"
+
+[features]
+multi_agent = false
+goals = false
+apps = false
+browser_use = false
+
+[model_providers.neuroapi_manual]
+name = "NeuroAPI"
+base_url = "https://codex.neuroapi.host/v1"
+wire_api = "responses"
+supports_websockets = true
+env_key = "NEUROAPI_API_KEY"
+```
+
+Запустите `codex --profile neuroapi-manual`, проверьте `/debug-config` и выполните короткую задачу. Этот ручной профиль не получает управляемый каталог: встроенное меню Codex может содержать недоступные модели. Выбирайте проверенный ID явно. Файл профиля должен находиться в том же `CODEX_HOME`, с которым вы запускаете Codex; проектный `.codex/config.toml` не заменяет его.
+
+Для Claude Code в том же терминале задайте адрес и модель, затем запустите `claude`:
+
+```bash
+export ANTHROPIC_API_KEY="$NEUROAPI_API_KEY"
+export ANTHROPIC_BASE_URL="https://claude.neuroapi.host"
+export ANTHROPIC_MODEL="claude-sonnet-5-5" # замените на доступную модель
+claude
+```
+
+В PowerShell эквивалентные команды — `$env:ANTHROPIC_API_KEY = $env:NEUROAPI_API_KEY`, `$env:ANTHROPIC_BASE_URL = 'https://claude.neuroapi.host'`, `$env:ANTHROPIC_MODEL = 'claude-sonnet-5-5'`, затем `claude`. Проверьте `/status` и `/model`. Старые `ANTHROPIC_AUTH_TOKEN`, Bedrock/Vertex/Foundry overrides и пользовательские settings могут иметь иной приоритет; [порядок восстановления](reconnect-after-update.md) помогает найти конфликт. При выходе из тестового терминала удалите временный ключ (`unset NEUROAPI_API_KEY ANTHROPIC_API_KEY` на macOS; `Remove-Item Env:NEUROAPI_API_KEY, Env:ANTHROPIC_API_KEY` в PowerShell) или просто закройте окно.
+
+Codex Desktop не наследует переменную из терминала при обычном запуске через GUI. Для него выбирайте опцию в установщике либо [ручную настройку Desktop](https://neuroapi.host/docs/codex-desktop). Claude Desktop настраивается только в [официальной форме приложения](https://neuroapi.host/docs/claude-desktop).
 
 ## Codex CLI
 
@@ -55,7 +126,7 @@ Project `.codex/config.toml` не подходит для provider/auth redirect
 
 Если соединение WebSocket блокируется вашей сетью, в секции `[model_providers.neuroapi]` созданного профиля замените `supports_websockets = true` на `supports_websockets = false`. Base URL остаётся `https://codex.neuroapi.host/v1`, auth helper и key storage не меняются. При повторном запуске setup управляемый профиль снова получит настройку по умолчанию `true`.
 
-Если сервер ещё не предоставляет `https://codex.neuroapi.host/v1/models` и `/v1/responses` на том же субдомене, не распространяйте эту версию установщика: сначала требуется согласованный серверный выпуск. Общий `/v1` возвращает другой формат каталога при command-backed auth.
+Если `https://codex.neuroapi.host/v1/models` или `/v1/responses` недоступны, проверьте DNS, сеть, ключ и [доступность сайта](https://neuroapi.host); локальное изменение `supports_websockets` не исправит ошибку `404` на endpoint. Общий `/v1` использует иной каталог и не заменяет выделенный адрес Codex для управляемого профиля.
 
 ## Claude Code
 
