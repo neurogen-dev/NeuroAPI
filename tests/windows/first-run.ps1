@@ -69,7 +69,9 @@ try {
         param([string]$Url, [string[]]$AllowedHosts, [long]$MaxBytes, [string]$Bearer, [string]$OutputPath, [int]$TimeoutSeconds)
         if ($Bearer -cne 'dummy-secret') { throw 'Wrong test credential' }
         $script:CatalogCalls++
-        $client = if ($Url -like '*/codex/*') { 'codex' } else { 'claude' }
+        $hostName = ([Uri]$Url).Host
+        if ($AllowedHosts.Count -ne 1 -or $AllowedHosts[0] -cne $hostName) { throw 'Catalog host allowlist mismatch' }
+        $client = if ($hostName -ceq 'codex.neuroapi.host') { 'codex' } else { 'claude' }
         return [pscustomobject]@{ Status = $script:CatalogStatus; Bytes = [Text.Encoding]::UTF8.GetBytes($script:CatalogBodies[$client]) }
     }
     Assert-NeuroAPIKeyCatalogs -SecureKey $secure
