@@ -10,7 +10,7 @@ This version configures `https://codex.neuroapi.host/v1` with `supports_websocke
 
 An existing `CODEX_HOME` selects the profile directory without being modified. Keep its value consistent for setup, launch and uninstall.
 
-Use a current Codex release whose `--help` describes `--profile` as loading `<name>.config.toml`. Update older clients that expect `[profiles.name]` in the main configuration. For WebSocket troubleshooting, temporarily set `supports_websockets = false` in the generated profile, keeping `/v1/codex` and its credential helper.
+Use a current Codex release whose `--help` describes `--profile` as loading `<name>.config.toml`. Update older clients that expect `[profiles.name]` in the main configuration. For WebSocket troubleshooting, temporarily set `supports_websockets = false` in the generated profile, keeping `https://codex.neuroapi.host/v1` and its credential helper.
 
 ## Quick start
 
