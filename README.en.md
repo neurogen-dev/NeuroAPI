@@ -6,7 +6,7 @@ Public, auditable guided setup for routing local Codex CLI and Claude Code sessi
 
 ## Release compatibility
 
-This version configures `https://codex.neuroapi.host/v1` with `supports_websockets = true`, and `https://claude.neuroapi.host` for Claude Code. The Codex profile disables hosted web search, multi-agent, goals, apps, and browser use because the current client includes these tools even in simple local tasks, while NeuroAPI does not guarantee their upstream execution. Local shell and file tools remain available. Setup checks both key-scoped catalogs without a paid generation. Verify HTTP/WebSocket Responses and Claude Messages/count_tokens after each server release.
+This version configures `https://codex.neuroapi.host/v1` with `supports_websockets = true`, and `https://claude.neuroapi.host` for Claude Code. The Codex profile disables hosted web search, multi-agent, goals, apps, and browser use because the current client includes these tools even in simple local tasks, while NeuroAPI does not guarantee their upstream execution. Local shell and file tools remain available. Setup checks both key-scoped catalogs without a paid generation. After setup, send one short real request and confirm it in your [NeuroAPI usage log](https://neuroapi.host/dashboard/logs); a catalog check alone does not prove generation works.
 
 An existing `CODEX_HOME` selects the profile directory without being modified. Keep its value consistent for setup, launch and uninstall.
 
@@ -36,6 +36,8 @@ macOS:
 
 The setup does not require administrator privileges or `sudo`. Codex Desktop integration edits the user config only after consent, with a guarded backup and conflict checks.
 
+Claude Desktop is configured separately in the app's official Developer Mode → Configure Third-Party Inference screen. The installer does not silently change the app's private settings; follow the [Claude Desktop guide](https://neuroapi.host/docs/claude-desktop). If an older connection failed, follow the [reconnection guide](docs/reconnect-after-update.md) before retrying.
+
 ## Secret model
 
 - The key is never accepted as a setup command-line argument.
@@ -64,9 +66,10 @@ Claude Code also uses the `haiku` alias for background work. If no recommended H
 
 - [Security model](docs/security.md)
 - [Manual setup and installed paths](docs/manual-setup.md)
+- [Reconnect after an older failed setup](docs/reconnect-after-update.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Codex guide](https://neuroapi.host/codex-api)
 - [Claude Code guide](https://neuroapi.host/claude-code)
 - [Codex Desktop guide](https://neuroapi.host/docs/codex-desktop)
-- [Claude Desktop Code guide](https://neuroapi.host/docs/claude-desktop)
+- [Claude Desktop guide](https://neuroapi.host/docs/claude-desktop)
 - [NeuroAPI documentation](https://neuroapi.host/docs/getting-started)
