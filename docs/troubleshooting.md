@@ -1,6 +1,12 @@
 # Решение проблем
 
-Эти инструкции относятся к терминальным `codex-neuroapi` и `claude-neuroapi`. Запуск тех же моделей в Codex Desktop или вкладке Code приложения Claude Desktop требует отдельной настройки и проверки GUI.
+Терминальные launchers и графические приложения читают разные настройки. Codex Desktop можно подключить отдельным согласием в установщике или [вручную](https://neuroapi.host/docs/codex-desktop); Claude Desktop настраивается в [официальной форме приложения](https://neuroapi.host/docs/claude-desktop).
+
+## Codex Desktop обращается к `chatgpt.com`
+
+Проверьте пользовательский `~/.codex/config.toml`: `model_provider = "neuroapi_agents"`, `base_url = "https://codex.neuroapi.host/v1"`, `supports_websockets = false`. Перезапустите приложение и создайте **новую локальную** задачу. Старые задачи и облачные функции могут сохранять прежний маршрут. Если вы пропустили предложение установщика, запустите setup заново и согласитесь на подключение Desktop.
+
+Если удаление останавливается из-за изменения `config.toml`, сначала сравните текущий файл с резервной копией в каталоге установщика. Это защищает ваши правки и сохраняет key helper до ручного разбора.
 
 ## `codex-neuroapi` или `claude-neuroapi` не найдены
 

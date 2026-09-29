@@ -3,11 +3,14 @@ param(
     [switch]$TestMode,
     [string]$StateRoot,
     [string]$CodexHome,
-    [switch]$NoPathUpdate
+    [switch]$NoPathUpdate,
+    [switch]$EnableCodexDesktop,
+    [string]$DesktopCatalogJson
 )
 
 . "$PSScriptRoot\common.ps1"
 . "$PSScriptRoot\managed-catalog.ps1"
+. "$PSScriptRoot\desktop-config.ps1"
 
 if ($env:OS -ne 'Windows_NT') {
     throw 'This installer must run on Windows.'
@@ -38,6 +41,13 @@ if (-not $TestMode) {
     if (-not [string]::Equals($CodexHome, $defaultCodexHome, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw 'A custom CodexHome is allowed only in test mode.'
     }
+}
+if (-not $TestMode -and -not $EnableCodexDesktop) {
+    $choice = Read-Host 'Настроить также Codex Desktop через NeuroAPI? Изменится ваш пользовательский config.toml. [y/N]'
+    $EnableCodexDesktop = $choice -match '^(?i:y|yes|да)$'
+}
+if (-not $TestMode -and -not [string]::IsNullOrEmpty($DesktopCatalogJson)) {
+    throw 'DesktopCatalogJson is available only in test mode.'
 }
 
 Assert-StateRootIsOwnedOrEmpty -StateRoot $StateRoot
@@ -73,6 +83,64 @@ $secretRoot = [System.IO.Path]::Combine($StateRoot, 'secret')
 $secretPath = [System.IO.Path]::Combine($secretRoot, 'api-key.dpapi')
 $helperPath = [System.IO.Path]::Combine($binRoot, 'get-neuroapi-key.ps1')
 $claudeSettingsPath = [System.IO.Path]::Combine($configRoot, 'claude-settings.json')
+$desktopConfigPath = [System.IO.Path]::Combine($CodexHome, 'config.toml')
+$desktopMetadataPath = Join-Path $configRoot $script:DesktopMetadataName
+$desktopOriginalPath = Join-Path $configRoot $script:DesktopOriginalName
+$desktopCatalogPath = Join-Path $configRoot $script:DesktopCatalogName
+$desktopState = $null
+$desktopOriginal = ''
+$desktopOriginalExists = $false
+$desktopOriginalSource = $null
+$desktopCurrentExists = $false
+$desktopCurrentHash = $null
+if ($EnableCodexDesktop) {
+    foreach ($path in @($CodexHome, $configRoot, $desktopConfigPath, $desktopOriginalPath, $desktopCatalogPath)) {
+        if (Test-Path -LiteralPath $path) {
+            $item = Get-Item -LiteralPath $path -Force
+            if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                throw 'Codex Desktop configuration is linked. No changes were made.'
+            }
+        }
+    }
+    Assert-NeuroAPIDesktopFile -Path $desktopConfigPath
+    Assert-NeuroAPIDesktopFile -Path $desktopOriginalPath
+    Assert-NeuroAPIDesktopFile -Path $desktopCatalogPath
+    $desktopState = Get-NeuroAPIDesktopState -ConfigRoot $configRoot
+    $desktopCurrentExists = Test-Path -LiteralPath $desktopConfigPath -PathType Leaf
+    if ($desktopCurrentExists) {
+        $desktopCurrentHash = (Get-FileHash -LiteralPath $desktopConfigPath -Algorithm SHA256).Hash
+    }
+    if ($null -ne $desktopState) {
+        if (-not (Test-Path -LiteralPath $desktopConfigPath -PathType Leaf)) {
+            throw 'Codex Desktop configuration was removed after setup. No changes were made.'
+        }
+        if ((Get-FileHash -LiteralPath $desktopConfigPath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $desktopState.applied_hash) {
+            throw 'Codex Desktop configuration changed after setup. Preserve your edits and configure manually.'
+        }
+        $desktopOriginalExists = $desktopState.original_exists
+        if ($desktopOriginalExists) {
+            if (-not (Test-Path -LiteralPath $desktopOriginalPath -PathType Leaf)) {
+                throw 'Codex Desktop backup is missing. No changes were made.'
+            }
+            $desktopOriginal = [IO.File]::ReadAllText($desktopOriginalPath)
+            $desktopOriginalSource = $desktopOriginalPath
+            if ((Get-FileHash -LiteralPath $desktopOriginalPath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $desktopState.original_hash) {
+                throw 'Codex Desktop backup changed after setup. No changes were made.'
+            }
+        } elseif (Test-Path -LiteralPath $desktopOriginalPath) {
+            throw 'Codex Desktop backup state is inconsistent. No changes were made.'
+        }
+    } else {
+        if (Test-Path -LiteralPath $desktopOriginalPath) {
+            throw 'An unowned Codex Desktop backup exists. No changes were made.'
+        }
+        $desktopOriginalExists = Test-Path -LiteralPath $desktopConfigPath -PathType Leaf
+        if ($desktopOriginalExists) {
+            $desktopOriginal = [IO.File]::ReadAllText($desktopConfigPath)
+            $desktopOriginalSource = $desktopConfigPath
+        }
+    }
+}
 
 if (-not $TestMode) {
     Ensure-Directory -Path $StateRoot
@@ -106,7 +174,7 @@ try {
     $ciphertext = $null
     $secureKey.Clear()
 
-    foreach ($scriptName in @('get-neuroapi-key.ps1', 'common.ps1', 'managed-catalog.ps1', 'launch-neuroapi.ps1')) {
+    foreach ($scriptName in @('get-neuroapi-key.ps1', 'common.ps1', 'managed-catalog.ps1', 'desktop-config.ps1', 'launch-neuroapi.ps1')) {
         Copy-Item -LiteralPath (Join-Path $PSScriptRoot $scriptName) -Destination (Join-Path (Join-Path $stageRoot 'bin') $scriptName)
     }
 
@@ -150,6 +218,45 @@ refresh_interval_ms = 300000
     } | ConvertTo-Json -Depth 5
     Write-Utf8NoBom -Path (Join-Path $stageRoot 'claude-settings.json') -Content $claudeSettings
 
+    if ($EnableCodexDesktop) {
+        $catalogJson = if ($TestMode) { $DesktopCatalogJson } else {
+            Get-NeuroAPICatalogJson -Client codex -SecretPath (Join-Path $stageRoot 'api-key.dpapi')
+        }
+        $catalog = ConvertFrom-NeuroAPICatalog -Client codex -Json $catalogJson -HelperCommand ''
+        $preferred = @($catalog.Content.models | Where-Object {
+            $_.slug -ceq 'gpt-6-sol' -and $_.visibility -ceq 'list' -and $_.supported_in_api
+        })
+        $desktopModel = if ($preferred.Count -gt 0) { 'gpt-6-sol' } else { $catalog.DefaultModel }
+        $desktopContent = New-NeuroAPIDesktopConfig -Original $desktopOriginal `
+            -HelperPath $helperPath -SecretPath $secretPath -CatalogPath $desktopCatalogPath `
+            -DefaultModel $desktopModel
+        $catalogFile = @{ models = @($catalog.Content.models) } | ConvertTo-Json -Depth 32
+        $stagedDesktopCatalog = Join-Path $stageRoot 'desktop-catalog.json'
+        Write-Utf8NoBom -Path $stagedDesktopCatalog -Content $catalogFile
+        $nativeCodex = Get-NeuroAPIClientExecutable -Client codex -StateRoot $StateRoot
+        if (-not $TestMode) {
+            Assert-NeuroAPIDesktopConfigWithCodex -Config $desktopOriginal -StageRoot $stageRoot -CodexBinary $nativeCodex
+            $validationContent = $desktopContent.Replace(
+                (ConvertTo-TomlBasicString -Value $desktopCatalogPath),
+                (ConvertTo-TomlBasicString -Value $stagedDesktopCatalog)
+            )
+            Assert-NeuroAPIDesktopConfigWithCodex -Config $validationContent -StageRoot $stageRoot -CodexBinary $nativeCodex
+        }
+        Write-Utf8NoBom -Path (Join-Path $stageRoot 'desktop-config.toml') -Content $desktopContent
+        if ($desktopOriginalExists) {
+            Copy-Item -LiteralPath $desktopOriginalSource -Destination (Join-Path $stageRoot 'desktop-original.toml') -ErrorAction Stop
+        }
+        $desktopMetadata = [ordered]@{
+            version = 1; provider = $script:DesktopProviderId
+            applied_hash = (Get-NeuroAPIDesktopHash -Text $desktopContent)
+            original_exists = $desktopOriginalExists
+            original_hash = $(if ($desktopOriginalExists) {
+                (Get-FileHash -LiteralPath (Join-Path $stageRoot 'desktop-original.toml') -Algorithm SHA256).Hash.ToLowerInvariant()
+            } else { $null })
+        } | ConvertTo-Json -Compress
+        Write-Utf8NoBom -Path (Join-Path $stageRoot 'desktop-state.json') -Content $desktopMetadata
+    }
+
     $codexLauncher = @"
 @echo off
 setlocal
@@ -173,6 +280,7 @@ exit /b %errorlevel%
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'bin/get-neuroapi-key.ps1'); Target = $helperPath; Name = 'get-neuroapi-key.ps1' },
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'bin/common.ps1'); Target = (Join-Path $binRoot 'common.ps1'); Name = 'common.ps1' },
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'bin/managed-catalog.ps1'); Target = (Join-Path $binRoot 'managed-catalog.ps1'); Name = 'managed-catalog.ps1' },
+        [pscustomobject]@{ Source = (Join-Path $stageRoot 'bin/desktop-config.ps1'); Target = (Join-Path $binRoot 'desktop-config.ps1'); Name = 'desktop-config.ps1' },
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'bin/launch-neuroapi.ps1'); Target = (Join-Path $binRoot 'launch-neuroapi.ps1'); Name = 'launch-neuroapi.ps1' },
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'profile.toml'); Target = $profilePath; Name = 'neuroapi-host.config.toml' },
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'profile-marker'); Target = $profileMarkerPath; Name = 'profile-marker' },
@@ -181,8 +289,23 @@ exit /b %errorlevel%
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'claude-neuroapi.cmd'); Target = (Join-Path $binRoot 'claude-neuroapi.cmd'); Name = 'claude-neuroapi.cmd' },
         [pscustomobject]@{ Source = (Join-Path $stageRoot 'api-key.dpapi'); Target = $secretPath; Name = 'api-key.dpapi' }
     )
+    if ($EnableCodexDesktop) {
+        $files += [pscustomobject]@{ Source = (Join-Path $stageRoot 'desktop-catalog.json'); Target = $desktopCatalogPath; Name = $script:DesktopCatalogName }
+        if ($desktopOriginalExists) {
+            $files += [pscustomobject]@{ Source = (Join-Path $stageRoot 'desktop-original.toml'); Target = $desktopOriginalPath; Name = $script:DesktopOriginalName }
+        }
+        $files += [pscustomobject]@{ Source = (Join-Path $stageRoot 'desktop-state.json'); Target = $desktopMetadataPath; Name = $script:DesktopMetadataName }
+        $files += [pscustomobject]@{ Source = (Join-Path $stageRoot 'desktop-config.toml'); Target = $desktopConfigPath; Name = 'config.toml' }
+    }
     foreach ($file in $files) {
         $target = $file.Target
+        if ($EnableCodexDesktop -and $file.Name -ceq 'config.toml') {
+            $stillExists = Test-Path -LiteralPath $target -PathType Leaf
+            if ($stillExists -ne $desktopCurrentExists -or
+                ($stillExists -and (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -cne $desktopCurrentHash)) {
+                throw 'Codex Desktop configuration changed during setup. No user edits were overwritten.'
+            }
+        }
         $pending = $target + '.new.' + $transactionId
         $backup = $target + '.backup.' + $transactionId
         if ((Test-Path -LiteralPath $pending) -or (Test-Path -LiteralPath $backup)) { throw 'Setup transaction path is occupied.' }
@@ -266,4 +389,5 @@ Write-Host ''
 Write-Host 'NeuroAPI setup is complete.'
 Write-Host "Codex launcher:  $binRoot\codex-neuroapi.cmd"
 Write-Host "Claude launcher: $binRoot\claude-neuroapi.cmd"
+if ($EnableCodexDesktop) { Write-Host 'Codex Desktop: пользовательская настройка активирована. Перезапустите приложение.' }
 Write-Host 'Open a new terminal, then run codex-neuroapi or claude-neuroapi.'

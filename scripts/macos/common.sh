@@ -38,6 +38,14 @@ codex_home() {
   fi
 }
 
+desktop_codex_home() {
+  if is_test_mode && [[ -n "${NEUROAPI_AGENTS_DESKTOP_CODEX_HOME:-}" ]]; then
+    printf '%s\n' "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME"
+  else
+    printf '%s\n' "$HOME/.codex"
+  fi
+}
+
 launcher_root() {
   if is_test_mode && [[ -n "${NEUROAPI_AGENTS_BIN_ROOT:-}" ]]; then
     printf '%s\n' "$NEUROAPI_AGENTS_BIN_ROOT"

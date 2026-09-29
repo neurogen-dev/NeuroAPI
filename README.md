@@ -6,7 +6,7 @@
 
 Открытые установщики для подключения [Codex CLI](https://developers.openai.com/codex/cli/) и [Claude Code](https://code.claude.com/docs/en/overview) к [NeuroAPI](https://neuroapi.host) на Windows и macOS.
 
-Пакет настраивает **клиенты в терминале** через команды `codex-neuroapi` и `claude-neuroapi`. Настройки Claude Desktop Code и Codex Desktop этим установщиком не изменяются; работу этих GUI с NeuroAPI он не подтверждает.
+Пакет настраивает **клиенты в терминале** через команды `codex-neuroapi` и `claude-neuroapi`. При отдельном согласии он также подключает **Codex Desktop** через пользовательский `~/.codex/config.toml`. Claude Desktop настраивается в самом приложении по [отдельной инструкции](https://neuroapi.host/docs/claude-desktop).
 
 NeuroAPI — российский AI API-сервис: единый доступ к моделям OpenAI, Anthropic Claude, Google Gemini, DeepSeek, генерации изображений и видео с оплатой в рублях. Проект работает от российского ООО, инфраструктура сервиса размещена в РФ. Актуальные модели и цены всегда проверяйте в [живом каталоге](https://neuroapi.host/price).
 
@@ -31,7 +31,8 @@ NeuroAPI — российский AI API-сервис: единый доступ
 1. [Скачайте ZIP с установщиками](https://github.com/neurogen-dev/NeuroAPI/archive/refs/heads/agents.zip) и распакуйте его.
 2. Дважды щёлкните `setup-windows.bat`.
 3. Вставьте API-ключ в скрытый запрос PowerShell.
-4. Откройте новый терминал и запустите:
+4. Если используете Codex Desktop, ответьте «да» на отдельный вопрос установщика и перезапустите приложение. Установщик создаст резервную копию вашего пользовательского конфига.
+5. Откройте новый терминал и запустите:
 
 ```powershell
 codex-neuroapi
@@ -51,7 +52,8 @@ bash setup-macos.command
 ```
 
 4. Вставьте API-ключ в защищённый запрос macOS Keychain.
-5. Запустите:
+5. Если используете Codex Desktop, ответьте «да» на отдельный вопрос установщика и перезапустите приложение. Установщик создаст резервную копию вашего пользовательского конфига.
+6. Запустите:
 
 ```bash
 ~/.local/bin/codex-neuroapi
@@ -69,7 +71,8 @@ bash setup-macos.command
 | Codex | отдельный `~/.codex/neuroapi-host.config.toml` | отдельный `~/.codex/neuroapi-host.config.toml` |
 | Claude Code | отдельный installer-owned JSON через `--settings` | отдельный installer-owned JSON через `--settings` |
 | Получает ключ | command-backed auth helper | `apiKeyHelper` / Keychain helper |
-| Существующие конфиги | не перезаписываются | не перезаписываются |
+| Codex Desktop по согласию | пользовательский `config.toml`, DPAPI helper, каталог доступных моделей | пользовательский `config.toml`, Keychain helper, каталог доступных моделей |
+| Существующий `config.toml` | резервная копия и атомарное изменение только по согласию; конфликт останавливает установку | резервная копия и атомарное изменение только по согласию; конфликт останавливает установку |
 
 Установщик отправляет ключ только в NeuroAPI для проверки доступных моделей; платной генерации при настройке нет. При запуске `codex-neuroapi` или `claude-neuroapi` запускатель вновь получает актуальный каталог с `https://neuroapi.host`, затем клиент использует API при ваших запросах.
 
@@ -89,12 +92,14 @@ Windows:
 
 - `%LOCALAPPDATA%\NeuroAPIAgents\` — helper, Claude settings, DPAPI-ciphertext и launchers;
 - `%USERPROFILE%\.codex\neuroapi-host.config.toml` — отдельный профиль Codex;
+- `%USERPROFILE%\.codex\config.toml` — только при согласии на Codex Desktop; исходный файл хранится в installer-owned каталоге;
 - `%LOCALAPPDATA%\NeuroAPIAgents\bin` — одна запись в пользовательском `PATH`.
 
 macOS:
 
 - `~/.local/share/neuroapi-agents/` — helper и Claude settings;
 - `~/.codex/neuroapi-host.config.toml` — отдельный профиль Codex;
+- `~/.codex/config.toml` — только при согласии на Codex Desktop; исходный файл хранится в installer-owned каталоге;
 - `~/.local/bin/codex-neuroapi` и `~/.local/bin/claude-neuroapi`;
 - Keychain item `host.neuroapi.agents.api-key`.
 
@@ -127,6 +132,7 @@ Claude Code обращается к alias `haiku` и в фоновых зада�
 - macOS: `./uninstall-macos.command`.
 
 Uninstaller удаляет только installer-owned файлы и локально сохранённый ключ. Удалённый ключ через этот пакет восстановить нельзя.
+Если после установки вы изменили `~/.codex/config.toml`, удаление остановится до удаления helper и ключа: это сохраняет работоспособность вашей конфигурации. Сначала вручную разберите изменения и повторите удаление.
 
 ## Документация
 
@@ -135,6 +141,8 @@ Uninstaller удаляет только installer-owned файлы и локал
 - [Решение проблем](docs/troubleshooting.md)
 - [Codex через NeuroAPI](https://neuroapi.host/codex-api)
 - [Claude Code через NeuroAPI](https://neuroapi.host/claude-code)
+- [Codex Desktop](https://neuroapi.host/docs/codex-desktop)
+- [Claude Desktop Code](https://neuroapi.host/docs/claude-desktop)
 - [OpenAI-совместимый API](https://neuroapi.host/openai-compatible-api)
 - [Модели и цены](https://neuroapi.host/price)
 

@@ -37,6 +37,9 @@ jobs:
       - name: Validate PowerShell syntax
         shell: powershell
         run: .\tests\windows\syntax.ps1
+      - name: Validate Codex Desktop configuration
+        shell: powershell
+        run: .\tests\windows\desktop-config.ps1
       - name: Run isolated installer smoke
         shell: powershell
         run: .\tests\windows\smoke.ps1
