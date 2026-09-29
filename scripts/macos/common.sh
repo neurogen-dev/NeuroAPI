@@ -46,6 +46,50 @@ launcher_root() {
   fi
 }
 
+resolve_client_bin() {
+  local client="$1"
+  shift
+  local resolved native
+  resolved="$(command -v "$client" 2>/dev/null || true)"
+  native="$HOME/.local/bin/$client"
+  if (( $# == 3 )); then
+    if [[ -n "$resolved" && -x "$resolved" ]] && client_version_at_least "$resolved" "$@"; then
+      printf '%s\n' "$resolved"
+      return 0
+    fi
+    if [[ -x "$native" ]] && client_version_at_least "$native" "$@"; then
+      printf '%s\n' "$native"
+      return 0
+    fi
+  fi
+  if [[ -n "$resolved" && -x "$resolved" ]]; then
+    printf '%s\n' "$resolved"
+    return 0
+  fi
+  # Native Codex and Claude installers use ~/.local/bin; GUI-launched
+  # terminals do not always inherit that directory in PATH immediately.
+  if [[ -x "$native" ]]; then
+    printf '%s\n' "$native"
+    return 0
+  fi
+  return 1
+}
+
+client_version_at_least() {
+  local binary="$1" minimum_major="$2" minimum_minor="$3" minimum_patch="$4"
+  local version major minor patch suffix
+  version="$("$binary" --version 2>/dev/null)" || return 1
+  [[ "$version" =~ (^|[[:space:]])([0-9]+)\.([0-9]+)\.([0-9]+)([^[:space:]]*) ]] || return 1
+  suffix="${BASH_REMATCH[5]}"
+  [[ -z "$suffix" ]] || return 1
+  major=$((10#${BASH_REMATCH[2]}))
+  minor=$((10#${BASH_REMATCH[3]}))
+  patch=$((10#${BASH_REMATCH[4]}))
+  (( major > minimum_major ||
+    (major == minimum_major && minor > minimum_minor) ||
+    (major == minimum_major && minor == minimum_minor && patch >= minimum_patch) ))
+}
+
 security_bin() {
   if is_test_mode && [[ -n "${NEUROAPI_AGENTS_SECURITY_BIN:-}" ]]; then
     printf '%s\n' "$NEUROAPI_AGENTS_SECURITY_BIN"

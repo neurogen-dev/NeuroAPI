@@ -49,10 +49,19 @@ Assert-Catalog ($claude.apiKeyHelper -ceq 'local-helper') 'Server replaced crede
 Assert-Catalog (-not $claude.Contains('hooks')) 'Server hooks were copied.'
 Assert-Catalog ($claude.env.ANTHROPIC_CUSTOM_HEADERS -ceq '' -and $claude.env.ANTHROPIC_AUTH_TOKEN -ceq '') 'Merged settings can override credentials.'
 Assert-Catalog ($claude.env.ANTHROPIC_MODEL -ceq $claude.model) 'Merged model override can bypass default.'
+Assert-Catalog ($claude.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS -ceq '4096') 'Claude output reservation cap missing.'
 Assert-Catalog (-not $claude.env.Contains('UNSAFE_ENV')) 'Unreviewed environment was copied.'
 Assert-Catalog (-not $claude.env.Contains('ANTHROPIC_DEFAULT_FABLE_MODEL')) 'Missing Fable was invented.'
 Assert-Catalog ($claude.availableModels.Count -eq 5 -and $claude.modelPicker.options.Count -eq 3) 'Compatibility aliases must remain available but hidden.'
 Assert-Catalog ($claude.fallbackModel.Count -eq 0) 'Inherited fallback was not disabled.'
+$sonnetBackground = New-TestClaudeCatalog | ConvertFrom-Json
+$sonnetBackground.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-sonnet-5'
+$sonnetSettings = ConvertFrom-NeuroAPICatalog claude ($sonnetBackground | ConvertTo-Json -Depth 8 -Compress) 'local-helper'
+Assert-Catalog ($sonnetSettings.env.ANTHROPIC_DEFAULT_HAIKU_MODEL -ceq 'claude-sonnet-5') 'Recommended Sonnet background fallback was rejected.'
+$opusBackground = New-TestClaudeCatalog | ConvertFrom-Json
+$opusBackground.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-opus-5-5'
+$opusSettings = ConvertFrom-NeuroAPICatalog claude ($opusBackground | ConvertTo-Json -Depth 8 -Compress) 'local-helper'
+Assert-Catalog ($opusSettings.env.ANTHROPIC_DEFAULT_HAIKU_MODEL -ceq 'claude-opus-5-5') 'Recommended default background fallback was rejected.'
 foreach ($bad in @('{', '{}', '{"models":[],"default_model":"model-one"}', '{"models":[{"slug":"model-one","display_name":"one"}],"default_model":"missing"}', '{"models":[{"slug":"bad model","display_name":"one"}],"default_model":"bad model"}')) {
     Assert-CatalogFailure { ConvertFrom-NeuroAPICatalog codex $bad '' }
 }
@@ -79,7 +88,9 @@ foreach ($mutation in @(
     { param($x) $x.model = 'claude-opus-5' },
     { param($x) $x.fallbackModel = @('not-allowed') },
     { param($x) $x.modelPicker.options[0].model = 'not-allowed' },
-    { param($x) $x.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-sonnet-5' },
+    { param($x) $x.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-opus-5' },
+    { param($x) $x.env | Add-Member -NotePropertyName ANTHROPIC_DEFAULT_FABLE_MODEL -NotePropertyValue 'claude-sonnet-5' },
+    { param($x) $x.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'gpt-6-sol'; $x.availableModels += 'gpt-6-sol'; $x.modelPicker.options += @{ model = 'gpt-6-sol' } },
     { param($x) $x.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = '' }
 )) {
     $payload = New-TestClaudeCatalog | ConvertFrom-Json
@@ -165,11 +176,11 @@ function Get-TestClientVersion {
     $script:versionText
 }
 foreach ($versionCase in @(
-    @{ Client = 'codex'; Text = 'codex-cli 0.147.0'; Valid = $true },
-    @{ Client = 'codex'; Text = 'codex-cli 0.146.9'; Valid = $false },
-    @{ Client = 'codex'; Text = 'codex-cli 0.147.0-alpha.1'; Valid = $false },
-    @{ Client = 'claude'; Text = '2.1.280 (Claude Code)'; Valid = $true },
-    @{ Client = 'claude'; Text = '2.1.279 (Claude Code)'; Valid = $false },
+    @{ Client = 'codex'; Text = 'codex-cli 0.158.0'; Valid = $true },
+    @{ Client = 'codex'; Text = 'codex-cli 0.157.9'; Valid = $false },
+    @{ Client = 'codex'; Text = 'codex-cli 0.158.0-alpha.1'; Valid = $false },
+    @{ Client = 'claude'; Text = '2.1.284 (Claude Code)'; Valid = $true },
+    @{ Client = 'claude'; Text = '2.1.283 (Claude Code)'; Valid = $false },
     @{ Client = 'claude'; Text = 'unknown'; Valid = $false }
 )) {
     $script:versionExit = 0
@@ -181,7 +192,7 @@ foreach ($versionCase in @(
     }
 }
 $script:versionExit = 1
-$script:versionText = 'codex-cli 0.147.0'
+$script:versionText = 'codex-cli 0.158.0'
 Assert-CatalogFailure { Assert-NeuroAPIClientVersion -Client codex -Command 'Get-TestClientVersion' }
 
 $tempRoot = Join-Path ([IO.Path]::GetTempPath()) ('neuroapi-managed-test-' + [Guid]::NewGuid().ToString('N'))

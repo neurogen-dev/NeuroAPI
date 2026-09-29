@@ -8,6 +8,13 @@ raw = pathlib.Path(profile_path).read_text(encoding="utf-8")
 profile = tomllib.loads(raw)
 assert "model" not in profile  # The authenticated startup catalog supplies it.
 assert profile["model_provider"] == "neuroapi"
+assert profile["web_search"] == "disabled"
+assert profile["features"] == {
+    "multi_agent": False,
+    "goals": False,
+    "apps": False,
+    "browser_use": False,
+}
 provider = profile["model_providers"]["neuroapi"]
 assert provider["base_url"] == "https://neuroapi.host/v1/codex"
 assert provider["wire_api"] == "responses"

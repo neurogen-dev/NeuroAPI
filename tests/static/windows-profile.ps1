@@ -15,7 +15,7 @@ if ((Resolve-CodexConfigRoot -ConfiguredRoot '' -UserRoot 'C:\User') -cne $expec
 
 # Render only the data template. Never execute setup, a helper or DPAPI here.
 $source = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts/windows/setup.ps1') -Raw
-$match = [regex]::Match($source, '(?ms)^\$profile = @"\r?\n(.*?)^"@')
+$match = [regex]::Match($source, '(?ms)^[ \t]*\$profile = @"\r?\n(.*?)^"@')
 if (-not $match.Success) { throw 'Windows profile template was not found.' }
 $helperPath = 'C:\Test user\NeuroAPI\bin\get-neuroapi-key.ps1'
 $secretPath = 'C:\Test user\NeuroAPI\secret\api-key.dpapi'

@@ -87,7 +87,14 @@ function validateClaude(data) {
   Object.keys(data.env).forEach(function (key) {
     requireValue(modelID(data.env[key]) && seen[data.env[key]])
     var family = key.slice('ANTHROPIC_DEFAULT_'.length, -'_MODEL'.length).toLowerCase()
-    requireValue(new RegExp('^claude-' + family + '(?:[-.]|$)').test(data.env[key]))
+    if (family === 'haiku') {
+      // Claude Code also uses the Haiku alias for background calls. The
+      // server may route it to an eligible recommended Sonnet or default.
+      requireValue(options[data.env[key]] === true)
+      requireValue(/^claude-(?:haiku|sonnet|opus|fable)(?:[-.]|$)/.test(data.env[key]))
+    } else {
+      requireValue(new RegExp('^claude-' + family + '(?:[-.]|$)').test(data.env[key]))
+    }
   })
 }
 function run(args) {
@@ -116,6 +123,9 @@ function run(args) {
     })
     data.env.ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'
     data.env.ANTHROPIC_MODEL = data.model
+    // Keep first-request quota reservations bounded. Claude Code can continue
+    // generation in another turn when a response reaches this limit.
+    data.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS = '4096'
     data.apiKeyHelper = "'" + args[2].replace(/'/g, "'\\''") + "'"
     write(args[1] + '/settings.json', JSON.stringify(data))
   }

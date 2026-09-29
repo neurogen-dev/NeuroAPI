@@ -5,13 +5,21 @@ set -euo pipefail
 umask 077
 
 SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+# shellcheck source=scripts/macos/common.sh
+. "$SCRIPT_DIR/common.sh"
 CLIENT="${1:-}"
 shift || true
 case "$CLIENT" in
-  codex) MIN_MAJOR=0; MIN_MINOR=147; MIN_PATCH=0; ENDPOINT='https://neuroapi.host/v1/codex/models' ;;
-  claude) MIN_MAJOR=2; MIN_MINOR=1; MIN_PATCH=280; ENDPOINT='https://neuroapi.host/v1/claude-code/client-settings' ;;
+  codex) MIN_MAJOR=0; MIN_MINOR=158; MIN_PATCH=0; ENDPOINT='https://neuroapi.host/v1/codex/models' ;;
+  claude) MIN_MAJOR=2; MIN_MINOR=1; MIN_PATCH=284; ENDPOINT='https://neuroapi.host/v1/claude-code/client-settings' ;;
   *) printf 'Неизвестный клиент NeuroAPI.\n' >&2; exit 1 ;;
 esac
+
+VERIFY_ONLY=0
+if [[ "${1:-}" == '--verify' ]]; then
+  VERIFY_ONLY=1
+  shift
+fi
 
 fail() { printf '%s\n' "$1" >&2; exit 1; }
 if [[ "$CLIENT" == 'claude' ]]; then
@@ -23,16 +31,10 @@ if [[ "$CLIENT" == 'claude' ]]; then
       fail 'Провайдер Claude Code управляется приложением-хостом. Запустите NeuroAPI из самостоятельного терминала.' ;;
   esac
 fi
-if ! VERSION_TEXT="$("$CLIENT" --version 2>/dev/null)" ||
-  [[ ! "$VERSION_TEXT" =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+if ! CLIENT_BIN="$(resolve_client_bin "$CLIENT" "$MIN_MAJOR" "$MIN_MINOR" "$MIN_PATCH")"; then
   fail "Не удалось проверить версию $CLIENT. Обновите клиент и повторите запуск."
 fi
-CLIENT_MAJOR=$((10#${BASH_REMATCH[1]}))
-CLIENT_MINOR=$((10#${BASH_REMATCH[2]}))
-CLIENT_PATCH=$((10#${BASH_REMATCH[3]}))
-if (( CLIENT_MAJOR < MIN_MAJOR ||
-      (CLIENT_MAJOR == MIN_MAJOR && CLIENT_MINOR < MIN_MINOR) ||
-      (CLIENT_MAJOR == MIN_MAJOR && CLIENT_MINOR == MIN_MINOR && CLIENT_PATCH < MIN_PATCH) )); then
+if ! client_version_at_least "$CLIENT_BIN" "$MIN_MAJOR" "$MIN_MINOR" "$MIN_PATCH"; then
   fail "Требуется $CLIENT версии $MIN_MAJOR.$MIN_MINOR.$MIN_PATCH или новее."
 fi
 
@@ -87,6 +89,11 @@ if ! printf 'header = "Authorization: Bearer %s"\n' "$credential" |
 fi
 unset credential
 
+if (( VERIFY_ONLY )); then
+  printf 'Каталог %s проверен.\n' "$CLIENT"
+  exit 0
+fi
+
 if [[ "$CLIENT" == 'codex' ]]; then
   IFS= read -r DEFAULT_MODEL <"$SNAPSHOT/model.txt"
   CATALOG_PATH="$SNAPSHOT/models.json"
@@ -94,7 +101,7 @@ if [[ "$CLIENT" == 'codex' ]]; then
   CATALOG_PATH="${CATALOG_PATH//\"/\\\"}"
   # User arguments follow generated defaults intentionally, so explicit --model
   # and ordinary CLI overrides retain their documented meaning.
-  launch_child codex --profile neuroapi-host -c "model_catalog_json=\"$CATALOG_PATH\"" -c "model=\"$DEFAULT_MODEL\"" "$@"
+  launch_child "$CLIENT_BIN" --profile neuroapi-host -c "model_catalog_json=\"$CATALOG_PATH\"" -c "model=\"$DEFAULT_MODEL\"" "$@"
 else
   run_claude() {
     # Remove inherited selectors and credentials only in this child. The
@@ -105,7 +112,7 @@ else
           unset "$variable" ;;
       esac
     done
-    exec claude --settings "$SNAPSHOT/settings.json" "$@"
+    exec "$CLIENT_BIN" --settings "$SNAPSHOT/settings.json" "$@"
   }
   launch_child run_claude "$@"
 fi

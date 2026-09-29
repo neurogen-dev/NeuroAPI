@@ -12,7 +12,7 @@ TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/neuroapi-agents-test.XXXXXX")"
 [[ "$(resolve_codex_config_root '' '/tmp/user')" == '/tmp/user/.codex' ]]
 MOCK_SECURITY="$TMP_ROOT/security"
 SECURITY_LOG="$TMP_ROOT/security.log"
-MOCK_KEYCHAIN_STATE="$TMP_ROOT/keychain-present"
+MOCK_KEYCHAIN_STATE="$TMP_ROOT/keychain"
 
 cleanup() {
   rm -rf -- "$TMP_ROOT"
@@ -39,22 +39,34 @@ cat >"$MOCK_SECURITY" <<'EOF'
 #!/bin/bash
 set -euo pipefail
 printf '%s\n' "$*" >>"$NEUROAPI_AGENTS_SECURITY_LOG"
+service=''
+for ((i=1; i<=$#; i++)); do
+  if [[ "${!i}" == '-s' ]]; then
+    j=$((i+1))
+    service="${!j}"
+    break
+  fi
+done
+[[ "$service" =~ ^host\.neuroapi\.agents\.api-key(\.[a-f0-9]{32})?$ ]] || exit 1
+mkdir -p -- "$NEUROAPI_AGENTS_MOCK_KEYCHAIN_STATE"
+item="$NEUROAPI_AGENTS_MOCK_KEYCHAIN_STATE/$service"
 case "$1" in
   add-generic-password)
     [[ "${!#}" == '-w' ]] || {
       printf 'Expected -w to be the final argument.\n' >&2
       exit 1
     }
-    : >"$NEUROAPI_AGENTS_MOCK_KEYCHAIN_STATE"
+    [[ ! -e "$item" ]] || exit 1
+    printf '%s\n' "${NEUROAPI_AGENTS_MOCK_NEXT_TOKEN:-test-neuroapi-token}" >"$item"
     ;;
   find-generic-password)
-    [[ -f "$NEUROAPI_AGENTS_MOCK_KEYCHAIN_STATE" ]] || exit 44
+    [[ -f "$item" ]] || exit 44
     if [[ "${!#}" == '-w' ]]; then
-      printf 'test-neuroapi-token\n'
+      cat -- "$item"
     fi
     ;;
   delete-generic-password)
-    rm -f -- "$NEUROAPI_AGENTS_MOCK_KEYCHAIN_STATE"
+    rm -f -- "$item"
     ;;
   *)
     printf 'Unexpected security command: %s\n' "$*" >&2
@@ -110,6 +122,113 @@ fi
 cp "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml" "$TMP_ROOT/profile-before.toml"
 /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>/dev/null
 cmp "$TMP_ROOT/profile-before.toml" "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml"
+
+# A failed authenticated preflight must leave the previous working key and
+# launcher configuration untouched. A successful retry changes only the key.
+MOCK_CLIENT_BIN="$TMP_ROOT/mock-client-bin"
+mkdir -p "$MOCK_CLIENT_BIN"
+cat >"$MOCK_CLIENT_BIN/codex" <<'EOF'
+#!/bin/bash
+[[ "$1" == '--version' ]] || exit 1
+printf '%s\n' "${MOCK_CODEX_VERSION:-codex-cli 0.158.0}"
+EOF
+cat >"$MOCK_CLIENT_BIN/claude" <<'EOF'
+#!/bin/bash
+[[ "$1" == '--version' ]] || exit 1
+printf '2.1.284 (Claude Code)\n'
+EOF
+chmod 700 "$MOCK_CLIENT_BIN/codex" "$MOCK_CLIENT_BIN/claude"
+if MOCK_CODEX_VERSION='codex-cli 0.158.0-alpha' \
+  client_version_at_least "$MOCK_CLIENT_BIN/codex" 0 158 0; then
+  printf 'Prerelease Codex version was accepted.\n' >&2
+  exit 1
+fi
+MOCK_CURL="$TMP_ROOT/mock-curl"
+cat >"$MOCK_CURL" <<'EOF'
+#!/bin/bash
+set -euo pipefail
+config="$(cat)"
+[[ "$config" == *'Bearer '* ]] || exit 1
+[[ "$config" != *'bad-rotation'* ]] || exit 22
+case "${!#}" in
+  https://neuroapi.host/v1/codex/models) cat "$NEUROAPI_TEST_CODEX_CATALOG" ;;
+  https://neuroapi.host/v1/claude-code/client-settings) cat "$NEUROAPI_TEST_CLAUDE_CATALOG" ;;
+  *) exit 1 ;;
+esac
+printf '\n200'
+EOF
+chmod 700 "$MOCK_CURL"
+export NEUROAPI_TEST_CODEX_CATALOG="$TMP_ROOT/codex-catalog.json"
+export NEUROAPI_TEST_CLAUDE_CATALOG="$TMP_ROOT/claude-catalog.json"
+"$PYTHON_BIN" - "$NEUROAPI_TEST_CODEX_CATALOG" "$NEUROAPI_TEST_CLAUDE_CATALOG" <<'PY'
+import json, pathlib, sys
+model = dict(slug='gpt-6-sol', display_name='GPT-6 Sol', description='Test model',
+             supported_reasoning_levels=[], shell_type='shell_command', visibility='list',
+             supported_in_api=True, priority=0, base_instructions='test',
+             model_messages={'instructions_template': 'test'},
+             supports_reasoning_summary_parameter=False, support_verbosity=False,
+             supports_parallel_tool_calls=False, truncation_policy={'mode': 'tokens', 'limit': 100},
+             context_window=10000, max_context_window=10000, auto_compact_token_limit=8000,
+             effective_context_window_percent=90, experimental_supported_tools=[],
+             input_modalities=['text'], supports_search_tool=False, use_responses_lite=False,
+             input_token_limit=8000, output_token_limit=2000)
+pathlib.Path(sys.argv[1]).write_text(json.dumps({'models': [model], 'default_model': model['slug']}))
+pathlib.Path(sys.argv[2]).write_text(json.dumps({
+    'model': 'claude-opus-5-5', 'availableModels': ['claude-opus-5-5'],
+    'enforceAvailableModels': True, 'fallbackModel': [],
+    'modelPicker': {'options': [{'model': 'claude-opus-5-5', 'label': 'Opus'}],
+                    'replaceBuiltInOptions': True},
+    'env': {'ANTHROPIC_DEFAULT_OPUS_MODEL': 'claude-opus-5-5'}}))
+PY
+export NEUROAPI_AGENTS_TEST_PREFLIGHT=1
+export NEUROAPI_AGENTS_CURL_BIN="$MOCK_CURL"
+rotation_path="$NEUROAPI_AGENTS_STATE_ROOT/config/keychain-service"
+old_service="$(<"$rotation_path")"
+cp "$rotation_path" "$TMP_ROOT/pointer-before"
+cp "$NEUROAPI_AGENTS_STATE_ROOT/config/claude-settings.json" "$TMP_ROOT/claude-before.json"
+cp "$NEUROAPI_AGENTS_BIN_ROOT/codex-neuroapi" "$TMP_ROOT/codex-before"
+if PATH="$MOCK_CLIENT_BIN:$PATH" NEUROAPI_AGENTS_MOCK_NEXT_TOKEN=bad-rotation \
+  /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >"$TMP_ROOT/rotation.out" 2>"$TMP_ROOT/rotation.err"; then
+  printf 'Invalid replacement key passed preflight.\n' >&2
+  exit 1
+fi
+cmp "$TMP_ROOT/pointer-before" "$rotation_path"
+cmp "$TMP_ROOT/profile-before.toml" "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml"
+cmp "$TMP_ROOT/claude-before.json" "$NEUROAPI_AGENTS_STATE_ROOT/config/claude-settings.json"
+cmp "$TMP_ROOT/codex-before" "$NEUROAPI_AGENTS_BIN_ROOT/codex-neuroapi"
+[[ "$("$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh")" == 'test-neuroapi-token' ]]
+[[ -f "$MOCK_KEYCHAIN_STATE/$old_service" ]]
+[[ "$(find "$MOCK_KEYCHAIN_STATE" -type f | wc -l | tr -d ' ')" == '1' ]]
+if grep -R -Fq 'bad-rotation' "$NEUROAPI_AGENTS_STATE_ROOT" "$NEUROAPI_AGENTS_CODEX_HOME" "$TMP_ROOT/rotation.out" "$TMP_ROOT/rotation.err"; then
+  printf 'Rejected replacement key leaked.\n' >&2
+  exit 1
+fi
+for failure_point in claude-settings.json keychain-service; do
+  if PATH="$MOCK_CLIENT_BIN:$PATH" NEUROAPI_AGENTS_MOCK_NEXT_TOKEN=good-rotation \
+    NEUROAPI_AGENTS_TEST_FAIL_COMMIT_AT="$failure_point" \
+    /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >"$TMP_ROOT/rotation.out" 2>"$TMP_ROOT/rotation.err"; then
+    printf 'Injected installer failure at %s was ignored.\n' "$failure_point" >&2
+    exit 1
+  fi
+  cmp "$TMP_ROOT/pointer-before" "$rotation_path"
+  cmp "$TMP_ROOT/profile-before.toml" "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml"
+  cmp "$TMP_ROOT/claude-before.json" "$NEUROAPI_AGENTS_STATE_ROOT/config/claude-settings.json"
+  cmp "$TMP_ROOT/codex-before" "$NEUROAPI_AGENTS_BIN_ROOT/codex-neuroapi"
+  [[ "$("$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh")" == 'test-neuroapi-token' ]]
+  [[ -f "$MOCK_KEYCHAIN_STATE/$old_service" ]]
+  [[ "$(find "$MOCK_KEYCHAIN_STATE" -type f | wc -l | tr -d ' ')" == '1' ]]
+done
+PATH="$MOCK_CLIENT_BIN:$PATH" NEUROAPI_AGENTS_MOCK_NEXT_TOKEN=good-rotation \
+  /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >"$TMP_ROOT/rotation.out" 2>"$TMP_ROOT/rotation.err"
+[[ "$("$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh")" == 'good-rotation' ]]
+[[ "$(<"$rotation_path")" != "$old_service" ]]
+[[ ! -e "$MOCK_KEYCHAIN_STATE/$old_service" ]]
+cmp "$TMP_ROOT/profile-before.toml" "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml"
+if grep -R -Fq 'good-rotation' "$NEUROAPI_AGENTS_STATE_ROOT" "$NEUROAPI_AGENTS_CODEX_HOME" "$TMP_ROOT/rotation.out" "$TMP_ROOT/rotation.err"; then
+  printf 'Replacement key leaked.\n' >&2
+  exit 1
+fi
+unset NEUROAPI_AGENTS_TEST_PREFLIGHT NEUROAPI_AGENTS_CURL_BIN
 /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >/dev/null
 
 [[ ! -e "$NEUROAPI_AGENTS_STATE_ROOT" ]]
@@ -119,13 +238,13 @@ cmp "$TMP_ROOT/profile-before.toml" "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.c
 [[ ! -e "$NEUROAPI_AGENTS_BIN_ROOT/claude-neuroapi" ]]
 grep -Fq 'delete-generic-password' "$SECURITY_LOG"
 
-printf 'pre-existing-secret\n' >"$MOCK_KEYCHAIN_STATE"
+printf 'pre-existing-secret\n' >"$MOCK_KEYCHAIN_STATE/host.neuroapi.agents.api-key"
 delete_count_before="$(grep -c 'delete-generic-password' "$SECURITY_LOG")"
 NEUROAPI_AGENTS_STATE_ROOT="$TMP_ROOT/no-installer-state" \
   /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >/dev/null
 delete_count_after="$(grep -c 'delete-generic-password' "$SECURITY_LOG")"
 [[ "$delete_count_after" == "$delete_count_before" ]]
-[[ -f "$MOCK_KEYCHAIN_STATE" ]]
+[[ -f "$MOCK_KEYCHAIN_STATE/host.neuroapi.agents.api-key" ]]
 
 UNOWNED_KEYCHAIN_STATE="$TMP_ROOT/unowned-keychain-state"
 if NEUROAPI_AGENTS_STATE_ROOT="$UNOWNED_KEYCHAIN_STATE" \
@@ -133,7 +252,7 @@ if NEUROAPI_AGENTS_STATE_ROOT="$UNOWNED_KEYCHAIN_STATE" \
   printf 'Setup overwrote an unowned Keychain item.\n' >&2
   exit 1
 fi
-[[ -f "$MOCK_KEYCHAIN_STATE" ]]
+[[ -f "$MOCK_KEYCHAIN_STATE/host.neuroapi.agents.api-key" ]]
 
 UNOWNED_STATE="$TMP_ROOT/unowned-state"
 mkdir -p "$UNOWNED_STATE"

@@ -254,7 +254,11 @@ function ConvertFrom-NeuroAPICatalog {
             $safe
         }
         if (-not $seen.Contains($model)) { throw 'Default model hidden from picker' }
-        $safeEnv = [ordered]@{ ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'; ANTHROPIC_MODEL = $model }
+        $safeEnv = [ordered]@{
+            ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'
+            ANTHROPIC_MODEL = $model
+            CLAUDE_CODE_MAX_OUTPUT_TOKENS = '4096'
+        }
         foreach ($name in (Get-NeuroAPIClaudeEnvironmentOverrides)) { $safeEnv[$name] = '' }
         $environment = Get-NeuroAPIProperty $data 'env'
         Assert-NeuroAPIKeys $environment @('ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_FABLE_MODEL')
@@ -262,8 +266,15 @@ function ConvertFrom-NeuroAPICatalog {
             $key = 'ANTHROPIC_DEFAULT_' + $family + '_MODEL'
             $value = Get-NeuroAPIProperty $environment $key
             if ($null -ne $value) {
-                if (-not (Test-NeuroAPIModelId $value) -or -not $allowed.Contains($value) -or
-                    $value -notmatch ('^claude-' + $family.ToLowerInvariant() + '(?:[.\-]|$)')) { throw 'Invalid model family' }
+                if (-not (Test-NeuroAPIModelId $value) -or -not $allowed.Contains($value)) { throw 'Invalid model family' }
+                if ($family -eq 'HAIKU') {
+                    # Claude Code uses this alias for background calls. The
+                    # target must be a recommended Claude model, not a hidden
+                    # compatibility-only entry from availableModels.
+                    if (-not $seen.Contains($value) -or $value -notmatch '^claude-(haiku|sonnet|opus|fable)(?:[.\-]|$)') { throw 'Invalid background model' }
+                } elseif ($value -notmatch ('^claude-' + $family.ToLowerInvariant() + '(?:[.\-]|$)')) {
+                    throw 'Invalid model family'
+                }
                 $safeEnv[$key] = $value
             }
         }
@@ -283,14 +294,18 @@ function ConvertFrom-NeuroAPICatalog {
 
 function Get-NeuroAPIClientCommand {
     param([string]$Client)
+    $stateRoot = Split-Path -Parent $PSScriptRoot
+    $nativeCodex = Join-Path $stateRoot 'native-codex/codex.exe'
+    $candidate = if ($Client -eq 'codex') { $nativeCodex } else { Join-Path $env:USERPROFILE '.local/bin/claude.exe' }
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
     $command = Get-Command $Client -CommandType Application, ExternalScript -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($null -eq $command) { throw 'Установите Codex CLI или Claude Code и откройте новый терминал.' }
-    return $command.Source
+    if ($null -ne $command) { return $command.Source }
+    throw 'Установите Codex CLI или Claude Code и откройте новый терминал.'
 }
 
 function Assert-NeuroAPIClientVersion {
     param([string]$Client, [string]$Command)
-    $minimum = if ($Client -eq 'codex') { [version]'0.147.0' } else { [version]'2.1.280' }
+    $minimum = if ($Client -eq 'codex') { [version]'0.158.0' } else { [version]'2.1.284' }
     try {
         $global:LASTEXITCODE = 0
         $output = @(& $Command --version 2>&1) -join ' '

@@ -24,6 +24,12 @@ $CodexHome = Get-FullPath -Path $CodexHome
 $defaultStateRoot = Get-FullPath -Path (Get-DefaultStateRoot)
 $defaultCodexHome = Get-FullPath -Path (Get-DefaultCodexHome)
 
+if ($TestMode -and (
+    [string]::Equals($StateRoot, $defaultStateRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+    [string]::Equals($CodexHome, $defaultCodexHome, [System.StringComparison]::OrdinalIgnoreCase)
+)) {
+    throw 'Test mode requires isolated StateRoot and CodexHome paths.'
+}
 if (-not $TestMode) {
     if (-not [string]::Equals($StateRoot, $defaultStateRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw 'A custom StateRoot is allowed only in test mode.'
@@ -59,7 +65,7 @@ if (Test-Path -LiteralPath $profilePath -PathType Leaf) {
 
 $binRoot = [System.IO.Path]::Combine($StateRoot, 'bin')
 if (-not $TestMode -and -not $NoPathUpdate) {
-    Remove-UserPathEntry -Entry $binRoot
+    Remove-OwnedUserPathEntries -StateRoot $StateRoot
 }
 
 if (Test-Path -LiteralPath $StateRoot -PathType Container) {

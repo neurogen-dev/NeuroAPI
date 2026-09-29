@@ -1,5 +1,7 @@
 # Решение проблем
 
+Эти инструкции относятся к терминальным `codex-neuroapi` и `claude-neuroapi`. Запуск тех же моделей в Codex Desktop или вкладке Code приложения Claude Desktop требует отдельной настройки и проверки GUI.
+
 ## `codex-neuroapi` или `claude-neuroapi` не найдены
 
 Windows: откройте новый терминал после установки. Проверьте наличие `%LOCALAPPDATA%\NeuroAPIAgents\bin` в пользовательском `PATH`.
@@ -15,6 +17,7 @@ macOS: используйте полный путь `~/.local/bin/codex-neuroapi
 - base URL `https://neuroapi.host/v1/codex`;
 - `wire_api = "responses"`;
 - `supports_websockets = true` (или `false` для диагностики HTTP/SSE).
+- `web_search = "disabled"` и `[features]` с `multi_agent = false`, `goals = false`, `apps = false`, `browser_use = false`: без них Codex 0.158.0 может включить неподдерживаемые hosted/namespace-инструменты в обычный запрос к файлу и получить `effective_request_unsupported`.
 
 Если `~/.codex/neuroapi-host.config.toml` существовал до установки без ownership-marker, setup должен отказать, а не перезаписать его.
 
@@ -57,8 +60,7 @@ macOS может показать системный запрос доступа
 Убедитесь, что файл скачан из `neurogen-dev/NeuroAPI`. Выполните:
 
 ```bash
-chmod +x setup-macos.command
-./setup-macos.command
+bash setup-macos.command
 ```
 
 Если Gatekeeper всё ещё блокирует запуск, откройте файл через Finder → правый клик → Open. Не отключайте Gatekeeper глобально.
