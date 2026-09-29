@@ -121,7 +121,7 @@ function run(args) {
       'CLAUDE_CODE_USE_FOUNDRY', 'CLAUDE_CODE_USE_ANTHROPIC_AWS', 'CLAUDE_CODE_USE_MANTLE'].forEach(function (key) {
       data.env[key] = ''
     })
-    data.env.ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'
+    data.env.ANTHROPIC_BASE_URL = 'https://claude.neuroapi.host'
     data.env.ANTHROPIC_MODEL = data.model
     // Keep first-request quota reservations bounded. Claude Code can continue
     // generation in another turn when a response reaches this limit.

@@ -10,8 +10,8 @@ SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
 CLIENT="${1:-}"
 shift || true
 case "$CLIENT" in
-  codex) MIN_MAJOR=0; MIN_MINOR=158; MIN_PATCH=0; ENDPOINT='https://neuroapi.host/v1/codex/models' ;;
-  claude) MIN_MAJOR=2; MIN_MINOR=1; MIN_PATCH=284; ENDPOINT='https://neuroapi.host/v1/claude-code/client-settings' ;;
+  codex) MIN_MAJOR=0; MIN_MINOR=158; MIN_PATCH=0; ENDPOINT='https://codex.neuroapi.host/v1/models' ;;
+  claude) MIN_MAJOR=2; MIN_MINOR=1; MIN_PATCH=284; ENDPOINT='https://claude.neuroapi.host/client-settings' ;;
   *) printf 'Неизвестный клиент NeuroAPI.\n' >&2; exit 1 ;;
 esac
 

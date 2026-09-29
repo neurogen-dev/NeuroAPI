@@ -55,11 +55,17 @@ if [[ -e "$DESKTOP_HASH_PATH" ]]; then
     printf 'Codex Desktop ownership state is incomplete. Existing settings were not changed.\n' >&2
     exit 1
   fi
-  IFS=' ' read -r desktop_state_version desktop_original_exists desktop_applied_hash <"$DESKTOP_HASH_PATH"
-  if [[ "$desktop_state_version" != 'v1' || ! "$desktop_original_exists" =~ ^[01]$ ||
+  IFS=' ' read -r desktop_state_version desktop_original_exists desktop_applied_hash desktop_original_hash <"$DESKTOP_HASH_PATH"
+  if [[ ! "$desktop_state_version" =~ ^v[12]$ || ! "$desktop_original_exists" =~ ^[01]$ ||
     ! "$desktop_applied_hash" =~ ^[a-f0-9]{64}$ ||
     "$(/usr/bin/shasum -a 256 "$DESKTOP_CONFIG_PATH" | /usr/bin/awk '{print $1}')" != "$desktop_applied_hash" ]]; then
     printf 'Codex Desktop config changed since setup. Resolve it manually before reinstalling.\n' >&2
+    exit 1
+  fi
+  if [[ "$desktop_state_version" == 'v2' ]] &&
+    { [[ ! "$desktop_original_hash" =~ ^[a-f0-9]{64}$ ]] ||
+      [[ "$(/usr/bin/shasum -a 256 "$DESKTOP_ORIGINAL_PATH" | /usr/bin/awk '{print $1}')" != "$desktop_original_hash" ]]; }; then
+    printf 'Codex Desktop original backup changed since setup. Settings and credentials were kept.\n' >&2
     exit 1
   fi
   DESKTOP_OPT_IN=1
@@ -143,27 +149,53 @@ DESKTOP_ROOT_WAS_PRESENT=0
 PROMOTE_TARGETS=()
 PROMOTE_BACKUPS=()
 cleanup_stage() {
-  local status=$? i
+  local status=$? i rollback_failed=0 restore_tmp
   trap - EXIT
   set +e
   if [[ "$status" -ne 0 && "$COMMIT_STARTED" == '1' ]]; then
     for ((i=0; i<${#PROMOTE_TARGETS[@]}; i++)); do
-      rm -f -- "${PROMOTE_TARGETS[i]}.new.$$"
+      rm -f -- "${PROMOTE_TARGETS[i]}.new.$$" || rollback_failed=1
     done
     for ((i=PROMOTE_COUNT-1; i>=0; i--)); do
+      # A user or another process may have edited a promoted file. Leave that
+      # state intact and keep both credentials plus all snapshots for recovery.
+      if ! cmp -s -- "${PROMOTE_SOURCES[i]}" "${PROMOTE_TARGETS[i]}"; then
+        rollback_failed=1
+        continue
+      fi
+      if is_test_mode && [[ "${NEUROAPI_AGENTS_TEST_FAIL_ROLLBACK_AT:-}" == "$(basename -- "${PROMOTE_TARGETS[i]}")" ]]; then
+        rollback_failed=1
+        continue
+      fi
       if [[ "${PROMOTE_BACKUPS[i]}" == 'present' ]]; then
-        cp -p -- "$STAGE_ROOT/rollback/$i" "${PROMOTE_TARGETS[i]}"
+        restore_tmp="${PROMOTE_TARGETS[i]}.rollback.$$"
+        if ! cp -p -- "$STAGE_ROOT/rollback/$i" "$restore_tmp" ||
+          ! cmp -s -- "$STAGE_ROOT/rollback/$i" "$restore_tmp" ||
+          ! mv -f -- "$restore_tmp" "${PROMOTE_TARGETS[i]}" ||
+          ! cmp -s -- "$STAGE_ROOT/rollback/$i" "${PROMOTE_TARGETS[i]}"; then
+          rollback_failed=1
+          rm -f -- "$restore_tmp" || true
+        fi
       else
-        rm -f -- "${PROMOTE_TARGETS[i]}"
+        if ! rm -f -- "${PROMOTE_TARGETS[i]}" ||
+          [[ -e "${PROMOTE_TARGETS[i]}" || -L "${PROMOTE_TARGETS[i]}" ]]; then
+          rollback_failed=1
+        fi
       fi
     done
-    if [[ "$STATE_ROOT_WAS_PRESENT" == '0' ]]; then
-      rm -rf -- "$STATE_ROOT"
-    elif ! marker_is_owned "$(state_marker_path)"; then
-      rmdir -- "$STATE_ROOT/bin" "$STATE_ROOT/config" 2>/dev/null || true
+    if [[ "$rollback_failed" == '0' ]]; then
+      if [[ "$STATE_ROOT_WAS_PRESENT" == '0' ]]; then
+        rm -rf -- "$STATE_ROOT" || rollback_failed=1
+      elif ! marker_is_owned "$(state_marker_path)"; then
+        rmdir -- "$STATE_ROOT/bin" "$STATE_ROOT/config" 2>/dev/null || true
+      fi
+      if [[ "$DESKTOP_OPT_IN" == '1' && "$DESKTOP_ROOT_WAS_PRESENT" == '0' ]]; then
+        rmdir -- "$DESKTOP_CONFIG_ROOT" 2>/dev/null || true
+      fi
     fi
-    if [[ "$DESKTOP_OPT_IN" == '1' && "$DESKTOP_ROOT_WAS_PRESENT" == '0' ]]; then
-      rmdir -- "$DESKTOP_CONFIG_ROOT" 2>/dev/null || true
+    if [[ "$rollback_failed" == '1' ]]; then
+      printf 'NeuroAPI setup rollback is incomplete. Snapshots and the candidate Keychain credential were kept. Recovery files: %s\n' "$STAGE_ROOT" >&2
+      exit "$status"
     fi
   fi
   if [[ "$CANDIDATE_OWNED" == '1' ]]; then
@@ -231,6 +263,11 @@ if [[ "$DESKTOP_OPT_IN" == '1' ]]; then
     printf 'Codex Desktop config changed during setup; existing settings were preserved.\n' >&2
     exit 1
   fi
+  if [[ -e "$DESKTOP_HASH_PATH" && "$desktop_state_version" == 'v2' &&
+    "$(/usr/bin/shasum -a 256 "$STAGE_ROOT/desktop/original.toml" | /usr/bin/awk '{print $1}')" != "$desktop_original_hash" ]]; then
+    printf 'Codex Desktop original backup changed during setup; existing settings were preserved.\n' >&2
+    exit 1
+  fi
   if ! "$STAGE_ROOT/bin/launch-managed.sh" codex --export-codex-catalog "$STAGE_ROOT/desktop"; then
     printf 'Не удалось проверить модели Codex Desktop для этого ключа. Настройки сохранены.\n' >&2
     exit 1
@@ -245,7 +282,8 @@ if [[ "$DESKTOP_OPT_IN" == '1' ]]; then
     IFS=' ' read -r _ desktop_original_exists _ <"$DESKTOP_HASH_PATH"
   fi
   desktop_hash="$(/usr/bin/shasum -a 256 "$STAGE_ROOT/desktop/config.toml" | /usr/bin/awk '{print $1}')"
-  printf 'v1 %s %s\n' "$desktop_original_exists" "$desktop_hash" >"$STAGE_ROOT/desktop/state"
+  desktop_original_hash="$(/usr/bin/shasum -a 256 "$STAGE_ROOT/desktop/original.toml" | /usr/bin/awk '{print $1}')"
+  printf 'v2 %s %s %s\n' "$desktop_original_exists" "$desktop_hash" "$desktop_original_hash" >"$STAGE_ROOT/desktop/state"
   desktop_codex_bin="$(resolve_client_bin codex 0 158 0 || true)"
   if [[ -z "$desktop_codex_bin" ]] || ! client_version_at_least "$desktop_codex_bin" 0 158 0; then
     printf 'Для проверки Codex Desktop требуется Codex CLI 0.158.0 или новее.\n' >&2
@@ -277,7 +315,7 @@ browser_use = false
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1/codex"
+base_url = "https://codex.neuroapi.host/v1"
 wire_api = "responses"
 supports_websockets = true
 
@@ -295,7 +333,7 @@ STAGED_CLAUDE_SETTINGS="$STAGE_ROOT/config/claude-settings.json"
 /usr/bin/plutil -insert apiKeyHelper -string "$HELPER_PATH" "$STAGED_CLAUDE_SETTINGS"
 /usr/bin/plutil -insert env -dictionary "$STAGED_CLAUDE_SETTINGS"
 /usr/bin/plutil -insert env.ANTHROPIC_BASE_URL \
-  -string 'https://neuroapi.host/v1/claude-code' \
+  -string 'https://claude.neuroapi.host' \
   "$STAGED_CLAUDE_SETTINGS"
 /usr/bin/plutil -convert json "$STAGED_CLAUDE_SETTINGS"
 chmod 600 "$STAGED_CLAUDE_SETTINGS"
