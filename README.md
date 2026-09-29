@@ -66,6 +66,8 @@ bash setup-macos.command
 
 Если вы уже пробовали подключиться и получали ошибки, сначала пройдите [восстановление старой настройки](docs/reconnect-after-update.md). Оно сохраняет ваши проекты и помогает найти старый URL, профиль или источник ключа.
 
+**Хотите настроить всё вручную?** В [инструкции с готовыми фрагментами](docs/copy-paste-setup.md) указаны точные пути для Windows и macOS, содержимое файлов Codex CLI и Claude Code, ручная настройка Codex Desktop с защищённым helper и поля формы Claude Desktop. Настоящий ключ вводится скрыто в терминале или в форме приложения; в TOML/JSON его вставлять не нужно.
+
 ## Что именно делает установщик
 
 | Действие | Windows | macOS |
@@ -142,6 +144,7 @@ Uninstaller удаляет только installer-owned файлы и локал
 
 - [Модель безопасности](docs/security.md)
 - [Ручная настройка и созданные файлы](docs/manual-setup.md)
+- [Ручное подключение: что скопировать и что заменить](docs/copy-paste-setup.md)
 - [Как переподключиться после неудачной старой настройки](docs/reconnect-after-update.md)
 - [Решение проблем](docs/troubleshooting.md)
 - [Codex через NeuroAPI](https://neuroapi.host/codex-api)
