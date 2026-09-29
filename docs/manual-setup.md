@@ -1,6 +1,6 @@
 # Что настраивают установщики
 
-Эта страница объясняет как выполнить настройку вручную и какие файлы создаёт автоматический установщик. Самый простой путь — [setup-файл для вашей ОС](../README.md#установка-в-один-запуск). Если старая настройка уже не работала, начните с [пошагового восстановления](reconnect-after-update.md).
+Эта страница объясняет, как выполнить настройку вручную и какие файлы создаёт автоматический установщик. Самый простой путь — [setup-файл для вашей ОС](../README.md#установка-в-один-запуск). Если старая настройка уже не работала, начните с [пошагового восстановления](reconnect-after-update.md). Для самостоятельного копирования файлов и замены конкретных значений есть [пошаговые шаблоны](copy-paste-setup.md).
 
 ## Адреса и ключ
 
@@ -71,7 +71,7 @@ claude
 
 В PowerShell эквивалентные команды — `$env:ANTHROPIC_API_KEY = $env:NEUROAPI_API_KEY`, `$env:ANTHROPIC_BASE_URL = 'https://claude.neuroapi.host'`, `$env:ANTHROPIC_MODEL = 'claude-sonnet-5-5'`, затем `claude`. Проверьте `/status` и `/model`. Старые `ANTHROPIC_AUTH_TOKEN`, Bedrock/Vertex/Foundry overrides и пользовательские settings могут иметь иной приоритет; [порядок восстановления](reconnect-after-update.md) помогает найти конфликт. При выходе из тестового терминала удалите временный ключ (`unset NEUROAPI_API_KEY ANTHROPIC_API_KEY` на macOS; `Remove-Item Env:NEUROAPI_API_KEY, Env:ANTHROPIC_API_KEY` в PowerShell) или просто закройте окно.
 
-Codex Desktop не наследует переменную из терминала при обычном запуске через GUI. Для него выбирайте опцию в установщике либо [ручную настройку Desktop](https://neuroapi.host/docs/codex-desktop). Claude Desktop настраивается только в [официальной форме приложения](https://neuroapi.host/docs/claude-desktop).
+Codex Desktop не наследует переменную из терминала при обычном запуске через GUI. Для постоянной настройки Desktop нужен credential helper, доступный приложению без терминала: безопасный готовый helper создаёт установщик. Точные пути и пример ручного `config.toml` после установки helper приведены в [пошаговых шаблонах](copy-paste-setup.md#codex-desktop-вручную-с-уже-сохранённым-ключом). Claude Desktop настраивается только в [официальной форме приложения](https://neuroapi.host/docs/claude-desktop).
 
 ## Codex CLI
 

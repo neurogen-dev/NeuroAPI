@@ -38,6 +38,8 @@ The setup does not require administrator privileges or `sudo`. Codex Desktop int
 
 Claude Desktop is configured separately in the app's official Developer Mode → Configure Third-Party Inference screen. The installer does not silently change the app's private settings; follow the [Claude Desktop guide](https://neuroapi.host/docs/claude-desktop). If an older connection failed, follow the [reconnection guide](docs/reconnect-after-update.md) before retrying.
 
+For a manual alternative, the [copy-and-paste guide (Russian)](docs/copy-paste-setup.md) lists the exact Windows/macOS file paths, Codex CLI and Claude Code snippets, Codex Desktop setup using the installer's protected credential helper, and the Claude Desktop form fields. It keeps the real key out of TOML and JSON.
+
 ## Secret model
 
 - The key is never accepted as a setup command-line argument.
@@ -66,6 +68,7 @@ Claude Code also uses the `haiku` alias for background work. If no recommended H
 
 - [Security model](docs/security.md)
 - [Manual setup and installed paths](docs/manual-setup.md)
+- [Manual copy-and-paste setup (Russian)](docs/copy-paste-setup.md)
 - [Reconnect after an older failed setup](docs/reconnect-after-update.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Codex guide](https://neuroapi.host/codex-api)
