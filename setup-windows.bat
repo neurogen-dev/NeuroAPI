@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-title NeuroAPI setup for Codex CLI and Claude Code
+title NeuroAPI setup for Codex and Claude Code
 
 set "PSModulePath="
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\windows\setup.ps1"

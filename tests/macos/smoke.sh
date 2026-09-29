@@ -129,8 +129,13 @@ MOCK_CLIENT_BIN="$TMP_ROOT/mock-client-bin"
 mkdir -p "$MOCK_CLIENT_BIN"
 cat >"$MOCK_CLIENT_BIN/codex" <<'EOF'
 #!/bin/bash
-[[ "$1" == '--version' ]] || exit 1
-printf '%s\n' "${MOCK_CODEX_VERSION:-codex-cli 0.158.0}"
+if [[ "$1" == '--version' ]]; then
+  printf '%s\n' "${MOCK_CODEX_VERSION:-codex-cli 0.158.0}"
+elif [[ "$1 $2" == 'features list' ]]; then
+  "${NEUROAPI_AGENTS_TEST_PYTHON:-python3}" -c 'import pathlib,sys,tomllib; tomllib.loads((pathlib.Path(sys.argv[1]) / "config.toml").read_text())' "$CODEX_HOME"
+else
+  exit 1
+fi
 EOF
 cat >"$MOCK_CLIENT_BIN/claude" <<'EOF'
 #!/bin/bash
@@ -228,15 +233,101 @@ if grep -R -Fq 'good-rotation' "$NEUROAPI_AGENTS_STATE_ROOT" "$NEUROAPI_AGENTS_C
   printf 'Replacement key leaked.\n' >&2
   exit 1
 fi
+
+# Desktop opt-in uses the real user-level config, independent of the CLI
+# profile. Existing TOML must survive byte-for-byte after guarded uninstall.
+export NEUROAPI_AGENTS_DESKTOP_CODEX_HOME="$TMP_ROOT/desktop-codex"
+export NEUROAPI_AGENTS_TEST_DESKTOP_OPT_IN=1
+mkdir -p "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME"
+cat >"$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" <<'EOF'
+# personal Codex settings
+model = "gpt-6-astra"
+
+[features]
+apps = false
+EOF
+cp "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" "$TMP_ROOT/desktop-original.toml"
+if PATH="$MOCK_CLIENT_BIN:$PATH" NEUROAPI_AGENTS_TEST_FAIL_COMMIT_AT=config.toml \
+  /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
+  printf 'Injected Desktop commit failure was ignored.\n' >&2
+  exit 1
+fi
+cmp "$TMP_ROOT/desktop-original.toml" "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+[[ ! -e "$NEUROAPI_AGENTS_STATE_ROOT/config/codex-desktop-state" ]]
+PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" \
+  >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"
+desktop_config="$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+desktop_catalog="$NEUROAPI_AGENTS_STATE_ROOT/config/codex-desktop-models.json"
+grep -Fq 'model_provider = "neuroapi_agents"' "$desktop_config"
+grep -Fq 'base_url = "https://codex.neuroapi.host/v1"' "$desktop_config"
+grep -Fq 'supports_websockets = false' "$desktop_config"
+grep -Fq 'model = "gpt-6-sol"' "$desktop_config"
+[[ -f "$desktop_catalog" ]]
+"$PYTHON_BIN" -c 'import json,pathlib,sys,tomllib; cfg=tomllib.loads(pathlib.Path(sys.argv[1]).read_text()); catalog=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert cfg["model"]==catalog["models"][0]["slug"]' "$desktop_config" "$desktop_catalog"
+if grep -R -Fq 'good-rotation' "$desktop_config" "$desktop_catalog"; then
+  printf 'Desktop configuration exposed the dummy token.\n' >&2
+  exit 1
+fi
+cp "$desktop_config" "$TMP_ROOT/desktop-installed.toml"
+PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" \
+  >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"
+cmp "$TMP_ROOT/desktop-installed.toml" "$desktop_config"
+printf '\n# user changed this later\n' >>"$desktop_config"
+if /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
+  printf 'Uninstall deleted credentials for a modified Desktop config.\n' >&2
+  exit 1
+fi
+[[ -f "$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh" ]]
+[[ "$("$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh")" == 'good-rotation' ]]
+cp "$TMP_ROOT/desktop-installed.toml" "$desktop_config"
+unset NEUROAPI_AGENTS_TEST_DESKTOP_OPT_IN
 unset NEUROAPI_AGENTS_TEST_PREFLIGHT NEUROAPI_AGENTS_CURL_BIN
 /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >/dev/null
 
 [[ ! -e "$NEUROAPI_AGENTS_STATE_ROOT" ]]
+cmp "$TMP_ROOT/desktop-original.toml" "$desktop_config"
 [[ ! -e "$NEUROAPI_AGENTS_CODEX_HOME/neuroapi-host.config.toml" ]]
 [[ -e "$NEUROAPI_AGENTS_CODEX_HOME/user-owned.txt" ]]
 [[ ! -e "$NEUROAPI_AGENTS_BIN_ROOT/codex-neuroapi" ]]
 [[ ! -e "$NEUROAPI_AGENTS_BIN_ROOT/claude-neuroapi" ]]
 grep -Fq 'delete-generic-password' "$SECURITY_LOG"
+
+# Fresh Desktop config, reserved provider name, malformed TOML, and symlink
+# refusal are tested independently of the existing-config flow above.
+export NEUROAPI_AGENTS_DESKTOP_CODEX_HOME="$TMP_ROOT/desktop-fresh"
+export NEUROAPI_AGENTS_TEST_DESKTOP_OPT_IN=1
+export NEUROAPI_AGENTS_CURL_BIN="$MOCK_CURL"
+mkdir -p "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME"
+cat >"$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" <<'EOF'
+[model_providers.neuroapi_agents]
+name = "user owned"
+EOF
+cp "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" "$TMP_ROOT/desktop-conflict.toml"
+if PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>/dev/null; then
+  printf 'Setup overwrote a user-owned Desktop provider.\n' >&2
+  exit 1
+fi
+cmp "$TMP_ROOT/desktop-conflict.toml" "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+printf 'broken = [\n' >"$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+if PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>/dev/null; then
+  printf 'Setup accepted malformed Desktop TOML.\n' >&2
+  exit 1
+fi
+[[ "$(<"$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml")" == 'broken = [' ]]
+mv "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" "$TMP_ROOT/malformed-desktop.toml"
+ln -s "$TMP_ROOT/malformed-desktop.toml" "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+if PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>/dev/null; then
+  printf 'Setup accepted a symlinked Desktop config.\n' >&2
+  exit 1
+fi
+[[ "$(<"$TMP_ROOT/malformed-desktop.toml")" == 'broken = [' ]]
+unlink "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>"$TMP_ROOT/install.err"
+[[ -f "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" ]]
+grep -Fq 'model = "gpt-6-sol"' "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+/bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >/dev/null
+[[ ! -e "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" ]]
+unset NEUROAPI_AGENTS_TEST_DESKTOP_OPT_IN NEUROAPI_AGENTS_CURL_BIN
 
 printf 'pre-existing-secret\n' >"$MOCK_KEYCHAIN_STATE/host.neuroapi.agents.api-key"
 delete_count_before="$(grep -c 'delete-generic-password' "$SECURITY_LOG")"

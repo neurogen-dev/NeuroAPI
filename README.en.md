@@ -1,6 +1,6 @@
 # NeuroAPI for Codex CLI and Claude Code
 
-Public, auditable guided setup for routing local Codex CLI and Claude Code sessions through [NeuroAPI](https://neuroapi.host) on Windows and macOS. It configures the terminal launchers `codex-neuroapi` and `claude-neuroapi`; it does not configure or validate the Claude Desktop Code or Codex Desktop GUIs.
+Public, auditable guided setup for routing local Codex CLI and Claude Code sessions through [NeuroAPI](https://neuroapi.host) on Windows and macOS. It configures the terminal launchers `codex-neuroapi` and `claude-neuroapi`. With separate consent, it also configures **Codex Desktop** in the user-level `~/.codex/config.toml`. See the [Claude Desktop guide](https://neuroapi.host/docs/claude-desktop) for that application's own setup.
 
 [Русская версия](README.md)
 
@@ -23,16 +23,18 @@ Windows:
 1. [Download the agents ZIP](https://github.com/neurogen-dev/NeuroAPI/archive/refs/heads/agents.zip).
 2. Extract it and double-click `setup-windows.bat`.
 3. Paste the key into the masked PowerShell prompt.
-4. Open a new terminal and run `codex-neuroapi` or `claude-neuroapi`.
+4. If you use Codex Desktop, choose the optional Desktop setup and restart the app. Your original user config is backed up.
+5. Open a new terminal and run `codex-neuroapi` or `claude-neuroapi`.
 
 macOS:
 
 1. Download and extract the same ZIP.
 2. In the extracted directory, run `bash setup-macos.command`.
 3. Paste the key into the macOS Keychain prompt.
-4. Run `~/.local/bin/codex-neuroapi` or `~/.local/bin/claude-neuroapi`.
+4. If you use Codex Desktop, choose the optional Desktop setup and restart the app. Your original user config is backed up.
+5. Run `~/.local/bin/codex-neuroapi` or `~/.local/bin/claude-neuroapi`.
 
-The setup does not require administrator privileges, does not use `sudo`, and does not overwrite existing Codex, Claude Code, or shell configuration.
+The setup does not require administrator privileges or `sudo`. Codex Desktop integration edits the user config only after consent, with a guarded backup and conflict checks.
 
 ## Secret model
 
@@ -49,6 +51,7 @@ This prevents accidental plaintext disclosure. It does not protect a key from ma
 
 - In `codex-neuroapi`, run `/debug-config` and confirm the `neuroapi-host` profile and `https://neuroapi.host/v1/codex`.
 - In `claude-neuroapi`, run `/status` and confirm `https://neuroapi.host/v1/claude-code` plus `apiKeyHelper`.
+- For Codex Desktop, check a new local task, `https://codex.neuroapi.host/v1` in the user config, and the request in your NeuroAPI usage logs. Setup uses HTTP/SSE for this GUI integration.
 - Check current model IDs and pricing at [neuroapi.host/price](https://neuroapi.host/price).
 
 Each launcher fetches a fresh catalog scoped to the ordinary NeuroAPI key. Codex uses a private `model_catalog_json`; Claude receives a configured picker. There are no hardcoded default models. Tested minimum versions are Codex 0.158.0 and Claude Code 2.1.284. The Claude launcher limits initial output to 4096 tokens to bound quota reservation. Invalid, empty or unavailable catalogs stop launch instead of restoring stale lists. Organization policies and deliberate CLI overrides retain their documented precedence; these launchers do not support host-managed provider mode.
@@ -64,4 +67,6 @@ Claude Code also uses the `haiku` alias for background work. If no recommended H
 - [Troubleshooting](docs/troubleshooting.md)
 - [Codex guide](https://neuroapi.host/codex-api)
 - [Claude Code guide](https://neuroapi.host/claude-code)
+- [Codex Desktop guide](https://neuroapi.host/docs/codex-desktop)
+- [Claude Desktop Code guide](https://neuroapi.host/docs/claude-desktop)
 - [NeuroAPI documentation](https://neuroapi.host/docs/getting-started)

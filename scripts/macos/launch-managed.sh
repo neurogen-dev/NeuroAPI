@@ -16,9 +16,13 @@ case "$CLIENT" in
 esac
 
 VERIFY_ONLY=0
+EXPORT_CATALOG_ROOT=''
 if [[ "${1:-}" == '--verify' ]]; then
   VERIFY_ONLY=1
   shift
+elif [[ "${1:-}" == '--export-codex-catalog' && "$CLIENT" == 'codex' && -n "${2:-}" ]]; then
+  EXPORT_CATALOG_ROOT="$2"
+  shift 2
 fi
 
 fail() { printf '%s\n' "$1" >&2; exit 1; }
@@ -88,6 +92,12 @@ if ! printf 'header = "Authorization: Bearer %s"\n' "$credential" |
   fail 'Не удалось загрузить актуальные модели NeuroAPI. Проверьте доступ ключа и соединение; старый список не используется.'
 fi
 unset credential
+
+if [[ -n "$EXPORT_CATALOG_ROOT" ]]; then
+  cp -- "$SNAPSHOT/models.json" "$EXPORT_CATALOG_ROOT/models.json"
+  cp -- "$SNAPSHOT/model.txt" "$EXPORT_CATALOG_ROOT/model.txt"
+  exit 0
+fi
 
 if (( VERIFY_ONLY )); then
   printf 'Каталог %s проверен.\n' "$CLIENT"

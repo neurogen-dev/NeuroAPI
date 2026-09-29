@@ -21,6 +21,11 @@ PROFILE_CONFIG_ROOT="$(codex_home)"
 LAUNCHER_ROOT="$(launcher_root)"
 PROFILE_PATH="$(profile_path)"
 PROFILE_MARKER_PATH="$(profile_marker_path)"
+DESKTOP_CONFIG_ROOT="$(desktop_codex_home)"
+DESKTOP_CONFIG_PATH="$DESKTOP_CONFIG_ROOT/config.toml"
+DESKTOP_ORIGINAL_PATH="$STATE_ROOT/config/codex-desktop-original.toml"
+DESKTOP_HASH_PATH="$STATE_ROOT/config/codex-desktop-state"
+DESKTOP_CATALOG_PATH="$STATE_ROOT/config/codex-desktop-models.json"
 SECURITY_BIN="$(security_bin)"
 CURRENT_USER="$(current_user)"
 HELPER_PATH="$STATE_ROOT/bin/get-neuroapi-key.sh"
@@ -37,6 +42,39 @@ fi
 
 if [[ -e "$PROFILE_PATH" ]] && ! marker_is_owned "$PROFILE_MARKER_PATH"; then
   printf 'Refusing to overwrite an unowned Codex profile: %s\n' "$PROFILE_PATH" >&2
+  exit 1
+fi
+
+DESKTOP_OPT_IN=0
+if [[ -L "$DESKTOP_ORIGINAL_PATH" || -L "$DESKTOP_HASH_PATH" || -L "$DESKTOP_CATALOG_PATH" ]]; then
+  printf 'Refusing to use symlinked Codex Desktop ownership state.\n' >&2
+  exit 1
+fi
+if [[ -e "$DESKTOP_HASH_PATH" ]]; then
+  if [[ ! -f "$DESKTOP_ORIGINAL_PATH" || ! -f "$DESKTOP_CATALOG_PATH" || ! -f "$DESKTOP_CONFIG_PATH" ]]; then
+    printf 'Codex Desktop ownership state is incomplete. Existing settings were not changed.\n' >&2
+    exit 1
+  fi
+  IFS=' ' read -r desktop_state_version desktop_original_exists desktop_applied_hash <"$DESKTOP_HASH_PATH"
+  if [[ "$desktop_state_version" != 'v1' || ! "$desktop_original_exists" =~ ^[01]$ ||
+    ! "$desktop_applied_hash" =~ ^[a-f0-9]{64}$ ||
+    "$(/usr/bin/shasum -a 256 "$DESKTOP_CONFIG_PATH" | /usr/bin/awk '{print $1}')" != "$desktop_applied_hash" ]]; then
+    printf 'Codex Desktop config changed since setup. Resolve it manually before reinstalling.\n' >&2
+    exit 1
+  fi
+  DESKTOP_OPT_IN=1
+elif [[ -e "$DESKTOP_ORIGINAL_PATH" || -e "$DESKTOP_CATALOG_PATH" ]]; then
+  printf 'Codex Desktop ownership state is incomplete. Existing settings were not changed.\n' >&2
+  exit 1
+elif is_test_mode; then
+  [[ "${NEUROAPI_AGENTS_TEST_DESKTOP_OPT_IN:-0}" == '1' ]] && DESKTOP_OPT_IN=1
+else
+  printf '\nПодключить также Codex Desktop к NeuroAPI? [y/N]: '
+  IFS= read -r desktop_answer || desktop_answer=''
+  case "$desktop_answer" in [yY]|[yY][eE][sS]|[дД]|[дД][аА]) DESKTOP_OPT_IN=1 ;; esac
+fi
+if [[ "$DESKTOP_OPT_IN" == '1' && ( -L "$DESKTOP_CONFIG_ROOT" || -L "$DESKTOP_CONFIG_PATH" ) ]]; then
+  printf 'Refusing to use a symlinked Codex Desktop configuration path.\n' >&2
   exit 1
 fi
 
@@ -97,8 +135,11 @@ STAGE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/neuroapi-agents-stage.XXXXXX")"
 CANDIDATE_SERVICE="${KEYCHAIN_SERVICE}.$(LC_ALL=C /usr/bin/od -An -N16 -tx1 /dev/urandom | /usr/bin/tr -d ' \n')"
 CANDIDATE_OWNED=0
 COMMIT_STARTED=0
+PROMOTE_COUNT=0
 STATE_ROOT_WAS_PRESENT=0
 [[ -d "$STATE_ROOT" ]] && STATE_ROOT_WAS_PRESENT=1
+DESKTOP_ROOT_WAS_PRESENT=0
+[[ -d "$DESKTOP_CONFIG_ROOT" ]] && DESKTOP_ROOT_WAS_PRESENT=1
 PROMOTE_TARGETS=()
 PROMOTE_BACKUPS=()
 cleanup_stage() {
@@ -106,8 +147,10 @@ cleanup_stage() {
   trap - EXIT
   set +e
   if [[ "$status" -ne 0 && "$COMMIT_STARTED" == '1' ]]; then
-    for ((i=${#PROMOTE_TARGETS[@]}-1; i>=0; i--)); do
+    for ((i=0; i<${#PROMOTE_TARGETS[@]}; i++)); do
       rm -f -- "${PROMOTE_TARGETS[i]}.new.$$"
+    done
+    for ((i=PROMOTE_COUNT-1; i>=0; i--)); do
       if [[ "${PROMOTE_BACKUPS[i]}" == 'present' ]]; then
         cp -p -- "$STAGE_ROOT/rollback/$i" "${PROMOTE_TARGETS[i]}"
       else
@@ -118,6 +161,9 @@ cleanup_stage() {
       rm -rf -- "$STATE_ROOT"
     elif ! marker_is_owned "$(state_marker_path)"; then
       rmdir -- "$STATE_ROOT/bin" "$STATE_ROOT/config" 2>/dev/null || true
+    fi
+    if [[ "$DESKTOP_OPT_IN" == '1' && "$DESKTOP_ROOT_WAS_PRESENT" == '0' ]]; then
+      rmdir -- "$DESKTOP_CONFIG_ROOT" 2>/dev/null || true
     fi
   fi
   if [[ "$CANDIDATE_OWNED" == '1' ]]; then
@@ -162,6 +208,58 @@ if ! is_test_mode || [[ "${NEUROAPI_AGENTS_TEST_PREFLIGHT:-0}" == '1' ]]; then
       exit 1
     fi
   done
+fi
+
+if [[ "$DESKTOP_OPT_IN" == '1' ]]; then
+  mkdir -p "$STAGE_ROOT/desktop"
+  if [[ -e "$DESKTOP_HASH_PATH" ]]; then
+    cp -p -- "$DESKTOP_ORIGINAL_PATH" "$STAGE_ROOT/desktop/original.toml"
+  elif [[ -e "$DESKTOP_CONFIG_PATH" ]]; then
+    [[ -f "$DESKTOP_CONFIG_PATH" ]] || { printf 'Invalid Codex Desktop config.\n' >&2; exit 1; }
+    cp -p -- "$DESKTOP_CONFIG_PATH" "$STAGE_ROOT/desktop/original.toml"
+  else
+    : >"$STAGE_ROOT/desktop/original.toml"
+  fi
+  chmod 600 "$STAGE_ROOT/desktop/original.toml"
+  desktop_expected_exists=0
+  desktop_expected_hash=''
+  if [[ -e "$DESKTOP_CONFIG_PATH" ]]; then
+    desktop_expected_exists=1
+    desktop_expected_hash="$(/usr/bin/shasum -a 256 "$DESKTOP_CONFIG_PATH" | /usr/bin/awk '{print $1}')"
+  fi
+  if [[ -e "$DESKTOP_HASH_PATH" && "$desktop_expected_hash" != "$desktop_applied_hash" ]]; then
+    printf 'Codex Desktop config changed during setup; existing settings were preserved.\n' >&2
+    exit 1
+  fi
+  if ! "$STAGE_ROOT/bin/launch-managed.sh" codex --export-codex-catalog "$STAGE_ROOT/desktop"; then
+    printf 'Не удалось проверить модели Codex Desktop для этого ключа. Настройки сохранены.\n' >&2
+    exit 1
+  fi
+  /usr/bin/osascript -l JavaScript "$SCRIPT_DIR/desktop-config.js" \
+    "$STAGE_ROOT/desktop/original.toml" "$STAGE_ROOT/desktop/model.txt" \
+    "$DESKTOP_CATALOG_PATH" "$HELPER_PATH" "$STAGE_ROOT/desktop/config.toml"
+  chmod 600 "$STAGE_ROOT/desktop/config.toml" "$STAGE_ROOT/desktop/models.json"
+  desktop_original_exists=0
+  [[ -e "$DESKTOP_CONFIG_PATH" && ! -e "$DESKTOP_HASH_PATH" ]] && desktop_original_exists=1
+  if [[ -e "$DESKTOP_HASH_PATH" ]]; then
+    IFS=' ' read -r _ desktop_original_exists _ <"$DESKTOP_HASH_PATH"
+  fi
+  desktop_hash="$(/usr/bin/shasum -a 256 "$STAGE_ROOT/desktop/config.toml" | /usr/bin/awk '{print $1}')"
+  printf 'v1 %s %s\n' "$desktop_original_exists" "$desktop_hash" >"$STAGE_ROOT/desktop/state"
+  desktop_codex_bin="$(resolve_client_bin codex 0 158 0 || true)"
+  if [[ -z "$desktop_codex_bin" ]] || ! client_version_at_least "$desktop_codex_bin" 0 158 0; then
+    printf 'Для проверки Codex Desktop требуется Codex CLI 0.158.0 или новее.\n' >&2
+    exit 1
+  fi
+  mkdir -p "$STAGE_ROOT/desktop/validate"
+  /usr/bin/osascript -l JavaScript "$SCRIPT_DIR/desktop-config.js" \
+    "$STAGE_ROOT/desktop/original.toml" "$STAGE_ROOT/desktop/model.txt" \
+    "$STAGE_ROOT/desktop/models.json" "$STAGE_ROOT/bin/get-neuroapi-key.sh" \
+    "$STAGE_ROOT/desktop/validate/config.toml"
+  if ! CODEX_HOME="$STAGE_ROOT/desktop/validate" "$desktop_codex_bin" features list >/dev/null; then
+    printf 'Codex отклонил настройки Desktop. Существующий конфиг сохранён.\n' >&2
+    exit 1
+  fi
 fi
 
 ESCAPED_HELPER_PATH="$(toml_escape "$HELPER_PATH")"
@@ -249,6 +347,12 @@ PROMOTE_SOURCES=(
   "$STAGE_ROOT/keychain-marker"
   "$STAGE_ROOT/config/keychain-service"
 )
+if [[ "$DESKTOP_OPT_IN" == '1' ]]; then
+  # Save the preimage and scoped model catalog before exposing the new config.
+  PROMOTE_TARGETS+=("$DESKTOP_ORIGINAL_PATH" "$DESKTOP_CATALOG_PATH" "$DESKTOP_HASH_PATH" "$DESKTOP_CONFIG_PATH")
+  PROMOTE_SOURCES+=("$STAGE_ROOT/desktop/original.toml" "$STAGE_ROOT/desktop/models.json" \
+    "$STAGE_ROOT/desktop/state" "$STAGE_ROOT/desktop/config.toml")
+fi
 for ((i=0; i<${#PROMOTE_TARGETS[@]}; i++)); do
   if [[ -L "${PROMOTE_TARGETS[i]}" ]]; then
     printf 'Refusing to replace a symlink: %s\n' "${PROMOTE_TARGETS[i]}" >&2
@@ -264,14 +368,30 @@ done
 
 COMMIT_STARTED=1
 mkdir -p "$STATE_ROOT/bin" "$STATE_ROOT/config" "$PROFILE_CONFIG_ROOT" "$LAUNCHER_ROOT"
+if [[ "$DESKTOP_OPT_IN" == '1' ]]; then
+  mkdir -p "$DESKTOP_CONFIG_ROOT"
+fi
 for ((i=0; i<${#PROMOTE_TARGETS[@]}; i++)); do
   target="${PROMOTE_TARGETS[i]}"
+  if [[ "$DESKTOP_OPT_IN" == '1' && "$target" == "$DESKTOP_CONFIG_PATH" ]]; then
+    if [[ "$desktop_expected_exists" == '1' ]]; then
+      if [[ ! -f "$target" || -L "$target" ||
+        "$(/usr/bin/shasum -a 256 "$target" | /usr/bin/awk '{print $1}')" != "$desktop_expected_hash" ]]; then
+        printf 'Codex Desktop config changed during setup; existing settings were preserved.\n' >&2
+        exit 1
+      fi
+    elif [[ -e "$target" || -L "$target" ]]; then
+      printf 'Codex Desktop config appeared during setup; existing settings were preserved.\n' >&2
+      exit 1
+    fi
+  fi
   if is_test_mode && [[ "${NEUROAPI_AGENTS_TEST_FAIL_COMMIT_AT:-}" == "$(basename -- "$target")" ]]; then
     printf 'Simulated installer commit failure.\n' >&2
     exit 1
   fi
   cp -p -- "${PROMOTE_SOURCES[i]}" "$target.new.$$"
   mv -f -- "$target.new.$$" "$target"
+  PROMOTE_COUNT=$((i + 1))
 done
 CANDIDATE_OWNED=0
 if [[ "$PREVIOUS_SERVICE" != "$CANDIDATE_SERVICE" ]] &&

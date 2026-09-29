@@ -45,6 +45,12 @@ Codex 0.158.0 по умолчанию добавляет к каждому за�
 
 Project `.codex/config.toml` не подходит для provider/auth redirect: актуальный Codex игнорирует там `model_provider` и `model_providers` по соображениям безопасности.
 
+## Codex Desktop (по отдельному согласию)
+
+Установщик предлагает включить пользовательский Codex Desktop. В этом случае он сохраняет точную исходную копию `~/.codex/config.toml`, затем устанавливает в нём `model_provider = "neuroapi_agents"`, `model_catalog_json` с моделями, доступными введённому ключу, и подходящую модель по умолчанию. Провайдер использует `https://codex.neuroapi.host/v1`, Responses API, HTTP/SSE (`supports_websockets = false`) и тот же защищённый DPAPI/Keychain helper. Отдельный профиль CLI остаётся независимым.
+
+Если в исходном файле есть конфликтующий провайдер, необычная форма root-настроек, неверный TOML либо файл изменился во время установки, setup останавливается без перезаписи. Повторная установка сохраняет первоначальную копию. При удалении проверяется хеш конфигурации: если пользователь изменил файл после setup, uninstaller не удаляет helper и ключ, чтобы не сломать действующую настройку. После установки перезапустите Codex Desktop и проверьте новую локальную задачу; полная инструкция: [Codex Desktop](https://neuroapi.host/docs/codex-desktop).
+
 ## HTTP/SSE для диагностики
 
 Если соединение WebSocket блокируется вашей сетью, в секции `[model_providers.neuroapi]` созданного профиля замените `supports_websockets = true` на `supports_websockets = false`. Base URL остаётся `https://neuroapi.host/v1/codex`, auth helper и key storage не меняются. При повторном запуске setup управляемый профиль снова получит настройку по умолчанию `true`.
@@ -77,6 +83,7 @@ Project `.codex/config.toml` не подходит для provider/auth redirect
 - Claude settings: `%LOCALAPPDATA%\NeuroAPIAgents\config\claude-settings.json`;
 - launchers: `%LOCALAPPDATA%\NeuroAPIAgents\bin`;
 - Codex profile: `%USERPROFILE%\.codex\neuroapi-host.config.toml`.
+- Codex Desktop (опционально): `%USERPROFILE%\.codex\config.toml`, резервная копия и каталог в `%LOCALAPPDATA%\NeuroAPIAgents\config`.
 
 Setup добавляет только launcher directory в пользовательский `PATH`.
 
@@ -87,6 +94,7 @@ Setup добавляет только launcher directory в пользовате
 - Claude settings: `~/.local/share/neuroapi-agents/config/claude-settings.json`;
 - launchers: `~/.local/bin/codex-neuroapi`, `~/.local/bin/claude-neuroapi`;
 - Codex profile: `~/.codex/neuroapi-host.config.toml`;
+- Codex Desktop (опционально): `~/.codex/config.toml`, резервная копия и каталог в `~/.local/share/neuroapi-agents/config`;
 - Keychain service: `host.neuroapi.agents.api-key`.
 
 Setup не меняет `.zprofile`, `.zshrc`, `.bash_profile` или системный `PATH`.

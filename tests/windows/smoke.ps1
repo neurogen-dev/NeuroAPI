@@ -11,6 +11,20 @@ function Assert-True {
     }
 }
 
+function New-DesktopTestCatalog {
+    param([string]$Model)
+    return @{ models = @(@{
+        slug = $Model; display_name = 'Test model'; description = 'Description'; base_instructions = 'Instructions'
+        supported_in_api = $true; supports_reasoning_summary_parameter = $true; support_verbosity = $false
+        supports_parallel_tool_calls = $true; supports_search_tool = $false; use_responses_lite = $false
+        priority = 0; context_window = 128000; max_context_window = 128000; auto_compact_token_limit = 100000
+        effective_context_window_percent = 95; input_token_limit = 128000; output_token_limit = 16000
+        supported_reasoning_levels = @(@{ effort = 'medium'; description = 'Medium' }); shell_type = 'shell_command'; visibility = 'list'
+        model_messages = @{ instructions_template = 'Instructions' }; truncation_policy = @{ mode = 'tokens'; limit = 10000 }
+        experimental_supported_tools = @(); input_modalities = @('text')
+    }); default_model = $Model } | ConvertTo-Json -Depth 8 -Compress
+}
+
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $tempRoot = [System.IO.Path]::Combine(
     [System.IO.Path]::GetTempPath(),
@@ -156,6 +170,59 @@ try {
     Assert-True ($rotatedKey -ceq 'rotated-test-token') 'Successful retry did not install the replacement key.'
     $env:NEUROAPI_AGENTS_TEST_TOKEN = $null
 
+    $desktopCatalog = New-DesktopTestCatalog 'gpt-6-sol'
+    & "$repoRoot\scripts\windows\setup.ps1" `
+        -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate `
+        -EnableCodexDesktop -DesktopCatalogJson $desktopCatalog | Out-Null
+    $desktopConfigPath = Join-Path $codexHome 'config.toml'
+    $desktopStatePath = Join-Path $stateRoot 'config/codex-desktop-state.json'
+    $desktopCatalogPath = Join-Path $stateRoot 'config/codex-desktop-models.json'
+    Assert-True (Test-Path -LiteralPath $desktopConfigPath) 'Desktop config was not created.'
+    Assert-True (Test-Path -LiteralPath $desktopStatePath) 'Desktop ownership metadata is missing.'
+    Assert-True (Test-Path -LiteralPath $desktopCatalogPath) 'Desktop model catalog is missing.'
+    $desktopBefore = [IO.File]::ReadAllText($desktopConfigPath)
+    Assert-True ($desktopBefore -match '(?m)^model = "gpt-6-sol"$') 'Entitled default model was not selected.'
+    Assert-True ($desktopBefore -match 'https://codex.neuroapi.host/v1') 'Desktop URL is incorrect.'
+    Assert-True ($desktopBefore -notmatch 'test-neuroapi-token') 'Desktop config contains a plaintext key.'
+    & "$repoRoot\scripts\windows\setup.ps1" `
+        -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate `
+        -EnableCodexDesktop -DesktopCatalogJson $desktopCatalog | Out-Null
+    Assert-True ([IO.File]::ReadAllText($desktopConfigPath) -ceq $desktopBefore) 'Desktop rerun changed a stable config.'
+
+    $desktopKeyBefore = (Get-FileHash -LiteralPath $secretPath -Algorithm SHA256).Hash
+    $emptyCatalogRefused = $false
+    try {
+        & "$repoRoot\scripts\windows\setup.ps1" `
+            -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate `
+            -EnableCodexDesktop -DesktopCatalogJson '{}' | Out-Null
+    } catch { $emptyCatalogRefused = $true }
+    Assert-True $emptyCatalogRefused 'Desktop setup accepted a key with no usable model catalog.'
+    Assert-True ([IO.File]::ReadAllText($desktopConfigPath) -ceq $desktopBefore) 'Invalid catalog changed Desktop config.'
+    Assert-True ((Get-FileHash -LiteralPath $secretPath -Algorithm SHA256).Hash -ceq $desktopKeyBefore) 'Invalid catalog changed protected key.'
+    $env:NEUROAPI_AGENTS_TEST_TOKEN = 'attempted-rotation'
+    $env:NEUROAPI_AGENTS_TEST_FAIL_AFTER = 'config.toml'
+    $desktopFailed = $false
+    try {
+        & "$repoRoot\scripts\windows\setup.ps1" `
+            -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate `
+            -EnableCodexDesktop -DesktopCatalogJson $desktopCatalog | Out-Null
+    } catch { $desktopFailed = $_.Exception.Message -match 'Simulated setup transaction failure' }
+    Assert-True $desktopFailed 'Desktop rollback injection did not fail.'
+    Assert-True ([IO.File]::ReadAllText($desktopConfigPath) -ceq $desktopBefore) 'Desktop rollback changed config.'
+    Assert-True ((Get-FileHash -LiteralPath $secretPath -Algorithm SHA256).Hash -ceq $desktopKeyBefore) 'Desktop rollback changed protected key.'
+    $env:NEUROAPI_AGENTS_TEST_FAIL_AFTER = $null
+    $env:NEUROAPI_AGENTS_TEST_TOKEN = $null
+
+    [IO.File]::AppendAllText($desktopConfigPath, "`n# user edit`n")
+    $desktopUninstallRefused = $false
+    try {
+        & "$repoRoot\scripts\windows\uninstall.ps1" `
+            -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate | Out-Null
+    } catch { $desktopUninstallRefused = $_.Exception.Message -match 'changed after setup' }
+    Assert-True $desktopUninstallRefused 'Uninstall overwrote a later user edit.'
+    Assert-True (Test-Path -LiteralPath $secretPath) 'Uninstall removed the key while Desktop still depends on it.'
+    [IO.File]::WriteAllText($desktopConfigPath, $desktopBefore, (New-Object Text.UTF8Encoding($false)))
+
     & "$repoRoot\scripts\windows\uninstall.ps1" `
         -TestMode `
         -StateRoot $stateRoot `
@@ -165,6 +232,31 @@ try {
     Assert-True (-not (Test-Path -LiteralPath $stateRoot)) 'Installer state remains after uninstall.'
     Assert-True (-not (Test-Path -LiteralPath $profilePath)) 'Codex profile remains after uninstall.'
     Assert-True (Test-Path -LiteralPath $sentinel) 'Uninstall removed an unrelated file.'
+
+    $originalDesktop = "# existing user setup`nmodel = `"old-model`"`n[features]`nmulti_agent = true`n"
+    [IO.File]::WriteAllText($desktopConfigPath, $originalDesktop, (New-Object Text.UTF8Encoding($false)))
+    $fallbackCatalog = New-DesktopTestCatalog 'model-one'
+    & "$repoRoot\scripts\windows\setup.ps1" `
+        -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate `
+        -EnableCodexDesktop -DesktopCatalogJson $fallbackCatalog | Out-Null
+    $existingUpdated = [IO.File]::ReadAllText($desktopConfigPath)
+    Assert-True ($existingUpdated -match '(?m)^model = "model-one"$') 'An unavailable gpt-6-sol was selected.'
+    Assert-True ($existingUpdated -match '(?m)^multi_agent = true$') 'User feature was overwritten.'
+    & "$repoRoot\scripts\windows\uninstall.ps1" `
+        -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate | Out-Null
+    Assert-True ([IO.File]::ReadAllText($desktopConfigPath) -ceq $originalDesktop) 'Uninstall did not restore the user config.'
+
+    $conflict = "[model_providers.neuroapi_agents]`nname = `"Mine`"`n"
+    [IO.File]::WriteAllText($desktopConfigPath, $conflict, (New-Object Text.UTF8Encoding($false)))
+    $conflictRefused = $false
+    try {
+        & "$repoRoot\scripts\windows\setup.ps1" `
+            -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate `
+            -EnableCodexDesktop -DesktopCatalogJson $fallbackCatalog | Out-Null
+    } catch { $conflictRefused = $true }
+    Assert-True $conflictRefused 'Installer overwrote a user-owned provider.'
+    Assert-True ([IO.File]::ReadAllText($desktopConfigPath) -ceq $conflict) 'Provider conflict changed user config.'
+    Remove-Item -LiteralPath $desktopConfigPath -Force
 
     $unownedState = [System.IO.Path]::Combine($tempRoot, 'unowned-state')
     New-Item -ItemType Directory -Path $unownedState -Force | Out-Null

@@ -13,6 +13,11 @@ fi
 STATE_ROOT="$(state_root)"
 PROFILE_PATH="$(profile_path)"
 PROFILE_MARKER_PATH="$(profile_marker_path)"
+DESKTOP_CONFIG_ROOT="$(desktop_codex_home)"
+DESKTOP_CONFIG_PATH="$DESKTOP_CONFIG_ROOT/config.toml"
+DESKTOP_ORIGINAL_PATH="$STATE_ROOT/config/codex-desktop-original.toml"
+DESKTOP_HASH_PATH="$STATE_ROOT/config/codex-desktop-state"
+DESKTOP_CATALOG_PATH="$STATE_ROOT/config/codex-desktop-models.json"
 LAUNCHER_ROOT="$(launcher_root)"
 SECURITY_BIN="$(security_bin)"
 CURRENT_USER="$(current_user)"
@@ -39,6 +44,39 @@ fi
 
 if [[ -d "$STATE_ROOT" ]] && ! marker_is_owned "$(state_marker_path)"; then
   printf 'Refusing to remove an unowned directory: %s\n' "$STATE_ROOT" >&2
+  exit 1
+fi
+
+# Do this before deleting the helper or Keychain secret: a changed Desktop
+# config could still point at both and must remain usable for manual repair.
+if [[ -L "$DESKTOP_ORIGINAL_PATH" || -L "$DESKTOP_HASH_PATH" || -L "$DESKTOP_CATALOG_PATH" ]]; then
+  printf 'Codex Desktop ownership state uses a symlink; uninstall stopped without changing credentials.\n' >&2
+  exit 1
+fi
+if [[ -e "$DESKTOP_HASH_PATH" ]]; then
+  if [[ -L "$DESKTOP_CONFIG_ROOT" || -L "$DESKTOP_CONFIG_PATH" ]]; then
+    printf 'Codex Desktop config uses a symlink; uninstall stopped without changing credentials.\n' >&2
+    exit 1
+  fi
+  if [[ ! -f "$DESKTOP_ORIGINAL_PATH" || ! -f "$DESKTOP_CATALOG_PATH" || ! -f "$DESKTOP_CONFIG_PATH" ]]; then
+    printf 'Codex Desktop ownership state is incomplete; uninstall stopped.\n' >&2
+    exit 1
+  fi
+  IFS=' ' read -r desktop_state_version desktop_original_exists desktop_applied_hash <"$DESKTOP_HASH_PATH"
+  if [[ "$desktop_state_version" != 'v1' || ! "$desktop_original_exists" =~ ^[01]$ ||
+    ! "$desktop_applied_hash" =~ ^[a-f0-9]{64}$ ||
+    "$(/usr/bin/shasum -a 256 "$DESKTOP_CONFIG_PATH" | /usr/bin/awk '{print $1}')" != "$desktop_applied_hash" ]]; then
+    printf 'Codex Desktop config changed since setup. Restore the saved config manually or remove the NeuroAPI provider, then retry uninstall. Credentials were kept.\n' >&2
+    exit 1
+  fi
+  if [[ "$desktop_original_exists" == '1' ]]; then
+    cp -p -- "$DESKTOP_ORIGINAL_PATH" "$DESKTOP_CONFIG_PATH.new.$$"
+    mv -f -- "$DESKTOP_CONFIG_PATH.new.$$" "$DESKTOP_CONFIG_PATH"
+  else
+    rm -f -- "$DESKTOP_CONFIG_PATH"
+  fi
+elif [[ -e "$DESKTOP_ORIGINAL_PATH" || -e "$DESKTOP_CATALOG_PATH" ]]; then
+  printf 'Codex Desktop ownership state is incomplete; uninstall stopped.\n' >&2
   exit 1
 fi
 
