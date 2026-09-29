@@ -60,7 +60,7 @@ try {
     Assert-True (Test-Path -LiteralPath $helperPath) 'Credential helper was not installed.'
     Assert-True (Test-Path -LiteralPath $settingsPath) 'Claude settings were not created.'
     $profileBefore = Get-Content -LiteralPath $profilePath -Raw
-    Assert-True ($profileBefore -match '(?m)^base_url = "https://neuroapi.host/v1/codex"\r?$') 'Wrong Codex base URL.'
+    Assert-True ($profileBefore -match '(?m)^base_url = "https://codex.neuroapi.host/v1"\r?$') 'Wrong Codex base URL.'
     Assert-True ($profileBefore -match '(?m)^supports_websockets = true\r?$') 'Codex WebSocket support is missing.'
     Assert-True ($profileBefore -notmatch 'test-neuroapi-token|experimental_bearer_token|env_key|http_headers') 'Credential leaked into Codex configuration.'
     Assert-True ((Get-Content -LiteralPath $settingsPath -Raw) -notmatch 'test-neuroapi-token') 'Credential leaked into Claude configuration.'
@@ -89,7 +89,7 @@ try {
     Remove-Item -LiteralPath $privateSnapshot -Force
 
     $settings = Get-Content -LiteralPath $settingsPath -Raw | ConvertFrom-Json
-    Assert-True ($settings.env.ANTHROPIC_BASE_URL -ceq 'https://neuroapi.host/v1/claude-code') 'Wrong Claude base URL.'
+    Assert-True ($settings.env.ANTHROPIC_BASE_URL -ceq 'https://claude.neuroapi.host') 'Wrong Claude base URL.'
     Assert-True (-not ($settings.env.PSObject.Properties.Name -contains 'ANTHROPIC_MODEL')) 'A bundled model must not override fresh catalog defaults.'
     Assert-True ($profileBefore -notmatch '(?m)^model =') 'Codex default must come from the fresh catalog.'
     foreach ($launcherFile in @('common.ps1', 'managed-catalog.ps1', 'launch-neuroapi.ps1')) {

@@ -25,7 +25,7 @@ browser_use = false
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1/codex"
+base_url = "https://codex.neuroapi.host/v1"
 wire_api = "responses"
 supports_websockets = true
 
@@ -53,7 +53,7 @@ Project `.codex/config.toml` не подходит для provider/auth redirect
 
 ## HTTP/SSE для диагностики
 
-Если соединение WebSocket блокируется вашей сетью, в секции `[model_providers.neuroapi]` созданного профиля замените `supports_websockets = true` на `supports_websockets = false`. Base URL остаётся `https://neuroapi.host/v1/codex`, auth helper и key storage не меняются. При повторном запуске setup управляемый профиль снова получит настройку по умолчанию `true`.
+Если соединение WebSocket блокируется вашей сетью, в секции `[model_providers.neuroapi]` созданного профиля замените `supports_websockets = true` на `supports_websockets = false`. Base URL остаётся `https://codex.neuroapi.host/v1`, auth helper и key storage не меняются. При повторном запуске setup управляемый профиль снова получит настройку по умолчанию `true`.
 
 Если сервер ещё не предоставляет `/v1/codex`, не распространяйте эту версию установщика: сначала требуется согласованный серверный выпуск. Возврат к общему `/v1` не решает несовпадение формата каталога при command-backed auth.
 
@@ -66,7 +66,7 @@ Project `.codex/config.toml` не подходит для provider/auth redirect
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "apiKeyHelper": "/absolute/path/to/installer-owned-helper",
   "env": {
-    "ANTHROPIC_BASE_URL": "https://neuroapi.host/v1/claude-code"
+    "ANTHROPIC_BASE_URL": "https://claude.neuroapi.host"
   }
 }
 ```

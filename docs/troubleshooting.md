@@ -20,7 +20,7 @@ macOS: используйте полный путь `~/.local/bin/codex-neuroapi
 
 - profile `neuroapi-host`;
 - provider `neuroapi`;
-- base URL `https://neuroapi.host/v1/codex`;
+- base URL `https://codex.neuroapi.host/v1`;
 - `wire_api = "responses"`;
 - `supports_websockets = true` (или `false` для диагностики HTTP/SSE).
 - `web_search = "disabled"` и `[features]` с `multi_agent = false`, `goals = false`, `apps = false`, `browser_use = false`: без них Codex 0.158.0 может включить неподдерживаемые hosted/namespace-инструменты в обычный запрос к файлу и получить `effective_request_unsupported`.

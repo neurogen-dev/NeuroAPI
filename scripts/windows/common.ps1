@@ -265,9 +265,10 @@ function Assert-NeuroAPIKeyCatalogs {
             throw 'Неверный формат ключа NeuroAPI.'
         }
         foreach ($client in @('codex', 'claude')) {
-            $endpoint = if ($client -eq 'codex') { 'https://neuroapi.host/v1/codex/models' } else { 'https://neuroapi.host/v1/claude-code/client-settings' }
+            $endpoint = if ($client -eq 'codex') { 'https://codex.neuroapi.host/v1/models' } else { 'https://claude.neuroapi.host/client-settings' }
+            $allowedHost = if ($client -eq 'codex') { 'codex.neuroapi.host' } else { 'claude.neuroapi.host' }
             try {
-                $result = Get-NeuroAPIHTTPSContent -Url $endpoint -AllowedHosts @('neuroapi.host') -MaxBytes (2 * 1024 * 1024) -Bearer $credential -TimeoutSeconds 20
+                $result = Get-NeuroAPIHTTPSContent -Url $endpoint -AllowedHosts @($allowedHost) -MaxBytes (2 * 1024 * 1024) -Bearer $credential -TimeoutSeconds 20
             } catch {
                 throw 'Не удалось проверить ключ: каталог NeuroAPI временно недоступен. Попробуйте позже.'
             }

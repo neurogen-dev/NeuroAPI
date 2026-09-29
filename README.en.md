@@ -6,7 +6,7 @@ Public, auditable guided setup for routing local Codex CLI and Claude Code sessi
 
 ## Release compatibility
 
-This version configures `https://neuroapi.host/v1/codex` with `supports_websockets = true`, and `https://neuroapi.host/v1/claude-code` for Claude Code. The Codex profile disables hosted web search, multi-agent, goals, apps, and browser use because the current client includes these tools even in simple local tasks, while NeuroAPI does not guarantee their upstream execution. Local shell and file tools remain available. Setup checks both key-scoped catalogs without a paid generation. Verify HTTP/WebSocket Responses and Claude Messages/count_tokens after each server release.
+This version configures `https://codex.neuroapi.host/v1` with `supports_websockets = true`, and `https://claude.neuroapi.host` for Claude Code. The Codex profile disables hosted web search, multi-agent, goals, apps, and browser use because the current client includes these tools even in simple local tasks, while NeuroAPI does not guarantee their upstream execution. Local shell and file tools remain available. Setup checks both key-scoped catalogs without a paid generation. Verify HTTP/WebSocket Responses and Claude Messages/count_tokens after each server release.
 
 An existing `CODEX_HOME` selects the profile directory without being modified. Keep its value consistent for setup, launch and uninstall.
 
@@ -49,8 +49,8 @@ This prevents accidental plaintext disclosure. It does not protect a key from ma
 
 ## Verification
 
-- In `codex-neuroapi`, run `/debug-config` and confirm the `neuroapi-host` profile and `https://neuroapi.host/v1/codex`.
-- In `claude-neuroapi`, run `/status` and confirm `https://neuroapi.host/v1/claude-code` plus `apiKeyHelper`.
+- In `codex-neuroapi`, run `/debug-config` and confirm the `neuroapi-host` profile and `https://codex.neuroapi.host/v1`.
+- In `claude-neuroapi`, run `/status` and confirm `https://claude.neuroapi.host` plus `apiKeyHelper`.
 - For Codex Desktop, check a new local task, `https://codex.neuroapi.host/v1` in the user config, and the request in your NeuroAPI usage logs. Setup uses HTTP/SSE for this GUI integration.
 - Check current model IDs and pricing at [neuroapi.host/price](https://neuroapi.host/price).
 

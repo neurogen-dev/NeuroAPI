@@ -45,8 +45,8 @@ macOS:
 
 Setup и uninstall не вызывают NeuroAPI. Каждый launcher сначала получает актуальный каталог через HTTPS с сохранённым ключом: фиксированный адрес, запрет redirects, ограничение времени и размера ответа. Ключ остаётся в памяти/анонимных pipes, не передаётся в argv и не сохраняется в каталоге. Отражение ключа в ответе проверяется до записи, включая JSON escaping. Произвольные hooks, команды и настройки сервера не принимаются.
 
-- Codex custom provider: `https://neuroapi.host/v1/codex`;
-- Claude Code gateway: `https://neuroapi.host/v1/claude-code`.
+- Codex custom provider: `https://codex.neuroapi.host/v1`;
+- Claude Code gateway: `https://claude.neuroapi.host`.
 
 Проверенные данные записываются в приватный отдельный каталог на время одного запуска, затем удаляются. Параллельные запуски не делят изменяемый snapshot. Ошибка загрузки не включает старый каталог. Чужие provider/auth overrides нейтрализуются только в дочернем процессе и его локальных settings; настройки пользователя на диске не переписываются. Host-managed provider mode отклоняется, а не обходится.
 
