@@ -65,9 +65,9 @@ function New-NeuroAPICatalogClient {
 function Get-NeuroAPICatalogJson {
     param([ValidateSet('codex', 'claude')][string]$Client, [string]$SecretPath)
     $endpoint = if ($Client -eq 'codex') {
-        'https://neuroapi.host/v1/codex/models'
+        'https://codex.neuroapi.host/v1/models'
     } else {
-        'https://neuroapi.host/v1/claude-code/client-settings'
+        'https://claude.neuroapi.host/client-settings'
     }
     $http = $null; $request = $null; $response = $null; $stream = $null; $buffer = $null; $timeout = $null
     $credential = $null
@@ -255,7 +255,7 @@ function ConvertFrom-NeuroAPICatalog {
         }
         if (-not $seen.Contains($model)) { throw 'Default model hidden from picker' }
         $safeEnv = [ordered]@{
-            ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'
+            ANTHROPIC_BASE_URL = 'https://claude.neuroapi.host'
             ANTHROPIC_MODEL = $model
             CLAUDE_CODE_MAX_OUTPUT_TOKENS = '4096'
         }

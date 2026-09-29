@@ -140,7 +140,7 @@ foreach ($client in @('codex', 'claude')) {
     $wire = Get-NeuroAPICatalogJson $client 'unused-secret-path'
     Assert-Catalog ($wire -ceq $script:mockHttp.Body) 'Catalog response changed.'
     Assert-Catalog ($script:mockHttp.Authorization -ceq 'Bearer test-neuroapi-token') 'Authorization missing.'
-    $expected = if ($client -eq 'codex') { 'https://neuroapi.host/v1/codex/models' } else { 'https://neuroapi.host/v1/claude-code/client-settings' }
+    $expected = if ($client -eq 'codex') { 'https://codex.neuroapi.host/v1/models' } else { 'https://claude.neuroapi.host/client-settings' }
     Assert-Catalog ($script:mockHttp.Uri -ceq $expected) 'Wrong catalog endpoint.'
 }
 foreach ($status in @(301, 302, 401, 403, 429, 503)) {
@@ -240,7 +240,7 @@ try {
             Assert-Catalog ([string]::IsNullOrEmpty($env:ANTHROPIC_SMALL_FAST_MODEL)) 'Inherited fast model overrides catalog.'
             Assert-Catalog ([string]::IsNullOrEmpty($env:ANTHROPIC_DEFAULT_FABLE_MODEL)) 'Missing family inherited.'
             Assert-Catalog ($env:ANTHROPIC_DEFAULT_HAIKU_MODEL -ceq 'claude-haiku-4-5') 'Concrete family missing.'
-            Assert-Catalog ($env:ANTHROPIC_BASE_URL -ceq 'https://neuroapi.host/v1/claude-code') 'Claude endpoint missing.'
+            Assert-Catalog ($env:ANTHROPIC_BASE_URL -ceq 'https://claude.neuroapi.host') 'Claude endpoint missing.'
         }
         $script:NeuroAPIChildExitCode = 37
     }

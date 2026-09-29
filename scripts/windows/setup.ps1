@@ -194,7 +194,7 @@ browser_use = false
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1/codex"
+base_url = "https://codex.neuroapi.host/v1"
 wire_api = "responses"
 supports_websockets = true
 
@@ -213,7 +213,7 @@ refresh_interval_ms = 300000
         '$schema' = 'https://json.schemastore.org/claude-code-settings.json'
         apiKeyHelper = $helperCommand
         env = [ordered]@{
-            ANTHROPIC_BASE_URL = 'https://neuroapi.host/v1/claude-code'
+            ANTHROPIC_BASE_URL = 'https://claude.neuroapi.host'
         }
     } | ConvertTo-Json -Depth 5
     Write-Utf8NoBom -Path (Join-Path $stageRoot 'claude-settings.json') -Content $claudeSettings

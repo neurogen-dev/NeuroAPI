@@ -14,11 +14,11 @@ NeuroAPI — российский AI API-сервис: единый доступ
 
 ## Совместимость версии
 
-Эта версия создаёт профиль Codex с `https://neuroapi.host/v1/codex` и `supports_websockets = true`, а профиль Claude Code — с `https://neuroapi.host/v1/claude-code`. Codex-профиль отключает hosted web search, multi-agent, goals, apps и browser use: эти инструменты новейший клиент отправляет даже в простых задачах, а NeuroAPI пока не гарантирует их провайдерское исполнение. Локальные команды, чтение и редактирование файлов работают. Установщик проверяет доступ ключа к обоим каталогам без платной генерации. Генерацию через HTTP/WebSocket Responses и Claude Messages/count_tokens проверяйте после серверного релиза.
+Эта версия создаёт профиль Codex с `https://codex.neuroapi.host/v1` и `supports_websockets = true`, а профиль Claude Code — с `https://claude.neuroapi.host`. Codex-профиль отключает hosted web search, multi-agent, goals, apps и browser use: эти инструменты новейший клиент отправляет даже в простых задачах, а NeuroAPI пока не гарантирует их провайдерское исполнение. Локальные команды, чтение и редактирование файлов работают. Установщик проверяет доступ ключа к обоим каталогам без платной генерации. Генерацию через HTTP/WebSocket Responses и Claude Messages/count_tokens проверяйте после серверного релиза.
 
 Уже заданный `CODEX_HOME` учитывается для профиля и не изменяется; сохраняйте одинаковое значение при установке, запуске и удалении.
 
-Нужен актуальный Codex с отдельными profile-файлами: `codex --help` должен описывать `--profile` как загрузку `<name>.config.toml`. Старые версии с `[profiles.name]` в общем конфиге обновите перед установкой. Для диагностики WebSocket можно временно поставить `supports_websockets = false` в созданном профиле, сохранив `/v1/codex` и credential helper. Подробнее — [решение проблем](docs/troubleshooting.md).
+Нужен актуальный Codex с отдельными profile-файлами: `codex --help` должен описывать `--profile` как загрузку `<name>.config.toml`. Старые версии с `[profiles.name]` в общем конфиге обновите перед установкой. Для диагностики WebSocket можно временно поставить `supports_websockets = false` в созданном профиле, сохранив `https://codex.neuroapi.host/v1` и credential helper. Подробнее — [решение проблем](docs/troubleshooting.md).
 
 ## Установка в один запуск
 
@@ -74,7 +74,7 @@ bash setup-macos.command
 | Codex Desktop по согласию | пользовательский `config.toml`, DPAPI helper, каталог доступных моделей | пользовательский `config.toml`, Keychain helper, каталог доступных моделей |
 | Существующий `config.toml` | резервная копия и атомарное изменение только по согласию; конфликт останавливает установку | резервная копия и атомарное изменение только по согласию; конфликт останавливает установку |
 
-Установщик отправляет ключ только в NeuroAPI для проверки доступных моделей; платной генерации при настройке нет. При запуске `codex-neuroapi` или `claude-neuroapi` запускатель вновь получает актуальный каталог с `https://neuroapi.host`, затем клиент использует API при ваших запросах.
+Установщик отправляет ключ только в NeuroAPI для проверки доступных моделей; платной генерации при настройке нет. При запуске `codex-neuroapi` или `claude-neuroapi` запускатель вновь получает актуальный каталог с соответствующего субдомена NeuroAPI, затем клиент использует API при ваших запросах.
 
 ## Почему ключ не лежит в конфиге
 
@@ -111,13 +111,13 @@ Codex CLI:
 
 1. Запустите `codex-neuroapi`.
 2. Выполните `/debug-config`.
-3. Проверьте профиль `neuroapi-host`, provider `neuroapi` и `https://neuroapi.host/v1/codex`.
+3. Проверьте профиль `neuroapi-host`, provider `neuroapi` и `https://codex.neuroapi.host/v1`.
 
 Claude Code:
 
 1. Запустите `claude-neuroapi`.
 2. Выполните `/status`.
-3. Проверьте base URL `https://neuroapi.host/v1/claude-code` и credential source `apiKeyHelper`.
+3. Проверьте base URL `https://claude.neuroapi.host` и credential source `apiKeyHelper`.
 
 При каждом запуске launcher получает актуальный список для вашего обычного ключа NeuroAPI. Codex использует отдельный каталог, Claude Code — настроенное меню; фиксированных моделей в установщике нет. Проверенные минимумы: Codex 0.158.0 и Claude Code 2.1.284. Для Claude Code установщик задаёт начальный лимит вывода 4096 токенов, чтобы запросы с большим стандартным лимитом не резервировали избыточную квоту. При ошибке обновления или пустом списке запуск останавливается, не возвращаясь к старым моделям. Подробности и ограничения managed-политик: [ручная настройка](docs/manual-setup.md).
 

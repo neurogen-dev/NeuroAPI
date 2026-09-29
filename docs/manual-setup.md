@@ -25,7 +25,7 @@ browser_use = false
 
 [model_providers.neuroapi]
 name = "NeuroAPI"
-base_url = "https://neuroapi.host/v1/codex"
+base_url = "https://codex.neuroapi.host/v1"
 wire_api = "responses"
 supports_websockets = true
 
@@ -39,7 +39,7 @@ refresh_interval_ms = 300000
 
 Codex 0.158.0 по умолчанию добавляет к каждому запросу hosted `web_search` и namespace-инструмент для multi-agent, даже при локальном чтении файла. NeuroAPI не объявляет эти инструменты как поддерживаемые для Codex-профиля: они требуют отдельного провайдерского контракта и тарификации. Профиль отключает только эти возможности, а чтение, правка и запуск команд остаются доступны. Возвращать их вручную в профиле можно лишь после отдельной проверки поддержки сервером.
 
-Запуск: `codex-neuroapi`. Перед каждым запуском launcher получает `/v1/codex/models` с обычным ключом NeuroAPI, проверяет ответ и передаёт приватный файл через `model_catalog_json` вместе с доступной моделью по умолчанию. Файл удаляется после завершения клиента. Проверка: `/debug-config` и `/model`.
+Запуск: `codex-neuroapi`. Перед каждым запуском launcher получает `https://codex.neuroapi.host/v1/models` с обычным ключом NeuroAPI, проверяет ответ и передаёт приватный файл через `model_catalog_json` вместе с доступной моделью по умолчанию. Файл удаляется после завершения клиента. Проверка: `/debug-config` и `/model`.
 
 Прямой `codex --profile neuroapi-host` пропускает этот механизм: command-auth discovery может подмешать встроенные модели. При ручной настройке без launcher можно задать собственный проверенный `model_catalog_json`; поддерживать его актуальность тогда нужно самостоятельно.
 
@@ -53,20 +53,20 @@ Project `.codex/config.toml` не подходит для provider/auth redirect
 
 ## HTTP/SSE для диагностики
 
-Если соединение WebSocket блокируется вашей сетью, в секции `[model_providers.neuroapi]` созданного профиля замените `supports_websockets = true` на `supports_websockets = false`. Base URL остаётся `https://neuroapi.host/v1/codex`, auth helper и key storage не меняются. При повторном запуске setup управляемый профиль снова получит настройку по умолчанию `true`.
+Если соединение WebSocket блокируется вашей сетью, в секции `[model_providers.neuroapi]` созданного профиля замените `supports_websockets = true` на `supports_websockets = false`. Base URL остаётся `https://codex.neuroapi.host/v1`, auth helper и key storage не меняются. При повторном запуске setup управляемый профиль снова получит настройку по умолчанию `true`.
 
-Если сервер ещё не предоставляет `/v1/codex`, не распространяйте эту версию установщика: сначала требуется согласованный серверный выпуск. Возврат к общему `/v1` не решает несовпадение формата каталога при command-backed auth.
+Если сервер ещё не предоставляет `https://codex.neuroapi.host/v1/models` и `/v1/responses` на том же субдомене, не распространяйте эту версию установщика: сначала требуется согласованный серверный выпуск. Общий `/v1` возвращает другой формат каталога при command-backed auth.
 
 ## Claude Code
 
-Нужен Claude Code 2.1.284 или новее. Существующий `~/.claude/settings.json` не меняется. Launcher получает `/v1/claude-code/client-settings`, проверяет разрешённые поля данных, добавляет локальный `apiKeyHelper` и передаёт приватный JSON через `claude --settings <file>`.
+Нужен Claude Code 2.1.284 или новее. Существующий `~/.claude/settings.json` не меняется. Launcher получает `https://claude.neuroapi.host/client-settings`, проверяет разрешённые поля данных, добавляет локальный `apiKeyHelper` и передаёт приватный JSON через `claude --settings <file>`.
 
 ```json
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "apiKeyHelper": "/absolute/path/to/installer-owned-helper",
   "env": {
-    "ANTHROPIC_BASE_URL": "https://neuroapi.host/v1/claude-code"
+    "ANTHROPIC_BASE_URL": "https://claude.neuroapi.host"
   }
 }
 ```

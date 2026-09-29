@@ -62,21 +62,34 @@ if [[ -e "$DESKTOP_HASH_PATH" ]]; then
     printf 'Codex Desktop ownership state is incomplete; uninstall stopped.\n' >&2
     exit 1
   fi
-  IFS=' ' read -r desktop_state_version desktop_original_exists desktop_applied_hash <"$DESKTOP_HASH_PATH"
-  if [[ "$desktop_state_version" != 'v1' || ! "$desktop_original_exists" =~ ^[01]$ ||
+  IFS=' ' read -r desktop_state_version desktop_original_exists desktop_applied_hash desktop_original_hash <"$DESKTOP_HASH_PATH"
+  if [[ "$desktop_state_version" == 'v1' ]]; then
+    printf 'Codex Desktop backup predates integrity tracking. Re-run setup to upgrade it before uninstalling; credentials were kept.\n' >&2
+    exit 1
+  fi
+  if [[ "$desktop_state_version" != 'v2' || ! "$desktop_original_exists" =~ ^[01]$ ||
     ! "$desktop_applied_hash" =~ ^[a-f0-9]{64}$ ||
+    ! "$desktop_original_hash" =~ ^[a-f0-9]{64}$ ||
     "$(/usr/bin/shasum -a 256 "$DESKTOP_CONFIG_PATH" | /usr/bin/awk '{print $1}')" != "$desktop_applied_hash" ]]; then
     printf 'Codex Desktop config changed since setup. Restore the saved config manually or remove the NeuroAPI provider, then retry uninstall. Credentials were kept.\n' >&2
     exit 1
   fi
+  if [[ "$(/usr/bin/shasum -a 256 "$DESKTOP_ORIGINAL_PATH" | /usr/bin/awk '{print $1}')" != "$desktop_original_hash" ]]; then
+    printf 'Codex Desktop original backup changed since setup. Uninstall stopped; credentials were kept.\n' >&2
+    exit 1
+  fi
   if [[ "$desktop_original_exists" == '1' ]]; then
     cp -p -- "$DESKTOP_ORIGINAL_PATH" "$DESKTOP_CONFIG_PATH.new.$$"
+    cmp -s -- "$DESKTOP_ORIGINAL_PATH" "$DESKTOP_CONFIG_PATH.new.$$"
     mv -f -- "$DESKTOP_CONFIG_PATH.new.$$" "$DESKTOP_CONFIG_PATH"
   else
     rm -f -- "$DESKTOP_CONFIG_PATH"
   fi
 elif [[ -e "$DESKTOP_ORIGINAL_PATH" || -e "$DESKTOP_CATALOG_PATH" ]]; then
   printf 'Codex Desktop ownership state is incomplete; uninstall stopped.\n' >&2
+  exit 1
+elif [[ -f "$DESKTOP_CONFIG_PATH" ]] && /usr/bin/grep -Fq 'neuroapi_agents' "$DESKTOP_CONFIG_PATH"; then
+  printf 'Codex Desktop still references NeuroAPI but its ownership state is missing. Uninstall stopped; credentials were kept.\n' >&2
   exit 1
 fi
 

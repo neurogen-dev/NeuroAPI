@@ -16,7 +16,7 @@ assert profile["features"] == {
     "browser_use": False,
 }
 provider = profile["model_providers"]["neuroapi"]
-assert provider["base_url"] == "https://neuroapi.host/v1/codex"
+assert provider["base_url"] == "https://codex.neuroapi.host/v1"
 assert provider["wire_api"] == "responses"
 assert provider["supports_websockets"] is True
 assert set(provider) == {"name", "base_url", "wire_api", "supports_websockets", "auth"}

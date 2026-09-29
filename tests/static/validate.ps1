@@ -85,7 +85,7 @@ Assert-NotMatches $macSetup '\|\s*"\$SECURITY_BIN"\s+add-generic-password' `
     'macOS setup must not pipe a key into the Keychain command.'
 
 foreach ($setup in @($windowsSetup, $macSetup)) {
-    Assert-Contains $setup 'base_url = "https://neuroapi.host/v1/codex"' `
+    Assert-Contains $setup 'base_url = "https://codex.neuroapi.host/v1"' `
         'Codex must use the profile-specific API and catalog.'
     Assert-Contains $setup 'supports_websockets = true' `
         'Codex must enable the supported Responses WebSocket transport.'

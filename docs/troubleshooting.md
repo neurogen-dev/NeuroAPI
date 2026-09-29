@@ -20,7 +20,7 @@ macOS: используйте полный путь `~/.local/bin/codex-neuroapi
 
 - profile `neuroapi-host`;
 - provider `neuroapi`;
-- base URL `https://neuroapi.host/v1/codex`;
+- base URL `https://codex.neuroapi.host/v1`;
 - `wire_api = "responses"`;
 - `supports_websockets = true` (или `false` для диагностики HTTP/SSE).
 - `web_search = "disabled"` и `[features]` с `multi_agent = false`, `goals = false`, `apps = false`, `browser_use = false`: без них Codex 0.158.0 может включить неподдерживаемые hosted/namespace-инструменты в обычный запрос к файлу и получить `effective_request_unsupported`.
@@ -29,9 +29,9 @@ macOS: используйте полный путь `~/.local/bin/codex-neuroapi
 
 ## WebSocket не подключается
 
-В `[model_providers.neuroapi]` файла `neuroapi-host.config.toml` временно установите `supports_websockets = false`, оставив base URL `/v1/codex`. Перезапустите `codex-neuroapi` и проверьте короткий запрос по HTTP/SSE. Не переносите ключ в TOML и не меняйте helper. Повторная установка восстановит `true`.
+В `[model_providers.neuroapi]` файла `neuroapi-host.config.toml` временно установите `supports_websockets = false`, оставив base URL `https://codex.neuroapi.host/v1`. Перезапустите `codex-neuroapi` и проверьте короткий запрос по HTTP/SSE. Не переносите ключ в TOML и не меняйте helper. Повторная установка восстановит `true`.
 
-`404` на `/v1/codex/models` или `/v1/codex/responses` может означать, что серверное обновление ещё не опубликовано. Эта версия установщика должна распространяться только после проверки обоих адресов и WebSocket на сервере. Один fallback на HTTP не создаёт отсутствующий endpoint.
+`404` на `https://codex.neuroapi.host/v1/models` или `/v1/responses` этого же субдомена может означать, что серверное обновление ещё не опубликовано. Эта версия установщика должна распространяться только после проверки обоих адресов и WebSocket на сервере. Один fallback на HTTP не создаёт отсутствующий endpoint.
 
 ## Codex сообщает, что профиль не найден
 
@@ -55,7 +55,7 @@ macOS может показать системный запрос доступа
 
 ## Каталог не загружается или список пуст
 
-Проверьте ключ, соединение и ограничения моделей/тарифа. Для этой версии нужны `/v1/codex/models` и `/v1/claude-code/client-settings`; обновление установщика само по себе не создаёт их на сервере. Ответы `401`, `403`, redirects, слишком большой/неправильный JSON и пустой список не заменяются локальным старым каталогом. Серверное обновление должно быть выпущено до распространения установщика.
+Проверьте ключ, соединение и ограничения моделей/тарифа. Для этой версии нужны `https://codex.neuroapi.host/v1/models` и `https://claude.neuroapi.host/client-settings`; обновление установщика само по себе не создаёт их на сервере. Ответы `401`, `403`, redirects, слишком большой/неправильный JSON и пустой список не заменяются локальным старым каталогом. Серверное обновление должно быть выпущено до распространения установщика.
 
 ## В меню всё ещё есть другие модели
 

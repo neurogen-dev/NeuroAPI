@@ -48,7 +48,7 @@ assert '--location' not in args and '-L' not in args
 assert args[args.index('--max-time')+1] == '20'
 assert args[args.index('--max-filesize')+1] == '4194304'
 assert args[args.index('--proto')+1] == '=https'
-assert args[-1] in ['https://neuroapi.host/v1/codex/models', 'https://neuroapi.host/v1/claude-code/client-settings']
+assert args[-1] in ['https://codex.neuroapi.host/v1/models', 'https://claude.neuroapi.host/client-settings']
 pathlib.Path(os.environ['TEST_FETCH_MARKER']).write_text('fetch')
 if os.environ.get('TEST_FETCH_FAIL'):
     print('private upstream error')
@@ -76,7 +76,7 @@ if pathlib.Path(sys.argv[0]).name == 'codex':
 else:
     path = pathlib.Path(a[a.index('--settings') + 1])
     payload = json.loads(path.read_text())
-    assert payload['env']['ANTHROPIC_BASE_URL'] == 'https://neuroapi.host/v1/claude-code'
+    assert payload['env']['ANTHROPIC_BASE_URL'] == 'https://claude.neuroapi.host'
     assert payload['env']['CLAUDE_CODE_MAX_OUTPUT_TOKENS'] == '4096'
     assert 'apiKeyHelper' in payload and 'test-neuroapi-token' not in path.read_text()
     neutralized = ['ANTHROPIC_SMALL_FAST_MODEL', 'CLAUDE_CODE_SUBAGENT_MODEL', 'ANTHROPIC_DEFAULT_MODEL',

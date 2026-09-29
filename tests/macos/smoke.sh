@@ -156,8 +156,8 @@ config="$(cat)"
 [[ "$config" == *'Bearer '* ]] || exit 1
 [[ "$config" != *'bad-rotation'* ]] || exit 22
 case "${!#}" in
-  https://neuroapi.host/v1/codex/models) cat "$NEUROAPI_TEST_CODEX_CATALOG" ;;
-  https://neuroapi.host/v1/claude-code/client-settings) cat "$NEUROAPI_TEST_CLAUDE_CATALOG" ;;
+  https://codex.neuroapi.host/v1/models) cat "$NEUROAPI_TEST_CODEX_CATALOG" ;;
+  https://claude.neuroapi.host/client-settings) cat "$NEUROAPI_TEST_CLAUDE_CATALOG" ;;
   *) exit 1 ;;
 esac
 printf '\n200'
@@ -247,6 +247,28 @@ model = "gpt-6-astra"
 apps = false
 EOF
 cp "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" "$TMP_ROOT/desktop-original.toml"
+cp "$rotation_path" "$TMP_ROOT/desktop-pointer-before"
+if PATH="$MOCK_CLIENT_BIN:$PATH" TMPDIR="$TMP_ROOT" \
+  NEUROAPI_AGENTS_TEST_FAIL_COMMIT_AT=config.toml \
+  NEUROAPI_AGENTS_TEST_FAIL_ROLLBACK_AT=keychain-service \
+  /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
+  printf 'Injected rollback failure was ignored.\n' >&2
+  exit 1
+fi
+recovery_stage="$(find "$TMP_ROOT" -maxdepth 1 -type d -name 'neuroapi-agents-stage.*' -print -quit)"
+[[ -n "$recovery_stage" && -f "$recovery_stage/rollback/0" ]]
+grep -Fq 'rollback is incomplete' "$TMP_ROOT/desktop.err"
+grep -Fq "$recovery_stage" "$TMP_ROOT/desktop.err"
+candidate_service="$(<"$rotation_path")"
+[[ "$candidate_service" != "$(<"$TMP_ROOT/desktop-pointer-before")" ]]
+[[ -f "$MOCK_KEYCHAIN_STATE/$candidate_service" ]]
+[[ -f "$MOCK_KEYCHAIN_STATE/$(<"$TMP_ROOT/desktop-pointer-before")" ]]
+[[ "$("$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh")" == 'test-neuroapi-token' ]]
+cp "$TMP_ROOT/desktop-pointer-before" "$rotation_path"
+"$MOCK_SECURITY" delete-generic-password -a "$(/usr/bin/id -un)" -s "$candidate_service"
+rm -rf -- "$recovery_stage"
+cmp "$TMP_ROOT/desktop-original.toml" "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+
 if PATH="$MOCK_CLIENT_BIN:$PATH" NEUROAPI_AGENTS_TEST_FAIL_COMMIT_AT=config.toml \
   /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
   printf 'Injected Desktop commit failure was ignored.\n' >&2
@@ -272,6 +294,39 @@ cp "$desktop_config" "$TMP_ROOT/desktop-installed.toml"
 PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" \
   >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"
 cmp "$TMP_ROOT/desktop-installed.toml" "$desktop_config"
+desktop_state="$NEUROAPI_AGENTS_STATE_ROOT/config/codex-desktop-state"
+desktop_original_backup="$NEUROAPI_AGENTS_STATE_ROOT/config/codex-desktop-original.toml"
+grep -Eq '^v2 [01] [a-f0-9]{64} [a-f0-9]{64}$' "$desktop_state"
+cp "$desktop_original_backup" "$TMP_ROOT/desktop-backup-before"
+printf '\n# corrupted backup\n' >>"$desktop_original_backup"
+if /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
+  printf 'Uninstall accepted a corrupted Desktop backup.\n' >&2
+  exit 1
+fi
+[[ -f "$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh" ]]
+cmp "$TMP_ROOT/desktop-installed.toml" "$desktop_config"
+cp "$TMP_ROOT/desktop-backup-before" "$desktop_original_backup"
+IFS=' ' read -r _ desktop_original_exists desktop_applied_hash _ <"$desktop_state"
+printf 'v1 %s %s\n' "$desktop_original_exists" "$desktop_applied_hash" >"$desktop_state"
+if /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
+  printf 'Uninstall accepted an unverifiable v1 Desktop backup.\n' >&2
+  exit 1
+fi
+PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" \
+  >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"
+grep -Eq '^v2 [01] [a-f0-9]{64} [a-f0-9]{64}$' "$desktop_state"
+cmp "$TMP_ROOT/desktop-installed.toml" "$desktop_config"
+mv "$desktop_state" "$TMP_ROOT/missing-desktop-state"
+mv "$desktop_original_backup" "$TMP_ROOT/missing-desktop-backup"
+mv "$desktop_catalog" "$TMP_ROOT/missing-desktop-catalog"
+if /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
+  printf 'Uninstall deleted credentials for a config with missing ownership state.\n' >&2
+  exit 1
+fi
+[[ -f "$NEUROAPI_AGENTS_STATE_ROOT/bin/get-neuroapi-key.sh" ]]
+mv "$TMP_ROOT/missing-desktop-state" "$desktop_state"
+mv "$TMP_ROOT/missing-desktop-backup" "$desktop_original_backup"
+mv "$TMP_ROOT/missing-desktop-catalog" "$desktop_catalog"
 printf '\n# user changed this later\n' >>"$desktop_config"
 if /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >"$TMP_ROOT/desktop.out" 2>"$TMP_ROOT/desktop.err"; then
   printf 'Uninstall deleted credentials for a modified Desktop config.\n' >&2
