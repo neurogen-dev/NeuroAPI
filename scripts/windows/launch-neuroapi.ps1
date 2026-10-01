@@ -15,6 +15,9 @@ try {
     if ($_.Exception.Message -ceq 'Провайдер Claude Code управляется организацией. Используйте настройки организации; запуск NeuroAPI отменен.') {
         $message = $_.Exception.Message
     }
+    if ($_.Exception.Message -cin @('Идентификатор модели не подтверждён (model_identity_unverified). Возможно сопоставление имени; проверьте настройки модели.', 'Используйте --doctor или --doctor-generate без дополнительных параметров.', 'Генерация не подтверждена. Проверьте баланс и доступность модели; повтор автоматически не выполняется.')) {
+        $message = $_.Exception.Message
+    }
     if ($_.Exception.Message -match '^Обновите (codex|claude) до версии [0-9.]+ или новее\. Запуск отменен\.$') {
         $message = $_.Exception.Message
     }

@@ -45,16 +45,26 @@ assert auth == 'header = "Authorization: Bearer test-neuroapi-token"\\n'
 assert 'test-neuroapi-token' not in ' '.join(args)
 assert args[:3] == ['--disable', '--config', '-']
 assert '--location' not in args and '-L' not in args
-assert args[args.index('--max-time')+1] == '20'
+assert args[args.index('--max-time')+1] == ('180' if '--request' in args else '20')
 assert args[args.index('--max-filesize')+1] == '4194304'
 assert args[args.index('--proto')+1] == '=https'
-assert args[-1] in ['https://codex.neuroapi.host/v1/models', 'https://claude.neuroapi.host/client-settings']
+assert args[-1] in ['https://codex.neuroapi.host/v1/models', 'https://claude.neuroapi.host/client-settings', 'https://codex.neuroapi.host/v1/responses', 'https://claude.neuroapi.host/v1/messages']
+if args[-1].endswith('/client-settings'):
+    assert 'X-NeuroAPI-Client-Settings-Version: 2' in args
 pathlib.Path(os.environ['TEST_FETCH_MARKER']).write_text('fetch')
 if os.environ.get('TEST_FETCH_FAIL'):
     print('private upstream error')
     sys.exit(22)
-sys.stdout.write(pathlib.Path(os.environ['TEST_PAYLOAD']).read_text())
-sys.stdout.write('\\n' + os.environ.get('TEST_STATUS', '200'))
+if '--request' in args:
+    assert args[args.index('--request')+1] == 'POST'
+    payload = json.loads(pathlib.Path(args[args.index('--data-binary')+1][1:]).read_text())
+    assert 'test-neuroapi-token' not in json.dumps(payload)
+    assert payload.get('max_tokens', payload.get('max_output_tokens')) in (64, 256)
+    sys.stdout.write(pathlib.Path(os.environ['TEST_GENERATION_PAYLOAD']).read_text())
+    sys.stdout.write('\\n' + os.environ.get('TEST_GENERATION_STATUS', '200'))
+else:
+    sys.stdout.write(pathlib.Path(os.environ['TEST_PAYLOAD']).read_text())
+    sys.stdout.write('\\n' + os.environ.get('TEST_STATUS', '200'))
 ''')
     curl.chmod(0o700)
     # The subprocess mock interpreter uses an explicit test-only PATH entry.
@@ -77,7 +87,7 @@ else:
     path = pathlib.Path(a[a.index('--settings') + 1])
     payload = json.loads(path.read_text())
     assert payload['env']['ANTHROPIC_BASE_URL'] == 'https://claude.neuroapi.host'
-    assert payload['env']['CLAUDE_CODE_MAX_OUTPUT_TOKENS'] == '4096'
+    assert payload['env']['CLAUDE_CODE_MAX_OUTPUT_TOKENS'] == os.environ.get('TEST_EXPECT_OUTPUT', '4096')
     assert 'apiKeyHelper' in payload and 'test-neuroapi-token' not in path.read_text()
     neutralized = ['ANTHROPIC_SMALL_FAST_MODEL', 'CLAUDE_CODE_SUBAGENT_MODEL', 'ANTHROPIC_DEFAULT_MODEL',
                    'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_API_KEY', 'CLAUDE_CODE_OAUTH_TOKEN',
@@ -152,10 +162,49 @@ sys.exit(int(os.environ.get('TEST_CHILD_EXIT', '0')))
                               text=True, capture_output=True, timeout=30)
     assert verified.returncode == 0 and verified.stdout == 'Каталог codex проверен.\n', verified.stderr
     assert not list(verify_scratch.iterdir()), 'Verify left a private snapshot'
+    for client in ['codex', 'claude']:
+        verify_payload.write_text(json.dumps(catalog() if client == 'codex' else claude_catalog()))
+        doctor = subprocess.run([str(launchers / (client + '-neuroapi')), '--doctor'],
+                                env=dict(base_env, TMPDIR=str(verify_scratch), TEST_PAYLOAD=str(verify_payload),
+                                         TEST_FETCH_MARKER=str(root / 'doctor-fetch')),
+                                text=True, capture_output=True, timeout=30)
+        assert doctor.returncode == 0 and 'Генерация не выполнялась.' in doctor.stdout, doctor.stderr
+        assert 'Ключ: скрыт' in doctor.stdout and 'test-neuroapi-token' not in doctor.stdout + doctor.stderr
+        assert not list(verify_scratch.iterdir()), 'Doctor left private snapshot'
+    generation_fixture = root / 'doctor-generation.json'
+    for client, response in [
+        ('codex', {'model':'test-model', 'status':'completed', 'output':[{'type':'message','role':'assistant','content':[{'type':'output_text','text':'NEUROAPI_OK'}]}]}),
+        ('claude', {'model':'claude-opus-5-5', 'type':'message', 'role':'assistant', 'stop_reason':'end_turn', 'content':[{'type':'text','text':'NEUROAPI_OK'}]})
+    ]:
+        verify_payload.write_text(json.dumps(catalog() if client == 'codex' else claude_catalog()))
+        for invalidCase in ['valid', 'empty', 'missing_model', 'wrong_model', 'user_role']:
+            invalid = invalidCase != 'valid'
+            candidate = dict(response)
+            if invalidCase == 'empty': candidate = {'usage': {'input_tokens': 10}}
+            elif invalidCase == 'missing_model': candidate.pop('model')
+            elif invalidCase == 'wrong_model': candidate['model'] = 'unexpected-model'
+            elif invalidCase == 'user_role':
+                candidate = json.loads(json.dumps(response))
+                if client == 'claude': candidate['role'] = 'user'
+                else: candidate['output'][0]['role'] = 'user'
+            generation_fixture.write_text(json.dumps(candidate))
+            generated = subprocess.run([str(launchers / (client + '-neuroapi')), '--doctor-generate'],
+                                      env=dict(base_env, TMPDIR=str(verify_scratch), TEST_PAYLOAD=str(verify_payload),
+                                               TEST_FETCH_MARKER=str(root / 'doctor-fetch'), TEST_GENERATION_PAYLOAD=str(generation_fixture)),
+                                      text=True, capture_output=True, timeout=30)
+            assert (generated.returncode != 0) == invalid, generated.stderr
+            assert 'платный API-запрос' in generated.stdout
+            assert 'test-neuroapi-token' not in generated.stdout + generated.stderr
+            assert ('Ответ ассистента получен' in generated.stdout) != invalid
+            if invalidCase in ('missing_model', 'wrong_model'): assert 'model_identity_unverified' in generated.stderr
+            assert not list(verify_scratch.iterdir()), 'Doctor generation retained files'
+    assert not run(catalog(), success=False, user_args=['--doctor-bad'])
+    assert not run(catalog(), success=False, user_args=['--doctor', '--model', 'x'])
     second = run(catalog("changed-model"))
     assert second["payload"]["models"][0]["slug"] == "changed-model"
     assert first["path"] != second["path"]
     run(catalog(), user_args=['--model', 'explicit-user-model'])
+    run(catalog('model-with-newline' + chr(10)), success=False)
     run(claude_catalog(), client="claude")
     sonnet_background = claude_catalog()
     sonnet_background['availableModels'].append('claude-sonnet-5-5')
@@ -167,6 +216,23 @@ sys.exit(int(os.environ.get('TEST_CHILD_EXIT', '0')))
     default_background = claude_catalog()
     default_background['env']['ANTHROPIC_DEFAULT_HAIKU_MODEL'] = default_background['model']
     run(default_background, client="claude")
+    v2 = claude_catalog()
+    v2['env'].update(CLAUDE_CODE_AUTO_COMPACT_WINDOW='200000', CLAUDE_CODE_MAX_OUTPUT_TOKENS='32000', CLAUDE_CODE_GATEWAY_HINT_HEADERS='1')
+    upgraded = run(v2, client='claude', TEST_EXPECT_OUTPUT='32000')
+    assert upgraded['payload']['env']['CLAUDE_CODE_AUTO_COMPACT_WINDOW'] == '200000'
+    assert upgraded['payload']['env']['CLAUDE_CODE_GATEWAY_HINT_HEADERS'] == '1'
+    for key, invalid in [
+        ('CLAUDE_CODE_AUTO_COMPACT_WINDOW', '99999'), ('CLAUDE_CODE_AUTO_COMPACT_WINDOW', '1000001'),
+        ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', '0'), ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', '32001'),
+        ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', '01'), ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', '32_000'),
+        ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', '1e3'), ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', '32000' + chr(10)),
+        ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', 32000), ('CLAUDE_CODE_MAX_OUTPUT_TOKENS', None),
+        ('CLAUDE_CODE_GATEWAY_HINT_HEADERS', 'true'), ('CLAUDE_CODE_GATEWAY_HINT_HEADERS', 1),
+        ('CLAUDE_CODE_GATEWAY_HINT_HEADERS', '0'), ('CLAUDE_CODE_GATEWAY_HINT_HEADERS', '1;echo unsafe')
+    ]:
+        rejected = claude_catalog()
+        rejected['env'][key] = invalid
+        run(rejected, client='claude', success=False)
     security_log = Path(os.environ['NEUROAPI_AGENTS_SECURITY_LOG'])
     for host_managed in ['1', 'true', 'yes', 'on', ' TRUE ', '\tOn\n', ' YeS ', ' 1 ']:
         before = security_log.read_bytes()

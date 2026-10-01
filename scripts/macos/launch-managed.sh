@@ -16,8 +16,17 @@ case "$CLIENT" in
 esac
 
 VERIFY_ONLY=0
+DOCTOR=0
+DOCTOR_GENERATE=0
 EXPORT_CATALOG_ROOT=''
-if [[ "${1:-}" == '--verify' ]]; then
+if [[ "${1:-}" == '--doctor' || "${1:-}" == '--doctor-generate' ]]; then
+  DOCTOR=1
+  [[ "$1" != '--doctor-generate' ]] || DOCTOR_GENERATE=1
+  shift
+  [[ $# == 0 ]] || { printf 'Диагностика не принимает дополнительные параметры.\n' >&2; exit 1; }
+elif [[ "${1:-}" == --doctor* ]]; then
+  printf 'Используйте --doctor или --doctor-generate.\n' >&2; exit 1
+elif [[ "${1:-}" == '--verify' ]]; then
   VERIFY_ONLY=1
   shift
 elif [[ "${1:-}" == '--export-codex-catalog' && "$CLIENT" == 'codex' && -n "${2:-}" ]]; then
@@ -40,6 +49,10 @@ if ! CLIENT_BIN="$(resolve_client_bin "$CLIENT" "$MIN_MAJOR" "$MIN_MINOR" "$MIN_
 fi
 if ! client_version_at_least "$CLIENT_BIN" "$MIN_MAJOR" "$MIN_MINOR" "$MIN_PATCH"; then
   fail "Требуется $CLIENT версии $MIN_MAJOR.$MIN_MINOR.$MIN_PATCH или новее."
+fi
+
+if (( DOCTOR_GENERATE )); then
+  printf 'Проверка выполнит один короткий платный API-запрос с вашего баланса; повторов не будет (до 180 секунд).\n'
 fi
 
 SNAPSHOT="$(mktemp -d "${TMPDIR:-/tmp}/neuroapi-models.XXXXXX")"
@@ -80,16 +93,54 @@ if [[ ${#credential} -gt 4096 || ! "$credential" =~ ^[A-Za-z0-9._~-]+$ ]]; then
   unset credential
   fail 'Ключ NeuroAPI имеет неподдерживаемый формат. Повторите настройку.'
 fi
+CATALOG_HEADERS=(--header 'Accept: application/json')
+if [[ "$CLIENT" == 'claude' ]]; then
+  CATALOG_HEADERS+=(--header 'X-NeuroAPI-Client-Settings-Version: 2')
+fi
 if ! printf 'header = "Authorization: Bearer %s"\n' "$credential" |
   "$CURL_BIN" --disable --config - --silent --fail --proto '=https' \
     --proto-redir '=https' --max-redirs 0 --connect-timeout 5 --max-time 20 \
-    --max-filesize 4194304 --header 'Accept: application/json' \
+    --max-filesize 4194304 "${CATALOG_HEADERS[@]}" \
     --write-out '\n%{http_code}' "$ENDPOINT" 2>/dev/null |
   /usr/bin/osascript -l JavaScript "$SCRIPT_DIR/catalog-validator.js" \
     "$CLIENT" "$SNAPSHOT" "$SCRIPT_DIR/get-neuroapi-key.sh" \
     3< <(printf '%s' "$credential") >/dev/null 2>/dev/null; then
   unset credential
   fail 'Не удалось загрузить актуальные модели NeuroAPI. Проверьте доступ ключа и соединение; старый список не используется.'
+fi
+if (( DOCTOR )); then
+  IFS= read -r DEFAULT_MODEL <"$SNAPSHOT/model.txt"
+  printf 'Клиент %s: версия совместима. Ключ: скрыт; доступ к актуальному каталогу подтверждён.\n' "$CLIENT"
+  printf 'Адрес каталога: %s\nМодель по умолчанию: %s\n' "$ENDPOINT" "$DEFAULT_MODEL"
+  if (( DOCTOR_GENERATE )); then
+    if [[ "$CLIENT" == 'codex' ]]; then
+      GENERATION_ENDPOINT='https://codex.neuroapi.host/v1/responses'
+      printf '{"model":"%s","input":"Reply with NEUROAPI_OK only.","store":false,"max_output_tokens":256,"reasoning":{"effort":"low"}}' "$DEFAULT_MODEL" >"$SNAPSHOT/request.json"
+    else
+      GENERATION_ENDPOINT='https://claude.neuroapi.host/v1/messages'
+      printf '{"model":"%s","messages":[{"role":"user","content":"Reply with NEUROAPI_OK only."}],"max_tokens":64}' "$DEFAULT_MODEL" >"$SNAPSHOT/request.json"
+    fi
+    START_SECONDS=$SECONDS
+    if ! printf 'header = "Authorization: Bearer %s"\n' "$credential" |
+      "$CURL_BIN" --disable --config - --silent --fail --proto '=https' \
+        --max-redirs 0 --connect-timeout 5 --max-time 180 --max-filesize 4194304 \
+        --header 'Content-Type: application/json' --header 'anthropic-version: 2023-06-01' \
+        --request POST --data-binary "@$SNAPSHOT/request.json" --write-out '\n%{http_code}' "$GENERATION_ENDPOINT" 2>/dev/null |
+      /usr/bin/osascript -l JavaScript "$SCRIPT_DIR/catalog-validator.js" \
+        "doctor-$CLIENT" "$SNAPSHOT" "$SCRIPT_DIR/get-neuroapi-key.sh" \
+        3< <(printf '%s' "$credential") 2>/dev/null; then
+      unset credential
+      if [[ -f "$SNAPSHOT/doctor-error.txt" ]]; then
+        fail 'Идентификатор модели не подтверждён (model_identity_unverified). Возможно сопоставление имени; проверьте настройки модели.'
+      fi
+      fail 'Генерация не подтверждена. Проверьте баланс и доступность модели; повтор автоматически не выполняется.'
+    fi
+    printf 'Время API-запроса: %s секунд.\n' "$((SECONDS - START_SECONDS))"
+  else
+    printf 'Генерация не выполнялась. Для платной проверки ответа используйте --doctor-generate.\n'
+  fi
+  unset credential
+  exit 0
 fi
 unset credential
 

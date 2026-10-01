@@ -1,4 +1,4 @@
-# These deterministic tests run on PowerShell 5.1 (Windows) and pwsh (other OS).
+﻿# These deterministic tests run on PowerShell 5.1 (Windows) and pwsh (other OS).
 # Credential/network/process seams are mocked; no real keys or provider calls.
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -54,6 +54,25 @@ Assert-Catalog (-not $claude.env.Contains('UNSAFE_ENV')) 'Unreviewed environment
 Assert-Catalog (-not $claude.env.Contains('ANTHROPIC_DEFAULT_FABLE_MODEL')) 'Missing Fable was invented.'
 Assert-Catalog ($claude.availableModels.Count -eq 5 -and $claude.modelPicker.options.Count -eq 3) 'Compatibility aliases must remain available but hidden.'
 Assert-Catalog ($claude.fallbackModel.Count -eq 0) 'Inherited fallback was not disabled.'
+$v2 = New-TestClaudeCatalog | ConvertFrom-Json
+$v2.env | Add-Member -NotePropertyName CLAUDE_CODE_AUTO_COMPACT_WINDOW -NotePropertyValue '200000'
+$v2.env | Add-Member -NotePropertyName CLAUDE_CODE_MAX_OUTPUT_TOKENS -NotePropertyValue '32000'
+$v2.env | Add-Member -NotePropertyName CLAUDE_CODE_GATEWAY_HINT_HEADERS -NotePropertyValue '1'
+$upgraded = ConvertFrom-NeuroAPICatalog claude ($v2 | ConvertTo-Json -Depth 8 -Compress) 'local-helper'
+Assert-Catalog ($upgraded.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS -ceq '32000' -and $upgraded.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW -ceq '200000' -and $upgraded.env.CLAUDE_CODE_GATEWAY_HINT_HEADERS -ceq '1') 'Verified v2 limits were clamped or discarded.'
+foreach ($invalid in @(
+    @{Key='CLAUDE_CODE_AUTO_COMPACT_WINDOW';Value='99999'}, @{Key='CLAUDE_CODE_AUTO_COMPACT_WINDOW';Value='1000001'},
+    @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value='0'}, @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value='32001'},
+    @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value='01'}, @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value='32_000'},
+    @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value='1e3'}, @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value="32000`n"},
+    @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value=32000}, @{Key='CLAUDE_CODE_MAX_OUTPUT_TOKENS';Value=$null},
+    @{Key='CLAUDE_CODE_GATEWAY_HINT_HEADERS';Value='0'}, @{Key='CLAUDE_CODE_GATEWAY_HINT_HEADERS';Value='true'},
+    @{Key='CLAUDE_CODE_GATEWAY_HINT_HEADERS';Value=1}, @{Key='CLAUDE_CODE_GATEWAY_HINT_HEADERS';Value='1;echo unsafe'}
+)) {
+    $invalidCatalog = New-TestClaudeCatalog | ConvertFrom-Json
+    $invalidCatalog.env | Add-Member -NotePropertyName $invalid.Key -NotePropertyValue $invalid.Value
+    Assert-CatalogFailure { ConvertFrom-NeuroAPICatalog claude ($invalidCatalog | ConvertTo-Json -Depth 8 -Compress) 'local-helper' }
+}
 $sonnetBackground = New-TestClaudeCatalog | ConvertFrom-Json
 $sonnetBackground.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-sonnet-5'
 $sonnetSettings = ConvertFrom-NeuroAPICatalog claude ($sonnetBackground | ConvertTo-Json -Depth 8 -Compress) 'local-helper'
@@ -62,6 +81,7 @@ $opusBackground = New-TestClaudeCatalog | ConvertFrom-Json
 $opusBackground.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = 'claude-opus-5-5'
 $opusSettings = ConvertFrom-NeuroAPICatalog claude ($opusBackground | ConvertTo-Json -Depth 8 -Compress) 'local-helper'
 Assert-Catalog ($opusSettings.env.ANTHROPIC_DEFAULT_HAIKU_MODEL -ceq 'claude-opus-5-5') 'Recommended default background fallback was rejected.'
+Assert-CatalogFailure { ConvertFrom-NeuroAPICatalog codex (New-TestCodexCatalog "model-with-newline`n") '' }
 foreach ($bad in @('{', '{}', '{"models":[],"default_model":"model-one"}', '{"models":[{"slug":"model-one","display_name":"one"}],"default_model":"missing"}', '{"models":[{"slug":"bad model","display_name":"one"}],"default_model":"bad model"}')) {
     Assert-CatalogFailure { ConvertFrom-NeuroAPICatalog codex $bad '' }
 }
@@ -114,13 +134,19 @@ public sealed class NeuroAPITestHttpHandler : HttpMessageHandler {
     public string Body = "{}";
     public string Uri;
     public string Authorization;
+    public string SettingsVersion;
+    public string Method;
+    public string RequestBody;
     public bool Fail;
     public bool MisleadingLength;
     public int Calls;
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token) {
         Calls++;
         Uri = request.RequestUri.ToString();
+        Method = request.Method.Method;
+        RequestBody = request.Content == null ? "" : request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         Authorization = request.Headers.Authorization.ToString();
+        SettingsVersion = request.Headers.Contains("X-NeuroAPI-Client-Settings-Version") ? string.Join(",", request.Headers.GetValues("X-NeuroAPI-Client-Settings-Version")) : "";
         if (Fail) throw new HttpRequestException("private-provider-body test-neuroapi-token");
         var response = new HttpResponseMessage((HttpStatusCode)Status);
         response.Content = new StringContent(Body);
@@ -142,6 +168,8 @@ foreach ($client in @('codex', 'claude')) {
     Assert-Catalog ($script:mockHttp.Authorization -ceq 'Bearer test-neuroapi-token') 'Authorization missing.'
     $expected = if ($client -eq 'codex') { 'https://codex.neuroapi.host/v1/models' } else { 'https://claude.neuroapi.host/client-settings' }
     Assert-Catalog ($script:mockHttp.Uri -ceq $expected) 'Wrong catalog endpoint.'
+    $expectedVersion = if ($client -eq 'claude') { '2' } else { '' }
+    Assert-Catalog ($script:mockHttp.SettingsVersion -ceq $expectedVersion) 'Wrong settings version negotiation.'
 }
 foreach ($status in @(301, 302, 401, 403, 429, 503)) {
     $script:mockHttp = New-Object NeuroAPITestHttpHandler
@@ -164,6 +192,48 @@ foreach ($echoBody in @('{"display_name":"test-neuroapi-token"}', '{"display_nam
     $script:mockHttp = New-Object NeuroAPITestHttpHandler
     $script:mockHttp.Body = $echoBody
     Assert-CatalogFailure { Get-NeuroAPICatalogJson codex 'unused' }
+}
+foreach ($generationCase in @(
+    @{Client='codex';Body='{"model":"test-model","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"NEUROAPI_OK"}]}]}'},
+    @{Client='claude';Body='{"model":"test-model","type":"message","role":"assistant","stop_reason":"end_turn","content":[{"type":"text","text":"NEUROAPI_OK"}]}'}
+)) {
+    $script:mockHttp = New-Object NeuroAPITestHttpHandler
+    $script:mockHttp.Body = $generationCase.Body
+    Invoke-NeuroAPIDoctorGeneration $generationCase.Client 'test-model' 'unused'
+    Assert-Catalog ($script:mockHttp.Calls -eq 1 -and $script:mockHttp.Method -ceq 'POST') 'Doctor retried generation or did not POST.'
+    $request = $script:mockHttp.RequestBody | ConvertFrom-Json
+    Assert-Catalog ($script:mockHttp.RequestBody -notmatch 'test-neuroapi-token') 'Generation body contains credential.'
+    $expectedGeneration = if ($generationCase.Client -eq 'codex') { 'https://codex.neuroapi.host/v1/responses' } else { 'https://claude.neuroapi.host/v1/messages' }
+    Assert-Catalog ($script:mockHttp.Uri -ceq $expectedGeneration) 'Wrong generation endpoint.'
+    if ($generationCase.Client -eq 'codex') { Assert-Catalog ($request.max_output_tokens -eq 256 -and -not $request.store) 'Unbounded or stateful doctor request.' }
+    else { Assert-Catalog ($request.max_tokens -eq 64) 'Unbounded Claude doctor request.' }
+}
+foreach ($badGeneration in @('{}', '{"usage":{"input_tokens":10}}', '{"model":"test-model","status":"completed","output":[]}', '{"model":"unexpected-model","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"OK"}]}]}', '{"status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"OK"}]}]}', '{"model":"test-model","status":"incomplete","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"hello"}]}]}', '{"model":"test-model","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"test-neuroapi-token"}]}]}', '{"model":"test-model","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"\u0074est-neuroapi-token"}]}]}', '{"model":"test-model","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"   "}]}]}')) {
+    $script:mockHttp = New-Object NeuroAPITestHttpHandler
+    $script:mockHttp.Body = $badGeneration
+    Assert-CatalogFailure { Invoke-NeuroAPIDoctorGeneration codex 'test-model' 'unused' }
+    Assert-Catalog ($script:mockHttp.Calls -eq 1) 'Doctor retried failed generation.'
+}
+foreach ($status in @(302,401,403,429,503)) {
+    $script:mockHttp = New-Object NeuroAPITestHttpHandler
+    $script:mockHttp.Status = $status
+    $script:mockHttp.Body = 'private-provider-body test-neuroapi-token'
+    Assert-CatalogFailure { Invoke-NeuroAPIDoctorGeneration claude 'test-model' 'unused' }
+    Assert-Catalog ($script:mockHttp.Calls -eq 1) 'Doctor followed redirect or retried.'
+}
+foreach ($roleCase in @(
+    @{Client='codex';Body='{"model":"test-model","status":"completed","output":[{"type":"message","role":"user","content":[{"type":"output_text","text":"OK"}]}]}'},
+    @{Client='claude';Body='{"model":"test-model","type":"message","role":"user","stop_reason":"end_turn","content":[{"type":"text","text":"OK"}]}'}
+)) {
+    $script:mockHttp = New-Object NeuroAPITestHttpHandler
+    $script:mockHttp.Body = $roleCase.Body
+    Assert-CatalogFailure { Invoke-NeuroAPIDoctorGeneration $roleCase.Client 'test-model' 'unused' }
+}
+foreach ($identity in @($null, 'unexpected-model')) {
+    $script:mockHttp = New-Object NeuroAPITestHttpHandler
+    $script:mockHttp.Body = @{ model=$identity; status='completed'; output=@(@{ type='message'; role='assistant'; content=@(@{type='output_text';text='OK'})})} | ConvertTo-Json -Depth 8 -Compress
+    try { Invoke-NeuroAPIDoctorGeneration codex 'test-model' 'unused'; throw 'Expected identity failure' }
+    catch { Assert-Catalog ($_.Exception.Message -match 'model_identity_unverified') 'Identity failure was misreported as network error.' }
 }
 # Ensure the actual factory (not the mocked handler) disables redirects/cookies.
 $factorySource = $originalClientFactory.ToString()
@@ -252,6 +322,13 @@ try {
     }
     Assert-Catalog ($script:fetchCount -eq 2 -and $script:childCount -eq 2) 'Every launch must refresh.'
     Assert-Catalog ($script:snapshots[0] -cne $script:snapshots[1]) 'Concurrent launches share a mutable snapshot.'
+    $beforeDoctorChildren = $script:childCount
+    Invoke-NeuroAPIManagedClient codex $tempRoot @('--doctor')
+    Assert-Catalog ($script:childCount -eq $beforeDoctorChildren -and $script:NeuroAPIChildExitCode -eq 0) 'Doctor launched a client or failed.'
+    $beforeInvalidDoctor = $script:fetchCount
+    Assert-CatalogFailure { Invoke-NeuroAPIManagedClient codex $tempRoot @('--doctor-bad') }
+    Assert-CatalogFailure { Invoke-NeuroAPIManagedClient codex $tempRoot @('--doctor', '--model', 'x') }
+    Assert-Catalog ($script:fetchCount -eq $beforeInvalidDoctor) 'Invalid doctor flags reached credentials or network.'
     $script:catalogJson = '{invalid}'
     Assert-CatalogFailure { Invoke-NeuroAPIManagedClient codex $tempRoot @() }
     Assert-Catalog ($script:childCount -eq 2) 'Malformed catalog launched child.'
