@@ -79,6 +79,7 @@ function Get-NeuroAPICatalogJson {
         $credential = Read-NeuroAPIProtectedCredential -SecretPath $SecretPath
         $request.Headers.Authorization = New-Object Net.Http.Headers.AuthenticationHeaderValue('Bearer', $credential)
         $request.Headers.Accept.ParseAdd('application/json')
+        if ($Client -eq 'claude') { $request.Headers.Add('X-NeuroAPI-Client-Settings-Version', '2') }
         $response = $http.SendAsync($request, [Net.Http.HttpCompletionOption]::ResponseHeadersRead, $timeout.Token).GetAwaiter().GetResult()
         if ([int]$response.StatusCode -ne 200) { throw 'Catalog unavailable' }
         $limit = 2 * 1024 * 1024
@@ -113,7 +114,7 @@ function Get-NeuroAPICatalogJson {
 
 function Test-NeuroAPIModelId {
     param($Value)
-    return ($Value -is [string] -and $Value -cmatch '^[A-Za-z0-9][A-Za-z0-9._:/\-]{0,255}$')
+    return ($Value -is [string] -and $Value -cmatch '^[A-Za-z0-9][A-Za-z0-9._:/\-]{0,255}\z')
 }
 
 function Get-NeuroAPIProperty {
@@ -261,7 +262,21 @@ function ConvertFrom-NeuroAPICatalog {
         }
         foreach ($name in (Get-NeuroAPIClaudeEnvironmentOverrides)) { $safeEnv[$name] = '' }
         $environment = Get-NeuroAPIProperty $data 'env'
-        Assert-NeuroAPIKeys $environment @('ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_FABLE_MODEL')
+        Assert-NeuroAPIKeys $environment @('ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_FABLE_MODEL', 'CLAUDE_CODE_AUTO_COMPACT_WINDOW', 'CLAUDE_CODE_MAX_OUTPUT_TOKENS', 'CLAUDE_CODE_GATEWAY_HINT_HEADERS')
+        foreach ($key in @('CLAUDE_CODE_AUTO_COMPACT_WINDOW', 'CLAUDE_CODE_MAX_OUTPUT_TOKENS', 'CLAUDE_CODE_GATEWAY_HINT_HEADERS')) {
+            $value = Get-NeuroAPIProperty $environment $key
+            if ($null -ne $environment.PSObject.Properties[$key]) {
+                if ($key -eq 'CLAUDE_CODE_GATEWAY_HINT_HEADERS') {
+                    if ($value -isnot [string] -or $value -cne '1') { throw 'Invalid gateway hints' }
+                } else {
+                    if ($value -isnot [string] -or $value -cnotmatch '^[1-9][0-9]{0,6}\z') { throw 'Invalid model limit' }
+                    $minimum = if ($key -eq 'CLAUDE_CODE_AUTO_COMPACT_WINDOW') { 100000 } else { 1 }
+                    $maximum = if ($key -eq 'CLAUDE_CODE_AUTO_COMPACT_WINDOW') { 1000000 } else { 32000 }
+                    if (-not (Test-NeuroAPIInteger ([long]$value) $minimum $maximum)) { throw 'Invalid model limit' }
+                }
+                $safeEnv[$key] = $value
+            }
+        }
         foreach ($family in @('SONNET', 'OPUS', 'HAIKU', 'FABLE')) {
             $key = 'ANTHROPIC_DEFAULT_' + $family + '_MODEL'
             $value = Get-NeuroAPIProperty $environment $key
@@ -331,13 +346,32 @@ function Invoke-NeuroAPIManagedClient {
     if ($Client -eq 'claude' -and ([string]$env:CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST).Trim() -match '^(1|true|yes|on)$') {
         throw 'Провайдер Claude Code управляется организацией. Используйте настройки организации; запуск NeuroAPI отменен.'
     }
+    $doctor = $ClientArguments.Count -gt 0 -and $ClientArguments[0] -cin @('--doctor', '--doctor-generate')
+    $doctorGenerate = $doctor -and $ClientArguments[0] -ceq '--doctor-generate'
+    if ($ClientArguments.Count -gt 0 -and $ClientArguments[0] -clike '--doctor*') {
+        if (-not $doctor -or $ClientArguments.Count -ne 1) { throw 'Используйте --doctor или --doctor-generate без дополнительных параметров.' }
+    }
     $command = Get-NeuroAPIClientCommand $Client
     Assert-NeuroAPIClientVersion -Client $Client -Command $command
     $secretPath = Join-Path $StateRoot 'secret/api-key.dpapi'
     $helperPath = Join-Path $StateRoot 'bin/get-neuroapi-key.ps1'
     $helperCommand = 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + $helperPath + '" -SecretPath "' + $secretPath + '"'
+    if ($doctorGenerate) { Write-Host 'Проверка выполнит один короткий платный API-запрос с вашего баланса; повторов не будет (до 180 секунд).' }
     $json = Get-NeuroAPICatalogJson -Client $Client -SecretPath $secretPath
     $catalog = ConvertFrom-NeuroAPICatalog -Client $Client -Json $json -HelperCommand $helperCommand
+    if ($doctor) {
+        $defaultModel = if ($Client -eq 'codex') { $catalog.DefaultModel } else { $catalog.model }
+        $endpoint = if ($Client -eq 'codex') { 'https://codex.neuroapi.host/v1' } else { 'https://claude.neuroapi.host' }
+        Write-Host "Клиент ${Client}: версия совместима. Ключ: скрыт; доступ к актуальному каталогу подтверждён."
+        Write-Host "Адрес API: $endpoint`nМодель по умолчанию: $defaultModel"
+        if ($doctorGenerate) {
+            Invoke-NeuroAPIDoctorGeneration -Client $Client -Model $defaultModel -SecretPath $secretPath
+        } else {
+            Write-Host 'Генерация не выполнялась. Для платной проверки ответа используйте --doctor-generate.'
+        }
+        $script:NeuroAPIChildExitCode = 0
+        return
+    }
     $launchRoot = $null
     $savedEnvironment = @{}
     try {
@@ -370,5 +404,79 @@ function Invoke-NeuroAPIManagedClient {
     } finally {
         foreach ($name in $savedEnvironment.Keys) { [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name], 'Process') }
         if ($null -ne $launchRoot -and (Test-Path -LiteralPath $launchRoot)) { Remove-Item -LiteralPath $launchRoot -Recurse -Force }
+    }
+}
+
+function Invoke-NeuroAPIDoctorGeneration {
+    param([ValidateSet('codex', 'claude')][string]$Client, [string]$Model, [string]$SecretPath)
+    if (-not (Test-NeuroAPIModelId $Model)) { throw 'Некорректная модель диагностики.' }
+    $endpoint = if ($Client -eq 'codex') { 'https://codex.neuroapi.host/v1/responses' } else { 'https://claude.neuroapi.host/v1/messages' }
+    $body = if ($Client -eq 'codex') {
+        @{ model = $Model; input = 'Reply with NEUROAPI_OK only.'; store = $false; max_output_tokens = 256; reasoning = @{ effort = 'low' } }
+    } else {
+        @{ model = $Model; messages = @(@{ role = 'user'; content = 'Reply with NEUROAPI_OK only.' }); max_tokens = 64 }
+    }
+    $http = $null; $request = $null; $response = $null; $stream = $null; $buffer = $null; $timeout = $null
+    $credential = $null
+    $clock = [Diagnostics.Stopwatch]::StartNew()
+    try {
+        $http = New-NeuroAPICatalogClient
+        $http.Timeout = [TimeSpan]::FromSeconds(180)
+        $timeout = New-Object Threading.CancellationTokenSource
+        $timeout.CancelAfter(180000)
+        $request = New-Object Net.Http.HttpRequestMessage([Net.Http.HttpMethod]::Post, $endpoint)
+        $credential = Read-NeuroAPIProtectedCredential -SecretPath $SecretPath
+        $request.Headers.Authorization = New-Object Net.Http.Headers.AuthenticationHeaderValue('Bearer', $credential)
+        $request.Headers.Add('anthropic-version', '2023-06-01')
+        $request.Content = New-Object Net.Http.StringContent(($body | ConvertTo-Json -Depth 8 -Compress), [Text.Encoding]::UTF8, 'application/json')
+        $response = $http.SendAsync($request, [Net.Http.HttpCompletionOption]::ResponseHeadersRead, $timeout.Token).GetAwaiter().GetResult()
+        if ([int]$response.StatusCode -ne 200) { throw 'Generation unavailable' }
+        $limit = 2 * 1024 * 1024
+        if ($null -ne $response.Content.Headers.ContentLength -and $response.Content.Headers.ContentLength -gt $limit) { throw 'Response too large' }
+        $stream = $response.Content.ReadAsStreamAsync().GetAwaiter().GetResult()
+        $buffer = New-Object IO.MemoryStream
+        $chunk = New-Object byte[] 8192
+        while ($true) {
+            $read = $stream.ReadAsync($chunk, 0, $chunk.Length, $timeout.Token).GetAwaiter().GetResult()
+            if ($read -eq 0) { break }
+            if ($buffer.Length + $read -gt $limit) { throw 'Response too large' }
+            $buffer.Write($chunk, 0, $read)
+        }
+        $utf8 = New-Object Text.UTF8Encoding($false, $true)
+        $json = $utf8.GetString($buffer.ToArray())
+        if ($json.IndexOf($credential, [StringComparison]::Ordinal) -ge 0) { throw 'Credential reflected' }
+        $data = $json | ConvertFrom-Json -ErrorAction Stop
+        Assert-NeuroAPINoCredential -Value $data -Credential $credential -Depth 0
+        if ($data -isnot [pscustomobject] -or $null -ne (Get-NeuroAPIProperty $data 'error')) { throw 'Invalid generation' }
+        if ((Get-NeuroAPIProperty $data 'model') -cne $Model) { throw 'model_identity_unverified' }
+        $blocks = @()
+        if ($Client -eq 'codex') {
+            if ((Get-NeuroAPIProperty $data 'status') -cne 'completed' -or (Get-NeuroAPIProperty $data 'output') -isnot [array]) { throw 'Incomplete generation' }
+            foreach ($item in $data.output) {
+                if ((Get-NeuroAPIProperty $item 'type') -ceq 'message' -and (Get-NeuroAPIProperty $item 'role') -ceq 'assistant' -and (Get-NeuroAPIProperty $item 'content') -is [array]) { $blocks += @($item.content) }
+            }
+        } else {
+            if ((Get-NeuroAPIProperty $data 'type') -cne 'message' -or (Get-NeuroAPIProperty $data 'role') -cne 'assistant' -or (Get-NeuroAPIProperty $data 'stop_reason') -cne 'end_turn' -or (Get-NeuroAPIProperty $data 'content') -isnot [array]) { throw 'Incomplete generation' }
+            $blocks = @($data.content)
+        }
+        $textType = if ($Client -eq 'codex') { 'output_text' } else { 'text' }
+        $textBlocks = @($blocks | Where-Object {
+            (Get-NeuroAPIProperty $_ 'type') -ceq $textType -and
+            (Get-NeuroAPIProperty $_ 'text') -is [string] -and -not [string]::IsNullOrWhiteSpace($_.text)
+        })
+        if ($textBlocks.Count -eq 0) { throw 'Empty generation' }
+        Write-Host 'Ответ ассистента получен по HTTP; заявленное имя модели совпадает. Эта проверка не проверяет WebSocket или инструменты клиента.'
+        Write-Host ('Время API-запроса: {0:N1} секунд.' -f $clock.Elapsed.TotalSeconds)
+    } catch {
+        if ($_.Exception.Message -ceq 'model_identity_unverified') {
+            throw 'Идентификатор модели не подтверждён (model_identity_unverified). Возможно сопоставление имени; проверьте настройки модели.'
+        }
+        throw 'Генерация не подтверждена. Проверьте баланс и доступность модели; повтор автоматически не выполняется.'
+    } finally {
+        $clock.Stop()
+        $credential = $null
+        foreach ($resource in @($buffer, $stream, $response, $request, $timeout, $http)) {
+            if ($null -ne $resource) { $resource.Dispose() }
+        }
     }
 }

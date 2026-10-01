@@ -58,7 +58,7 @@ This prevents accidental plaintext disclosure. It does not protect a key from ma
 - For Codex Desktop, check a new local task, `https://codex.neuroapi.host/v1` in the user config, and the request in your NeuroAPI usage logs. Setup uses HTTP/SSE for this GUI integration.
 - Check current model IDs and pricing at [neuroapi.host/price](https://neuroapi.host/price).
 
-Each launcher fetches a fresh catalog scoped to the ordinary NeuroAPI key. Codex uses a private `model_catalog_json`; Claude receives a configured picker. There are no hardcoded default models. Tested minimum versions are Codex 0.158.0 and Claude Code 2.1.284. The Claude launcher limits initial output to 4096 tokens to bound quota reservation. Invalid, empty or unavailable catalogs stop launch instead of restoring stale lists. Organization policies and deliberate CLI overrides retain their documented precedence; these launchers do not support host-managed provider mode.
+Each launcher fetches a fresh catalog scoped to the ordinary NeuroAPI key. Codex uses a private `model_catalog_json`; Claude receives a configured picker. There are no hardcoded default models. Tested minimum versions are Codex 0.158.0 and Claude Code 2.1.284. The Claude launcher requests v2 settings and accepts strictly validated context/output limits and gateway hint headers. Older servers retain the 4096-token output fallback; output limits are independent of financial reservation estimates. Invalid, empty or unavailable catalogs stop launch instead of restoring stale lists. Organization policies and deliberate CLI overrides retain their documented precedence; these launchers do not support host-managed provider mode.
 
 Recommended server selection: GPT-6 Sol, Astra and Luna for Codex; **Opus 5.5** (`claude-opus-5-5`, preferred), Sonnet 5.5, Sonnet 5 and Fable 5.1 for Claude Code. An entry appears only when its published model, tariff and compatible upstream route are available to the key. Existing administrator catalog settings override source defaults.
 
@@ -76,3 +76,12 @@ Claude Code also uses the `haiku` alias for background work. If no recommended H
 - [Codex Desktop guide](https://neuroapi.host/docs/codex-desktop)
 - [Claude Desktop guide](https://neuroapi.host/docs/claude-desktop)
 - [NeuroAPI documentation](https://neuroapi.host/docs/getting-started)
+
+## Connection diagnostics
+
+Run `codex-neuroapi --doctor` or `claude-neuroapi --doctor` to validate the client version
+and protected key's access to the current model catalog. The key is not printed and no
+paid generation occurs. `--doctor-generate` explicitly requests one small **billable** HTTP
+generation and measures its duration, without retries. It validates a completed nonempty
+answer; it does not prove WebSocket, client tools, GUI sessions or deliberate overrides.
+Organization provider policies remain authoritative. Temporary snapshots are removed.

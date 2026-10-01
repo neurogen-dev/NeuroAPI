@@ -12,7 +12,7 @@ function keys(value, allowed) {
 function text(value, limit) {
   return typeof value === 'string' && value.length <= limit && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)
 }
-function modelID(value) { return typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$/.test(value) }
+function modelID(value) { return typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$/.test(value) && !/\s/.test(value) }
 function integer(value, min, max) { return Number.isSafeInteger(value) && value >= min && value <= max }
 function readBounded(handle, limit) {
   var data = $.NSMutableData.data
@@ -83,9 +83,17 @@ function validateClaude(data) {
     if (option.description !== undefined) requireValue(text(option.description, 4096))
   })
   requireValue(options[data.model] === true)
-  keys(data.env, ['ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_FABLE_MODEL'])
+  keys(data.env, ['ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_FABLE_MODEL', 'CLAUDE_CODE_AUTO_COMPACT_WINDOW', 'CLAUDE_CODE_MAX_OUTPUT_TOKENS', 'CLAUDE_CODE_GATEWAY_HINT_HEADERS'])
   Object.keys(data.env).forEach(function (key) {
-    requireValue(modelID(data.env[key]) && seen[data.env[key]])
+    var value = data.env[key]
+    if (key === 'CLAUDE_CODE_GATEWAY_HINT_HEADERS') { requireValue(value === '1'); return }
+    if (key === 'CLAUDE_CODE_AUTO_COMPACT_WINDOW' || key === 'CLAUDE_CODE_MAX_OUTPUT_TOKENS') {
+      requireValue(typeof value === 'string' && /^[1-9][0-9]{0,6}$/.test(value) && String(Number(value)) === value)
+      requireValue(integer(Number(value), key === 'CLAUDE_CODE_AUTO_COMPACT_WINDOW' ? 100000 : 1,
+        key === 'CLAUDE_CODE_AUTO_COMPACT_WINDOW' ? 1000000 : 32000))
+      return
+    }
+    requireValue(modelID(value) && seen[value])
     var family = key.slice('ANTHROPIC_DEFAULT_'.length, -'_MODEL'.length).toLowerCase()
     if (family === 'haiku') {
       // Claude Code also uses the Haiku alias for background calls. The
@@ -97,8 +105,28 @@ function validateClaude(data) {
     }
   })
 }
+function validateDoctor(data, client) {
+  requireValue(object(data) && !data.error)
+  var blocks
+  if (client === 'codex') {
+    requireValue(data.status === 'completed' && Array.isArray(data.output))
+    blocks = []
+    data.output.forEach(function (item) {
+      if (item.type === 'message' && item.role === 'assistant' && Array.isArray(item.content)) blocks = blocks.concat(item.content)
+    })
+  } else {
+    requireValue(data.type === 'message' && data.role === 'assistant' && data.stop_reason === 'end_turn' && Array.isArray(data.content))
+    blocks = data.content
+  }
+  // An empty 200, metadata or usage alone is not a working generation.
+  requireValue(blocks.some(function (block) {
+    return object(block) && block.type === (client === 'codex' ? 'output_text' : 'text') &&
+      typeof block.text === 'string' && block.text.trim().length > 0
+  }))
+  return 'Ответ ассистента получен по HTTP; заявленное имя модели совпадает. Эта проверка не проверяет WebSocket или инструменты клиента.'
+}
 function run(args) {
-  requireValue(args.length === 3 && ['codex', 'claude'].indexOf(args[0]) !== -1)
+  requireValue(args.length === 3 && ['codex', 'claude', 'doctor-codex', 'doctor-claude'].indexOf(args[0]) !== -1)
   var raw = readBounded($.NSFileHandle.fileHandleWithStandardInput, 4194310)
   var secretHandle = $.NSFileHandle.fileHandleForReadingAtPath('/dev/fd/3')
   requireValue(!secretHandle.isNil())
@@ -107,6 +135,18 @@ function run(args) {
   requireValue(raw.slice(-4) === '\n200')
   var data = JSON.parse(raw.slice(0, -4))
   requireValue(JSON.stringify(data).indexOf(secret) === -1)
+  if (args[0].indexOf('doctor-') === 0) {
+    var modelHandle = $.NSFileHandle.fileHandleForReadingAtPath($(args[1] + '/model.txt'))
+    requireValue(!modelHandle.isNil())
+    var expectedModel = readBounded(modelHandle, 257).trim()
+    requireValue(modelID(expectedModel))
+    requireValue(object(data) && !data.error)
+    if (data.model !== expectedModel) {
+      write(args[1] + '/doctor-error.txt', 'model_identity_unverified')
+      requireValue(false)
+    }
+    return validateDoctor(data, args[0].slice(7))
+  }
   if (args[0] === 'codex') {
     validateCodex(data)
     write(args[1] + '/models.json', JSON.stringify({models: data.models}))
@@ -123,10 +163,11 @@ function run(args) {
     })
     data.env.ANTHROPIC_BASE_URL = 'https://claude.neuroapi.host'
     data.env.ANTHROPIC_MODEL = data.model
-    // Keep first-request quota reservations bounded. Claude Code can continue
-    // generation in another turn when a response reaches this limit.
-    data.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS = '4096'
+    // v1 servers provide no verified limits. v2 output limits are independent
+    // of financial reservation estimates and must survive validation.
+    if (data.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS === undefined) data.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS = '4096'
     data.apiKeyHelper = "'" + args[2].replace(/'/g, "'\\''") + "'"
     write(args[1] + '/settings.json', JSON.stringify(data))
+    write(args[1] + '/model.txt', data.model + '\n')
   }
 }
