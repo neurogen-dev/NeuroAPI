@@ -48,6 +48,7 @@ model_provider = "neuroapi_manual"
 web_search = "live"
 
 [features]
+plugins = false
 remote_plugin = false
 multi_agent = false
 goals = false
@@ -94,6 +95,7 @@ model_provider = "neuroapi"
 web_search = "live"
 
 [features]
+plugins = false
 remote_plugin = false
 multi_agent = false
 goals = false
@@ -114,9 +116,9 @@ refresh_interval_ms = 300000
 
 На Windows `command` — `powershell.exe`, а helper и DPAPI secret передаются отдельными элементами `args`.
 
-Hosted web search включён через NeuroAPI: `web_search = "live"` запрашивает актуальные страницы. Его использование может тарифицироваться отдельно от токенов; актуальные цены указаны в [каталоге NeuroAPI](https://neuroapi.host/price). `remote_plugin = false` отключает удалённый каталог плагинов; поле `plugins` не отключается, поэтому установленные локальные плагины остаются доступны. CLI-профиль сохраняет отключёнными multi-agent, goals, apps и browser use до отдельной проверки поддержки.
+Hosted web search включён через NeuroAPI: `web_search = "live"` запрашивает актуальные страницы. Его использование может тарифицироваться отдельно от токенов; актуальные цены указаны в [каталоге NeuroAPI](https://neuroapi.host/price). `plugins = false` и `remote_plugin = false` отключают плагины только в отдельном CLI-профиле: одного `remote_plugin = false` недостаточно для отключения всех фоновых запросов каталогов при API-key запуске. Отдельно настроенные MCP, локальные команды и файлы остаются доступны; инструменты, поставляемые через плагины, в этом профиле недоступны. CLI-профиль сохраняет отключёнными multi-agent, goals, apps и browser use до отдельной проверки поддержки.
 
-Режимы поиска описаны в [официальной документации](https://learn.chatgpt.com/docs/web-search). Раздельные флаги `plugins` и `remote_plugin` есть уже в [Codex 0.158.0](https://github.com/openai/codex/blob/rust-v0.158.0/codex-rs/features/src/lib.rs); минимум версии установщика не меняется. Это не отключает всю сеть плагинов: локальные плагины и их MCP, обновление Git-каталогов и функции приложения могут обращаться к собственным сервисам. Не включайте `supports_standalone_web_search`: отдельная самостоятельная search-сессия у стороннего провайдера не заявлена.
+Режимы поиска описаны в [официальной документации](https://learn.chatgpt.com/docs/web-search). Раздельные флаги `plugins` и `remote_plugin` есть уже в [Codex 0.158.0](https://github.com/openai/codex/blob/rust-v0.158.0/codex-rs/features/src/lib.rs); минимум версии установщика не меняется. Это не отключает всю сеть клиента: отдельно настроенные MCP и функции приложения могут обращаться к собственным сервисам. В Desktop установщик сохраняет значение `plugins`; если плагины не нужны и появляются ошибки их каталога, можно вручную установить `plugins = false` в существующей `[features]`, сохранив остальные настройки. Не включайте `supports_standalone_web_search`: отдельная самостоятельная search-сессия у стороннего провайдера не заявлена.
 
 Запуск: `codex-neuroapi`. Перед каждым запуском launcher получает `https://codex.neuroapi.host/v1/models` с обычным ключом NeuroAPI, проверяет ответ и передаёт приватный файл через `model_catalog_json` вместе с доступной моделью по умолчанию. Файл удаляется после завершения клиента. Проверка: `/debug-config` и `/model`.
 

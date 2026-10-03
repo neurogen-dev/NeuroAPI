@@ -138,7 +138,7 @@ Windows PowerShell — выполните весь блок из распако�
 
 macOS: `mkdir -p ~/.codex && nano ~/.codex/neuroapi-manual.config.toml`. Windows: `New-Item -ItemType Directory -Force "$HOME\.codex" | Out-Null; notepad "$HOME\.codex\neuroapi-manual.config.toml"`. Если установлен `CODEX_HOME`, откройте файл в нём. Вставьте весь блок:
 
-Hosted поиск включён (`web_search = "live"`). `remote_plugin = false` отключает удалённый каталог плагинов и сохраняет локальные плагины; не добавляйте `plugins = false`. Остальные ограничения CLI-профиля оставьте как в примере. Подробнее — [ручная настройка](manual-setup.md).
+Hosted поиск включён (`web_search = "live"`). `plugins = false` и `remote_plugin = false` отключают плагины только в отдельном CLI-профиле, чтобы запуск с API-ключом не зависел от фоновой синхронизации ChatGPT/Git-каталогов. Отдельно настроенные MCP остаются доступны, инструменты плагинов — нет. Остальные ограничения CLI-профиля оставьте как в примере. Подробнее — [ручная настройка](manual-setup.md).
 
 ```toml
 model = "gpt-6-sol" # замените только ID модели, если вашему ключу доступна другая
@@ -147,6 +147,7 @@ model_provider = "neuroapi_manual"
 web_search = "live"
 
 [features]
+plugins = false
 remote_plugin = false
 multi_agent = false
 goals = false
@@ -257,6 +258,8 @@ args = ["-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass"
 timeout_ms = 5000
 refresh_interval_ms = 300000
 ```
+
+Desktop сохраняет ваши настройки плагинов. Если плагины не нужны и вы видите ошибки ChatGPT/Git-каталога, **по желанию** добавьте `plugins = false` в существующую `[features]`. Это отключит инструменты плагинов, но не отдельно настроенные MCP. Не создавайте вторую `[features]`; установщик сам значение `plugins` Desktop не меняет.
 
 В обоих Desktop-блоках замените пример `model_catalog_json` и `model` **точными строками**, выведенными шагом 3. В Windows это уже экранированный TOML-путь; не вставляйте буквально `%LOCALAPPDATA%`, `$HOME` или `~`. Каталог постоянный и приватный, но обновляется вручную: перед запуском Desktop и после смены ключа/тарифа повторяйте загрузку; при ошибке обновления клиент не запускайте. Перезапустите приложение, создайте **новую локальную** задачу и проверьте её в [истории NeuroAPI](https://neuroapi.host/dashboard/logs). Не удаляйте helper/ключ через uninstaller, пока Desktop-config ссылается на него. Если захотите перейти на автоматическое управление Desktop, сначала уберите ручную секцию и верните прежние root-настройки из сохранённой копии, затем повторите setup с опцией Desktop: иначе последующее удаление установщика может восстановить конфиг, который всё ещё ссылается на удаляемый helper.
 

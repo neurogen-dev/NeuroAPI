@@ -306,8 +306,9 @@ cat >"$STAGE_ROOT/profile.toml" <<EOF
 model_provider = "neuroapi"
 web_search = "live"
 
-# Keep unsupported agent features off; local plugins remain available.
+# API-key CLI startup avoids plugin catalog sync; standalone MCP stays available.
 [features]
+plugins = false
 remote_plugin = false
 multi_agent = false
 goals = false
