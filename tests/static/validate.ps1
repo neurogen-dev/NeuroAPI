@@ -92,9 +92,9 @@ foreach ($setup in @($windowsSetup, $macSetup)) {
     Assert-Contains $setup 'web_search = "live"' `
         'Codex must enable verified hosted web search through NeuroAPI.'
     Assert-Contains $setup 'remote_plugin = false' `
-        'Codex must avoid remote ChatGPT plugin synchronization without disabling local plugins.'
-    Assert-NotMatches $setup '(?m)^plugins\s*=\s*false' `
-        'Setup must preserve local plugin availability.'
+        'Codex CLI must disable remote plugin synchronization.'
+    Assert-Contains $setup 'plugins = false' `
+        'Codex CLI must disable plugin startup sync for API-key sessions.'
     Assert-Contains $setup 'multi_agent = false' `
         'Codex must omit unsupported namespace tools from ordinary requests.'
     Assert-Contains $setup '[model_providers.neuroapi.auth]' `

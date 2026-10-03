@@ -10,6 +10,7 @@ assert "model" not in profile  # The authenticated startup catalog supplies it.
 assert profile["model_provider"] == "neuroapi"
 assert profile["web_search"] == "live"
 assert profile["features"] == {
+    "plugins": False,
     "remote_plugin": False,
     "multi_agent": False,
     "goals": False,
