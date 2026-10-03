@@ -37,14 +37,18 @@ finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 Remove-Variable secure, ptr
 ```
 
-Для Codex создайте файл `~/.codex/neuroapi-manual.config.toml` (Windows: `%USERPROFILE%\.codex\neuroapi-manual.config.toml`):
+Для Codex сначала [загрузите проверенный приватный каталог](copy-paste-setup.md#2-загрузите-проверенный-каталог) командами для своей ОС из распакованного публичного ZIP. Установка не обязательна: для CLI используются временный ключ и проверенные библиотеки архива, для Desktop — уже сохранённый helper. Команды проверяют authenticated ответ, атомарно сохраняют JSON без ключа и печатают абсолютный `model_catalog_json` и доступную `model`. Не запускайте клиент, если обновление не удалось.
+
+Затем создайте файл `~/.codex/neuroapi-manual.config.toml` (Windows: `%USERPROFILE%\.codex\neuroapi-manual.config.toml`):
 
 ```toml
 model = "gpt-6-sol" # замените на модель, доступную вашему ключу
+model_catalog_json = "/АБСОЛЮТНЫЙ/ПУТЬ/models.json" # точная строка из загрузчика каталога
 model_provider = "neuroapi_manual"
-web_search = "disabled"
+web_search = "live"
 
 [features]
+remote_plugin = false
 multi_agent = false
 goals = false
 apps = false
@@ -58,7 +62,7 @@ supports_websockets = true
 env_key = "NEUROAPI_API_KEY"
 ```
 
-Запустите `codex --profile neuroapi-manual`, проверьте `/debug-config` и выполните короткую задачу. Этот ручной профиль не получает управляемый каталог: встроенное меню Codex может содержать недоступные модели. Выбирайте проверенный ID явно. Файл профиля должен находиться в том же `CODEX_HOME`, с которым вы запускаете Codex; проектный `.codex/config.toml` не заменяет его.
+Замените пример пути `model_catalog_json` точной выведенной строкой и `model` доступным ID из того же каталога. Перед каждым запуском обновляйте каталог по ссылке выше, затем запустите `codex --profile neuroapi-manual`, проверьте `/debug-config` и выполните короткую задачу. Каталог задаёт также возможности модели, включая hosted search; встроенный каталог не заменяет его. Файл профиля должен находиться в том же `CODEX_HOME`, с которым вы запускаете Codex; проектный `.codex/config.toml` не заменяет его.
 
 Для Claude Code в том же терминале задайте адрес и модель, затем запустите `claude`:
 
@@ -85,10 +89,12 @@ Codex Desktop не наследует переменную из терминал
 Основная конфигурация:
 
 ```toml
+# Launcher передаёт актуальный абсолютный model_catalog_json через -c при каждом запуске.
 model_provider = "neuroapi"
-web_search = "disabled"
+web_search = "live"
 
 [features]
+remote_plugin = false
 multi_agent = false
 goals = false
 apps = false
@@ -108,11 +114,13 @@ refresh_interval_ms = 300000
 
 На Windows `command` — `powershell.exe`, а helper и DPAPI secret передаются отдельными элементами `args`.
 
-Codex 0.158.0 по умолчанию добавляет к каждому запросу hosted `web_search` и namespace-инструмент для multi-agent, даже при локальном чтении файла. NeuroAPI не объявляет эти инструменты как поддерживаемые для Codex-профиля: они требуют отдельного провайдерского контракта и тарификации. Профиль отключает только эти возможности, а чтение, правка и запуск команд остаются доступны. Возвращать их вручную в профиле можно лишь после отдельной проверки поддержки сервером.
+Hosted web search включён через NeuroAPI: `web_search = "live"` запрашивает актуальные страницы. Его использование может тарифицироваться отдельно от токенов; актуальные цены указаны в [каталоге NeuroAPI](https://neuroapi.host/price). `remote_plugin = false` отключает удалённый каталог плагинов; поле `plugins` не отключается, поэтому установленные локальные плагины остаются доступны. CLI-профиль сохраняет отключёнными multi-agent, goals, apps и browser use до отдельной проверки поддержки.
+
+Режимы поиска описаны в [официальной документации](https://learn.chatgpt.com/docs/web-search). Раздельные флаги `plugins` и `remote_plugin` есть уже в [Codex 0.158.0](https://github.com/openai/codex/blob/rust-v0.158.0/codex-rs/features/src/lib.rs); минимум версии установщика не меняется. Это не отключает всю сеть плагинов: локальные плагины и их MCP, обновление Git-каталогов и функции приложения могут обращаться к собственным сервисам. Не включайте `supports_standalone_web_search`: отдельная самостоятельная search-сессия у стороннего провайдера не заявлена.
 
 Запуск: `codex-neuroapi`. Перед каждым запуском launcher получает `https://codex.neuroapi.host/v1/models` с обычным ключом NeuroAPI, проверяет ответ и передаёт приватный файл через `model_catalog_json` вместе с доступной моделью по умолчанию. Файл удаляется после завершения клиента. Проверка: `/debug-config` и `/model`.
 
-Прямой `codex --profile neuroapi-host` пропускает этот механизм: command-auth discovery может подмешать встроенные модели. При ручной настройке без launcher можно задать собственный проверенный `model_catalog_json`; поддерживать его актуальность тогда нужно самостоятельно.
+Прямой `codex --profile neuroapi-host` пропускает получение каталога и не является эквивалентом launcher. Для ручного профиля обязательно задайте проверенный `model_catalog_json` в root по [командам загрузки](copy-paste-setup.md#2-загрузите-проверенный-каталог), обновляя его перед каждым запуском; `model` выбирайте из того же snapshot.
 
 Project `.codex/config.toml` не подходит для provider/auth redirect: актуальный Codex игнорирует там `model_provider` и `model_providers` по соображениям безопасности.
 
@@ -120,7 +128,7 @@ Project `.codex/config.toml` не подходит для provider/auth redirect
 
 Установщик предлагает включить пользовательский Codex Desktop. В этом случае он сохраняет точную исходную копию `~/.codex/config.toml`, затем устанавливает в нём `model_provider = "neuroapi_agents"`, `model_catalog_json` с моделями, доступными введённому ключу, и подходящую модель по умолчанию. Провайдер использует `https://codex.neuroapi.host/v1`, Responses API, HTTP/SSE (`supports_websockets = false`) и тот же защищённый DPAPI/Keychain helper. Отдельный профиль CLI остаётся независимым.
 
-Если в исходном файле есть конфликтующий провайдер, необычная форма root-настроек, неверный TOML либо файл изменился во время установки, setup останавливается без перезаписи. Повторная установка сохраняет первоначальную копию. При удалении проверяется хеш конфигурации: если пользователь изменил файл после setup, uninstaller не удаляет helper и ключ, чтобы не сломать действующую настройку. После установки перезапустите Codex Desktop и проверьте новую локальную задачу; полная инструкция: [Codex Desktop](https://neuroapi.host/docs/codex-desktop).
+Если в исходном файле есть конфликтующий провайдер, необычная форма root-настроек, неверный TOML либо файл изменился во время установки, setup останавливается без перезаписи. Повторная установка сохраняет первоначальную копию. При удалении проверяется хеш конфигурации: если пользователь изменил файл после setup, uninstaller не удаляет helper и ключ, чтобы не сломать действующую настройку. Для ручного Desktop-конфига с уже сохранённым helper также обязательны [загрузка каталога и root model_catalog_json](copy-paste-setup.md#codex-desktop-вручную-с-уже-сохранённым-ключом). Ручной JSON не обновляется автоматически: обновляйте его перед запуском приложения и после смены ключа/тарифа, а при ошибке остановитесь. После установки перезапустите Codex Desktop и проверьте новую локальную задачу; полная инструкция: [Codex Desktop](https://neuroapi.host/docs/codex-desktop).
 
 ## HTTP/SSE для диагностики
 

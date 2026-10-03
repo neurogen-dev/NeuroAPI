@@ -10,8 +10,8 @@
 
 | Клиент | Файл или экран | Что меняется |
 |---|---|---|
-| Codex CLI | `~/.codex/neuroapi-manual.config.toml` или `%USERPROFILE%\.codex\neuroapi-manual.config.toml` | `model`, `model_provider`, `base_url`, `env_key` |
-| Codex Desktop | `~/.codex/config.toml` или `%USERPROFILE%\.codex\config.toml` | root `model`/`model_provider` и секция провайдера; нужен защищённый helper |
+| Codex CLI | `~/.codex/neuroapi-manual.config.toml` или `%USERPROFILE%\.codex\neuroapi-manual.config.toml` | `model`, `model_catalog_json`, `model_provider`, `base_url`, `env_key` |
+| Codex Desktop | `~/.codex/config.toml` или `%USERPROFILE%\.codex\config.toml` | root `model`/`model_catalog_json`/`model_provider` и секция провайдера; нужен защищённый helper |
 | Claude Code | отдельный `~/.claude/neuroapi-manual-settings.json` или `%USERPROFILE%\.claude\neuroapi-manual-settings.json` | `ANTHROPIC_BASE_URL`, `ANTHROPIC_MODEL`; ключ только в терминале |
 | Claude Desktop | `Developer → Configure Third-Party Inference` | Gateway URL, ключ и схема авторизации в форме приложения |
 
@@ -42,16 +42,112 @@ Remove-Variable secret, ptr
 
 Переменная существует только в этом терминале и его дочерних процессах. Не записывайте строку ключа через `export ...="sk-..."`, `setx` или в файл настроек.
 
-### 2. Создайте отдельный профиль
+### 2. Загрузите проверенный каталог
+
+Скачайте и распакуйте [публичный ZIP](https://github.com/neurogen-dev/NeuroAPI/archive/refs/heads/agents.zip), затем откройте терминал **в корне распакованной папки** (рядом с `scripts/`). Запускать setup для этого шага не нужно: команды используют его проверенные библиотеки. При ручном CLI используется временный `NEUROAPI_API_KEY` из шага 1; для Desktop без этой переменной команда читает уже сохранённый Keychain/DPAPI ключ установщика.
+
+Каталог определяет возможности модели, включая поиск, поэтому обязателен вместе с `web_search = "live"`. Нельзя заменять его стандартным OpenAI-списком `{ "data": [...] }` или придумывать capability-поля. Команды принимают только актуальный authenticated ответ выделенного Codex endpoint, проверяют схему, IDs, default, права и отсутствие отражённого ключа, затем атомарно заменяют приватный файл. При ошибке **не запускайте клиент со старым каталогом**.
+
+macOS — выполните весь блок из Bash (`/bin/bash`, если текущий shell другой):
+
+```bash
+(
+  set +x
+  set -euo pipefail
+  umask 077
+  repo_root="$(pwd -P)"
+  . "$repo_root/scripts/macos/common.sh"
+  catalog_root="$HOME/.local/share/neuroapi-manual-codex"
+  [[ ! -L "$catalog_root" ]] || exit 1
+  mkdir -p "$catalog_root"
+  chmod 700 "$catalog_root"
+  [[ ! -L "$catalog_root/models.json" ]] || exit 1
+  [[ ! -e "$catalog_root/models.json" || -f "$catalog_root/models.json" ]] || exit 1
+  stage="$(mktemp -d "$catalog_root/.update.XXXXXX")"
+  trap 'rm -rf -- "$stage"' EXIT
+  credential="${NEUROAPI_API_KEY:-}"
+  helper="$HOME/.local/share/neuroapi-agents/bin/get-neuroapi-key.sh"
+  if [[ -z "$credential" ]]; then credential="$("$helper" 2>/dev/null)"; fi
+  [[ ${#credential} -le 4096 && "$credential" =~ ^[A-Za-z0-9._~-]+$ ]] || exit 1
+  if ! printf 'header = "Authorization: Bearer %s"\n' "$credential" |
+    /usr/bin/curl --disable --config - --silent --fail --proto '=https' \
+      --proto-redir '=https' --max-redirs 0 --connect-timeout 5 --max-time 20 \
+      --max-filesize 4194304 --header 'Accept: application/json' \
+      --write-out '\n%{http_code}' 'https://codex.neuroapi.host/v1/models' 2>/dev/null |
+    /usr/bin/osascript -l JavaScript "$repo_root/scripts/macos/catalog-validator.js" \
+      codex "$stage" "$helper" 3< <(printf '%s' "$credential") >/dev/null 2>/dev/null; then
+    printf 'Каталог не обновлён. Проверьте ключ и соединение; запуск отменён.\n' >&2
+    exit 1
+  fi
+  unset credential
+  model="$(<"$stage/model.txt")"
+  mv -f -- "$stage/models.json" "$catalog_root/models.json"
+  printf 'model_catalog_json = "%s"\nmodel = "%s"\n' \
+    "$(toml_escape "$catalog_root/models.json")" "$model"
+)
+```
+
+Windows PowerShell — выполните весь блок из распакованной папки:
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $repoRoot = (Get-Location).Path
+    . (Join-Path $repoRoot 'scripts/windows/common.ps1')
+    . (Join-Path $repoRoot 'scripts/windows/managed-catalog.ps1')
+    $catalogRoot = Join-Path $env:LOCALAPPDATA 'NeuroAPIManualCodex'
+    Ensure-Directory -Path $catalogRoot
+    Set-NeuroAPIPrivateDirectory -Path $catalogRoot
+    $catalogPath = Join-Path $catalogRoot 'models.json'
+    if (Test-Path -LiteralPath $catalogPath) {
+        $item = Get-Item -LiteralPath $catalogPath -Force
+        if ($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw 'Каталог моделей не должен быть каталогом или ссылкой.'
+        }
+    }
+    $stage = New-NeuroAPILaunchDirectory -StateRoot $catalogRoot
+    try {
+        $secretPath = Join-Path $env:LOCALAPPDATA 'NeuroAPIAgents/secret/api-key.dpapi'
+        if (-not [string]::IsNullOrEmpty($env:NEUROAPI_API_KEY)) {
+            # Windows DPAPI ciphertext only; never write the plaintext key.
+            $secretPath = Join-Path $stage 'temporary-key.dpapi'
+            $secure = ConvertTo-SecureString $env:NEUROAPI_API_KEY -AsPlainText -Force
+            try { Write-Utf8NoBom -Path $secretPath -Content (ConvertFrom-SecureString $secure) }
+            finally { $secure.Dispose() }
+        }
+        $json = Get-NeuroAPICatalogJson -Client codex -SecretPath $secretPath
+        $catalog = ConvertFrom-NeuroAPICatalog -Client codex -Json $json
+        $stagedCatalog = Join-Path $stage 'models.json'
+        Write-Utf8NoBom -Path $stagedCatalog -Content ($catalog.Content | ConvertTo-Json -Depth 100)
+        if (Test-Path -LiteralPath $catalogPath) {
+            [IO.File]::Replace($stagedCatalog, $catalogPath, (Join-Path $stage 'previous-models.json'))
+        } else {
+            [IO.File]::Move($stagedCatalog, $catalogPath)
+        }
+        'model_catalog_json = ' + (ConvertTo-TomlBasicString -Value $catalogPath)
+        'model = ' + (ConvertTo-TomlBasicString -Value $catalog.DefaultModel)
+    } finally {
+        Remove-Item -LiteralPath $stage -Recurse -Force
+    }
+}
+```
+
+Оба блока печатают **две безопасные TOML-строки**: абсолютный `model_catalog_json` и доступную `model`. Скопируйте их в root конфигурации перед первой `[секцией]`, заменяя существующие значения без дубликатов. JSON содержит только проверенные метаданные моделей, не ключ. Обновляйте его перед каждым ручным CLI-запуском, перед запуском Desktop и после смены ключа/тарифа; после обновления перезапустите Desktop. Для автоматического обновления каждого CLI-запуска используйте `codex-neuroapi`.
+
+### 3. Создайте отдельный профиль
 
 macOS: `mkdir -p ~/.codex && nano ~/.codex/neuroapi-manual.config.toml`. Windows: `New-Item -ItemType Directory -Force "$HOME\.codex" | Out-Null; notepad "$HOME\.codex\neuroapi-manual.config.toml"`. Если установлен `CODEX_HOME`, откройте файл в нём. Вставьте весь блок:
 
+Hosted поиск включён (`web_search = "live"`). `remote_plugin = false` отключает удалённый каталог плагинов и сохраняет локальные плагины; не добавляйте `plugins = false`. Остальные ограничения CLI-профиля оставьте как в примере. Подробнее — [ручная настройка](manual-setup.md).
+
 ```toml
 model = "gpt-6-sol" # замените только ID модели, если вашему ключу доступна другая
+model_catalog_json = "/АБСОЛЮТНЫЙ/ПУТЬ/models.json" # строка из шага 2
 model_provider = "neuroapi_manual"
-web_search = "disabled"
+web_search = "live"
 
 [features]
+remote_plugin = false
 multi_agent = false
 goals = false
 apps = false
@@ -65,7 +161,7 @@ supports_websockets = true
 env_key = "NEUROAPI_API_KEY"
 ```
 
-Сохраните файл и **из того же терминала** запустите `codex --profile neuroapi-manual`. В клиенте проверьте `/debug-config`, затем поручите короткую файловую задачу. При проблеме с WebSocket замените только `supports_websockets = true` на `false`, перезапустите CLI и повторите задачу по HTTP/SSE. При ручном профиле меню Codex может содержать модели, которых нет у вашего ключа; используйте точный ID из каталога. После работы закройте терминал либо выполните `unset NEUROAPI_API_KEY` (macOS) / `Remove-Item Env:NEUROAPI_API_KEY` (PowerShell).
+Сохраните файл и **из того же терминала** запустите `codex --profile neuroapi-manual`. В клиенте проверьте `/debug-config`, затем поручите короткую файловую задачу. При проблеме с WebSocket замените только `supports_websockets = true` на `false`, перезапустите CLI и повторите задачу по HTTP/SSE. Перед каждым запуском повторите шаг 2; при ошибке обновления остановитесь. `model` должна присутствовать в проверенном каталоге. Не удаляйте файл, пока клиент работает. После работы закройте терминал либо выполните `unset NEUROAPI_API_KEY` (macOS) / `Remove-Item Env:NEUROAPI_API_KEY` (PowerShell).
 
 ## Claude Code без установщика
 
@@ -104,16 +200,19 @@ claude --settings "$HOME\.claude\neuroapi-manual-settings.json"
 
 1. Полностью закройте Codex Desktop. Скопируйте существующий `config.toml` в резервную копию с датой. macOS: `cp -p ~/.codex/config.toml ~/.codex/config.toml.before-neuroapi-$(date +%Y%m%d-%H%M%S)` (если файла ещё нет, пропустите). Windows PowerShell: `Copy-Item "$HOME\.codex\config.toml" "$HOME\.codex\config.toml.before-neuroapi-$(Get-Date -Format yyyyMMdd-HHmmss)"` (если файл существует).
 2. Проверьте наличие helper: macOS — `~/.local/share/neuroapi-agents/bin/get-neuroapi-key.sh`; Windows — `%LOCALAPPDATA%\NeuroAPIAgents\bin\get-neuroapi-key.ps1` и `%LOCALAPPDATA%\NeuroAPIAgents\secret\api-key.dpapi`. Не запускайте helper для диагностики с выводом на экран: он печатает секрет.
-3. Откройте `~/.codex/config.toml` (Windows: `%USERPROFILE%\.codex\config.toml`). Если файл пустой, вставьте соответствующий блок ниже целиком. Если уже содержит настройки, **замените** существующие root `model` и `model_provider`, добавьте `web_search = "disabled"` в root, а секцию `[model_providers.neuroapi_manual_desktop]` с auth добавьте один раз в конец. Не создавайте второй `[features]`: обновите указанные поля внутри существующей секции. Не удаляйте другие провайдеры.
+3. Для Desktop очистите только временную переменную текущего терминала: `unset NEUROAPI_API_KEY` (macOS) или `Remove-Item Env:NEUROAPI_API_KEY -ErrorAction SilentlyContinue` (PowerShell). Затем из распакованного ZIP выполните [шаг загрузки каталога](#2-загрузите-проверенный-каталог) выше: он использует уже сохранённый ключ helper — тот же, с которым Desktop будет отправлять запросы. Сохраните выведенные `model_catalog_json` и `model`.
+4. Откройте `~/.codex/config.toml` (Windows: `%USERPROFILE%\.codex\config.toml`). Если файл пустой, вставьте соответствующий блок ниже целиком. Если уже содержит настройки, **замените** существующие root `model`, `model_catalog_json` и `model_provider`, добавьте `web_search = "live"` в root, а секцию `[model_providers.neuroapi_manual_desktop]` с auth добавьте один раз в конец. Не создавайте второй `[features]`: обновите указанные поля внутри существующей секции. Не удаляйте другие провайдеры.
 
 macOS: в `command` замените `ИМЯ_ПОЛЬЗОВАТЕЛЯ` на имя домашней папки из `echo "$HOME"` (например, `roman`):
 
 ```toml
 model = "gpt-6-sol"
+model_catalog_json = "/АБСОЛЮТНЫЙ/ПУТЬ/models.json" # строка из шага 3
 model_provider = "neuroapi_manual_desktop"
-web_search = "disabled"
+web_search = "live"
 
 [features]
+remote_plugin = false
 multi_agent = false
 goals = false
 apps = false
@@ -135,10 +234,12 @@ Windows: сначала выполните `$env:LOCALAPPDATA` в PowerShell. П
 
 ```toml
 model = "gpt-6-sol"
+model_catalog_json = "/АБСОЛЮТНЫЙ/ПУТЬ/models.json" # строка из шага 3
 model_provider = "neuroapi_manual_desktop"
-web_search = "disabled"
+web_search = "live"
 
 [features]
+remote_plugin = false
 multi_agent = false
 goals = false
 apps = false
@@ -157,7 +258,7 @@ timeout_ms = 5000
 refresh_interval_ms = 300000
 ```
 
-Также замените `model` на доступный ключу ID. Этот **ручной** Desktop-вариант не создаёт управляемый `model_catalog_json`, поэтому встроенный список моделей может содержать посторонние варианты. Перезапустите приложение, создайте **новую локальную** задачу и проверьте её в [истории NeuroAPI](https://neuroapi.host/dashboard/logs). Не удаляйте helper/ключ через uninstaller, пока Desktop-config ссылается на него. Если захотите перейти на автоматическое управление Desktop, сначала уберите ручную секцию и верните прежние root-настройки из сохранённой копии, затем повторите setup с опцией Desktop: иначе последующее удаление установщика может восстановить конфиг, который всё ещё ссылается на удаляемый helper.
+В обоих Desktop-блоках замените пример `model_catalog_json` и `model` **точными строками**, выведенными шагом 3. В Windows это уже экранированный TOML-путь; не вставляйте буквально `%LOCALAPPDATA%`, `$HOME` или `~`. Каталог постоянный и приватный, но обновляется вручную: перед запуском Desktop и после смены ключа/тарифа повторяйте загрузку; при ошибке обновления клиент не запускайте. Перезапустите приложение, создайте **новую локальную** задачу и проверьте её в [истории NeuroAPI](https://neuroapi.host/dashboard/logs). Не удаляйте helper/ключ через uninstaller, пока Desktop-config ссылается на него. Если захотите перейти на автоматическое управление Desktop, сначала уберите ручную секцию и верните прежние root-настройки из сохранённой копии, затем повторите setup с опцией Desktop: иначе последующее удаление установщика может восстановить конфиг, который всё ещё ссылается на удаляемый helper.
 
 ## Claude Desktop вручную
 

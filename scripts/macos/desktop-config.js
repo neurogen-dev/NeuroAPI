@@ -35,6 +35,38 @@ function rootSetting(source, key, value, newline) {
   }
   return root + rest
 }
+function disableRemotePlugins(source, newline) {
+  var firstTable = /^[ \t]*\[[^\r\n]*\]/m.exec(source)
+  var root = source.slice(0, firstTable ? firstTable.index : source.length)
+  if (/^[ \t]*(?:features|"features"|'features')[ \t]*(?:=|\.)/m.test(root))
+    fail('Inline or dotted features require manual Codex Desktop setup')
+  var headers = [], match
+  var headerPattern = /^[ \t]*\[[ \t]*(?:features|"features"|'features')[ \t]*\][ \t]*(?:#.*)?\r?$/gm
+  while ((match = headerPattern.exec(source)) !== null) headers.push(match)
+  if (headers.length > 1) fail('Duplicate Codex features table')
+  if (headers.length === 0) {
+    if (source.length && !/\n$/.test(source)) source += newline
+    return source + newline + '[features]' + newline + 'remote_plugin = false' + newline
+  }
+  var start = headers[0].index + headers[0][0].length
+  var following = /^[ \t]*\[[^\r\n]*\]/m.exec(source.slice(start))
+  var end = following ? start + following.index : source.length
+  var section = source.slice(start, end)
+  var toggles = [], toggle
+  var togglePattern = /^([ \t]*)(?:remote_plugin|"remote_plugin"|'remote_plugin')[ \t]*=[ \t]*(.*)$/gm
+  while ((toggle = togglePattern.exec(section)) !== null) toggles.push(toggle)
+  if (toggles.length > 1) fail('Duplicate Codex remote_plugin setting')
+  if (toggles.length === 1) {
+    var suffix = /^(?:true|false)([ \t]*(?:#.*)?\r?)$/.exec(toggles[0][2])
+    if (!suffix) fail('Unsupported Codex remote_plugin setting')
+    section = section.slice(0, toggles[0].index) + toggles[0][1] + 'remote_plugin = false' + suffix[1] +
+      section.slice(toggles[0].index + toggles[0][0].length)
+  } else {
+    section = newline + 'remote_plugin = false' + section
+    if (!/\n$/.test(section)) section += newline
+  }
+  return source.slice(0, start) + section + source.slice(end)
+}
 function run(args) {
   if (args.length !== 5) fail('Invalid desktop config arguments')
   var original = read(args[0])
@@ -50,6 +82,8 @@ function run(args) {
   result = rootSetting(result, 'model_provider', 'neuroapi_agents', newline)
   result = rootSetting(result, 'model_catalog_json', args[2], newline)
   result = rootSetting(result, 'model', model, newline)
+  result = rootSetting(result, 'web_search', 'live', newline)
+  result = disableRemotePlugins(result, newline)
   if (result.length && !/\n$/.test(result)) result += newline
   result += ('\n# NeuroAPI Agents desktop provider. Owned by the installer.\n' +
     '[model_providers.neuroapi_agents]\n' +

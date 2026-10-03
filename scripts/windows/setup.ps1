@@ -183,10 +183,11 @@ try {
     $profile = @"
 # Managed by the NeuroAPI Agents installer.
 model_provider = "neuroapi"
-web_search = "disabled"
+web_search = "live"
 
-# These Codex-hosted tools are not part of the NeuroAPI Responses contract.
+# Keep unsupported agent features off; local plugins remain available.
 [features]
+remote_plugin = false
 multi_agent = false
 goals = false
 apps = false
