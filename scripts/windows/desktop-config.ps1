@@ -41,6 +41,45 @@ function Get-NeuroAPIDesktopState {
     }
 }
 
+function Disable-NeuroAPIDesktopRemotePlugins {
+    param([string]$Config)
+    $lines = @([regex]::Split($Config, '\r\n|\n|\r'))
+    $featureStart = -1
+    $featureEnd = $lines.Count
+    $inRoot = $true
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($inRoot -and $lines[$i] -match '^\s*(?:features|"features"|''features'')\s*(?:=|\.)') {
+            throw 'Inline or dotted features require manual Codex Desktop setup.'
+        }
+        if ($lines[$i] -match '^\s*\[') { $inRoot = $false }
+        if ($lines[$i] -match '^\s*\[\s*(?:features|"features"|''features'')\s*\]\s*(?:#.*)?$') {
+            if ($featureStart -ge 0) { throw 'Duplicate Codex features table.' }
+            $featureStart = $i + 1
+        } elseif ($featureStart -ge 0 -and $featureEnd -eq $lines.Count -and $lines[$i] -match '^\s*\[') {
+            $featureEnd = $i
+        }
+    }
+    if ($featureStart -lt 0) {
+        return $Config.TrimEnd("`r", "`n") + "`n`n[features]`nremote_plugin = false`n"
+    }
+    $found = @()
+    for ($i = $featureStart; $i -lt $featureEnd; $i++) {
+        if ($lines[$i] -match '^\s*(?:remote_plugin|"remote_plugin"|''remote_plugin'')\s*=') { $found += $i }
+    }
+    if ($found.Count -gt 1) { throw 'Duplicate Codex remote_plugin setting.' }
+    if ($found.Count -eq 1) {
+        if ($lines[$found[0]] -notmatch '^(?<indent>\s*)(?:remote_plugin|"remote_plugin"|''remote_plugin'')\s*=\s*(?:true|false)(?<suffix>\s*(?:#.*)?)$') {
+            throw 'Unsupported Codex remote_plugin setting.'
+        }
+        $lines[$found[0]] = $Matches.indent + 'remote_plugin = false' + $Matches.suffix
+    } else {
+        $suffix = @()
+        if ($featureStart -lt $lines.Count) { $suffix = @($lines[$featureStart..($lines.Count - 1)]) }
+        $lines = @($lines[0..($featureStart - 1)]) + @('remote_plugin = false') + $suffix
+    }
+    return $lines -join "`n"
+}
+
 function New-NeuroAPIDesktopConfig {
     param(
         [AllowEmptyString()][string]$Original,
@@ -50,6 +89,11 @@ function New-NeuroAPIDesktopConfig {
         [string]$DefaultModel
     )
     if (-not (Test-NeuroAPIModelId $DefaultModel)) { throw 'No valid Codex model is available for this key.' }
+    # Table-looking text inside multiline strings is not a real TOML table.
+    # This editor deliberately supports only unambiguous single-line values.
+    if ($Original -match '("""|'''''')') {
+        throw 'Multiline TOML requires manual Codex Desktop setup. No changes were made.'
+    }
     if ($Original -match '(?m)^\s*\[\s*model_providers\.\s*(?:neuroapi_agents|"neuroapi_agents"|''neuroapi_agents'')(?:\.|\])') {
         throw 'The Codex provider ID is already in use. No changes were made.'
     }
@@ -62,13 +106,11 @@ function New-NeuroAPIDesktopConfig {
     [string[]]$tail = @()
     if ($firstTable -gt 0) { $header = @($lines[0..($firstTable - 1)]) }
     if ($firstTable -lt $lines.Count) { $tail = @($lines[$firstTable..($lines.Count - 1)]) }
-    if (($header -join "`n") -match '("""|'''''')') {
-        throw 'Multiline root TOML cannot be edited safely. No changes were made.'
-    }
     $values = [ordered]@{
         model_provider = (ConvertTo-TomlBasicString -Value $script:DesktopProviderId)
         model_catalog_json = (ConvertTo-TomlBasicString -Value $CatalogPath)
         model = (ConvertTo-TomlBasicString -Value $DefaultModel)
+        web_search = '"live"'
     }
     foreach ($key in @($values.Keys)) {
         $found = @()
@@ -87,6 +129,7 @@ function New-NeuroAPIDesktopConfig {
         }
     }
     $base = ((@($header) + @($tail)) -join "`n").TrimEnd("`r", "`n")
+    $base = Disable-NeuroAPIDesktopRemotePlugins -Config $base
     $tomlHelper = ConvertTo-TomlBasicString -Value $HelperPath
     $tomlSecret = ConvertTo-TomlBasicString -Value $SecretPath
     return ($base + "`n`n" + @"

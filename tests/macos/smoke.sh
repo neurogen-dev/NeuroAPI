@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)"
 PYTHON_BIN="${NEUROAPI_AGENTS_TEST_PYTHON:-python3}"
 "$PYTHON_BIN" -c 'import tomllib'
+"$PYTHON_BIN" "$REPO_ROOT/tests/macos/desktop_config.py"
 TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/neuroapi-agents-test.XXXXXX")"
 # Resolve synthetic values through the same pure helper used by setup/uninstall.
 # shellcheck source=scripts/macos/common.sh
@@ -242,8 +243,11 @@ mkdir -p "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME"
 cat >"$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" <<'EOF'
 # personal Codex settings
 model = "gpt-6-astra"
+web_search = "cached"
 
 [features]
+plugins = true
+remote_plugin = true # existing preference
 apps = false
 EOF
 cp "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" "$TMP_ROOT/desktop-original.toml"
@@ -285,7 +289,7 @@ grep -Fq 'base_url = "https://codex.neuroapi.host/v1"' "$desktop_config"
 grep -Fq 'supports_websockets = false' "$desktop_config"
 grep -Fq 'model = "gpt-6-sol"' "$desktop_config"
 [[ -f "$desktop_catalog" ]]
-"$PYTHON_BIN" -c 'import json,pathlib,sys,tomllib; cfg=tomllib.loads(pathlib.Path(sys.argv[1]).read_text()); catalog=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert cfg["model"]==catalog["models"][0]["slug"]' "$desktop_config" "$desktop_catalog"
+"$PYTHON_BIN" -c 'import json,pathlib,sys,tomllib; cfg=tomllib.loads(pathlib.Path(sys.argv[1]).read_text()); catalog=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert cfg["model"]==catalog["models"][0]["slug"]; assert cfg["web_search"]=="live"; assert cfg["features"]=={"plugins":True,"remote_plugin":False,"apps":False}' "$desktop_config" "$desktop_catalog"
 if grep -R -Fq 'good-rotation' "$desktop_config" "$desktop_catalog"; then
   printf 'Desktop configuration exposed the dummy token.\n' >&2
   exit 1

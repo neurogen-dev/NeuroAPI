@@ -6,6 +6,8 @@
 
 Проверьте пользовательский `~/.codex/config.toml`: `model_provider = "neuroapi_agents"`, `base_url = "https://codex.neuroapi.host/v1"`, `supports_websockets = false`. Перезапустите приложение и создайте **новую локальную** задачу. Старые задачи и облачные функции могут сохранять прежний маршрут. Если вы пропустили предложение установщика, запустите setup заново и согласитесь на подключение Desktop.
 
+Если ошибка относится к загрузке плагинов, проверьте `remote_plugin = false` в существующей секции `[features]` и запустите setup повторно. Синхронизация удалённого каталога плагинов и генерация модели — разные операции. Этот флаг сохраняет локальные плагины; их MCP, обновления Git-каталогов и облачные функции приложения могут использовать собственную сеть.
+
 Если удаление останавливается из-за изменения `config.toml`, сначала сравните текущий файл с резервной копией в каталоге установщика. Это защищает ваши правки и сохраняет key helper до ручного разбора.
 
 ## `codex-neuroapi` или `claude-neuroapi` не найдены
@@ -23,7 +25,8 @@ macOS: используйте полный путь `~/.local/bin/codex-neuroapi
 - base URL `https://codex.neuroapi.host/v1`;
 - `wire_api = "responses"`;
 - `supports_websockets = true` (или `false` для диагностики HTTP/SSE).
-- `web_search = "disabled"` и `[features]` с `multi_agent = false`, `goals = false`, `apps = false`, `browser_use = false`: без них Codex 0.158.0 может включить неподдерживаемые hosted/namespace-инструменты в обычный запрос к файлу и получить `effective_request_unsupported`.
+- `web_search = "live"` и `[features]` с `remote_plugin = false`: hosted поиск идёт через NeuroAPI, удалённый каталог плагинов отключён. Не задавайте `plugins = false`, если используете установленные локальные плагины.
+- В CLI-профиле остаются `multi_agent = false`, `goals = false`, `apps = false`, `browser_use = false`: эти возможности требуют отдельной проверки исполнения.
 
 Если `~/.codex/neuroapi-host.config.toml` существовал до установки без ownership-marker, setup должен отказать, а не перезаписать его.
 
