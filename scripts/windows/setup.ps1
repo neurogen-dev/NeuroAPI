@@ -225,13 +225,10 @@ refresh_interval_ms = 300000
             Get-NeuroAPICatalogJson -Client codex -SecretPath (Join-Path $stageRoot 'api-key.dpapi')
         }
         $catalog = ConvertFrom-NeuroAPICatalog -Client codex -Json $catalogJson -HelperCommand ''
-        $preferred = @($catalog.Content.models | Where-Object {
-            $_.slug -ceq 'gpt-6-sol' -and $_.visibility -ceq 'list' -and $_.supported_in_api
-        })
-        $desktopModel = if ($preferred.Count -gt 0) { 'gpt-6-sol' } else { $catalog.DefaultModel }
+        # The validated server default owns the recommendation, independently of model order.
         $desktopContent = New-NeuroAPIDesktopConfig -Original $desktopOriginal `
             -HelperPath $helperPath -SecretPath $secretPath -CatalogPath $desktopCatalogPath `
-            -DefaultModel $desktopModel
+            -DefaultModel $catalog.DefaultModel
         $catalogFile = @{ models = @($catalog.Content.models) } | ConvertTo-Json -Depth 32
         $stagedDesktopCatalog = Join-Path $stageRoot 'desktop-catalog.json'
         Write-Utf8NoBom -Path $stagedDesktopCatalog -Content $catalogFile

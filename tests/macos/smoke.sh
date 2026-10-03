@@ -178,7 +178,8 @@ model = dict(slug='gpt-6-sol', display_name='GPT-6 Sol', description='Test model
              effective_context_window_percent=90, experimental_supported_tools=[],
              input_modalities=['text'], supports_search_tool=False, use_responses_lite=False,
              input_token_limit=8000, output_token_limit=2000)
-pathlib.Path(sys.argv[1]).write_text(json.dumps({'models': [model], 'default_model': model['slug']}))
+luna = dict(model, slug='gpt-6-luna', display_name='GPT-6 Luna')
+pathlib.Path(sys.argv[1]).write_text(json.dumps({'models': [model, luna], 'default_model': luna['slug']}))
 pathlib.Path(sys.argv[2]).write_text(json.dumps({
     'model': 'claude-opus-5-5', 'availableModels': ['claude-opus-5-5'],
     'enforceAvailableModels': True, 'fallbackModel': [],
@@ -287,9 +288,9 @@ desktop_catalog="$NEUROAPI_AGENTS_STATE_ROOT/config/codex-desktop-models.json"
 grep -Fq 'model_provider = "neuroapi_agents"' "$desktop_config"
 grep -Fq 'base_url = "https://codex.neuroapi.host/v1"' "$desktop_config"
 grep -Fq 'supports_websockets = false' "$desktop_config"
-grep -Fq 'model = "gpt-6-sol"' "$desktop_config"
+grep -Fq 'model = "gpt-6-luna"' "$desktop_config"
 [[ -f "$desktop_catalog" ]]
-"$PYTHON_BIN" -c 'import json,pathlib,sys,tomllib; cfg=tomllib.loads(pathlib.Path(sys.argv[1]).read_text()); catalog=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert cfg["model"]==catalog["models"][0]["slug"]; assert cfg["web_search"]=="live"; assert cfg["features"]=={"plugins":True,"remote_plugin":False,"apps":False}' "$desktop_config" "$desktop_catalog"
+"$PYTHON_BIN" -c 'import json,pathlib,sys,tomllib; cfg=tomllib.loads(pathlib.Path(sys.argv[1]).read_text()); catalog=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert cfg["model"]=="gpt-6-luna"; assert [m["slug"] for m in catalog["models"]]==["gpt-6-sol","gpt-6-luna"]; assert cfg["web_search"]=="live"; assert cfg["features"]=={"plugins":True,"remote_plugin":False,"apps":False}' "$desktop_config" "$desktop_catalog"
 if grep -R -Fq 'good-rotation' "$desktop_config" "$desktop_catalog"; then
   printf 'Desktop configuration exposed the dummy token.\n' >&2
   exit 1
@@ -381,9 +382,17 @@ if PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh"
 fi
 [[ "$(<"$TMP_ROOT/malformed-desktop.toml")" == 'broken = [' ]]
 unlink "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+# A catalog without Sol must keep its validated Luna default as well.
+"$PYTHON_BIN" - "$NEUROAPI_TEST_CODEX_CATALOG" <<'PYCODE'
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+catalog = json.loads(path.read_text())
+catalog['models'] = [m for m in catalog['models'] if m['slug'] == 'gpt-6-luna']
+path.write_text(json.dumps(catalog))
+PYCODE
 PATH="$MOCK_CLIENT_BIN:$PATH" /bin/bash "$REPO_ROOT/scripts/macos/install.sh" >/dev/null 2>"$TMP_ROOT/install.err"
 [[ -f "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" ]]
-grep -Fq 'model = "gpt-6-sol"' "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
+grep -Fq 'model = "gpt-6-luna"' "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml"
 /bin/bash "$REPO_ROOT/scripts/macos/uninstall.sh" >/dev/null
 [[ ! -e "$NEUROAPI_AGENTS_DESKTOP_CODEX_HOME/config.toml" ]]
 unset NEUROAPI_AGENTS_TEST_DESKTOP_OPT_IN NEUROAPI_AGENTS_CURL_BIN

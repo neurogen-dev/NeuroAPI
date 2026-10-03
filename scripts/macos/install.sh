@@ -272,6 +272,7 @@ if [[ "$DESKTOP_OPT_IN" == '1' ]]; then
     printf 'Не удалось проверить модели Codex Desktop для этого ключа. Настройки сохранены.\n' >&2
     exit 1
   fi
+  # model.txt is the validated server default, never a hardcoded preferred model.
   /usr/bin/osascript -l JavaScript "$SCRIPT_DIR/desktop-config.js" \
     "$STAGE_ROOT/desktop/original.toml" "$STAGE_ROOT/desktop/model.txt" \
     "$DESKTOP_CATALOG_PATH" "$HELPER_PATH" "$STAGE_ROOT/desktop/config.toml"

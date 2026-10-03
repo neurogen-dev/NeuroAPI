@@ -56,6 +56,50 @@ Assert-Desktop (([regex]::Matches($updated, '(?m)^model_provider\s*=')).Count -e
 Assert-Desktop (([regex]::Matches($updated, '(?m)^model\s*=')).Count -eq 1) 'Model root key was duplicated.'
 Assert-Desktop ($updated -match '(?s)^.*model_catalog_json = .*\[features\]') 'Catalog root key landed inside a table.'
 
+# Execute the actual setup selection/rendering block without credentials, DPAPI or writes.
+# Sol is deliberately listed first: neither availability nor order may override default_model.
+$setupSource = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts/windows/setup.ps1') -Raw
+$selection = [regex]::Match($setupSource, '(?ms)^        (\$catalog = ConvertFrom-NeuroAPICatalog.*?)(?=^        \$catalogFile =)')
+Assert-Desktop $selection.Success 'Desktop setup selection block was not found.'
+$selectionScript = [scriptblock]::Create($selection.Groups[1].Value)
+function New-DesktopCatalogModel {
+    param([string]$Id)
+    return @{
+        slug = $Id; display_name = $Id; description = 'Test'; base_instructions = 'Test'
+        supported_in_api = $true; supports_reasoning_summary_parameter = $true; support_verbosity = $false
+        supports_parallel_tool_calls = $true; supports_search_tool = $true; use_responses_lite = $false
+        priority = 0; context_window = 128000; max_context_window = 128000; auto_compact_token_limit = 100000
+        effective_context_window_percent = 95; input_token_limit = 128000; output_token_limit = 16000
+        supported_reasoning_levels = @(); shell_type = 'shell_command'; visibility = 'list'
+        model_messages = @{ instructions_template = 'Test' }; truncation_policy = @{ mode = 'tokens'; limit = 10000 }
+        experimental_supported_tools = @(); input_modalities = @('text')
+    }
+}
+function Get-DesktopSetupConfig {
+    param([string]$Json)
+    $catalogJson = $Json
+    $desktopOriginal = $existing
+    $helperPath = $options.HelperPath
+    $secretPath = $options.SecretPath
+    $desktopCatalogPath = $options.CatalogPath
+    . $selectionScript
+    return $desktopContent
+}
+foreach ($case in @(
+    @{ models = @('gpt-6-sol', 'gpt-6-luna'); default = 'gpt-6-luna' },
+    @{ models = @('gpt-6-sol'); default = 'gpt-6-sol' },
+    @{ models = @('model-one'); default = 'model-one' }
+)) {
+    $models = @($case.models | ForEach-Object { New-DesktopCatalogModel $_ })
+    $json = @{ models = $models; default_model = $case.default } | ConvertTo-Json -Depth 8
+    $selected = Get-DesktopSetupConfig -Json $json
+    Assert-Desktop ($selected -match ('(?m)^model = "' + [regex]::Escape($case.default) + '"\s*(?:#.*)?$')) 'Setup ignored the validated server default.'
+    Assert-Desktop ($selected -match '(?m)^plugins = true$' -and $selected -match '(?m)^multi_agent = true$') 'Setup changed unrelated feature preferences.'
+    Assert-Desktop ($selected -match '(?m)^url = "https://example.test/mcp"$') 'Setup changed user MCP settings.'
+}
+$missingDefault = @{ models = @((New-DesktopCatalogModel 'gpt-6-sol')); default_model = 'gpt-6-luna' } | ConvertTo-Json -Depth 8
+Assert-DesktopFailure { Get-DesktopSetupConfig -Json $missingDefault }
+
 Assert-DesktopFailure { New-NeuroAPIDesktopConfig -Original "[model_providers.neuroapi_agents]`nname = 'mine'" @options }
 Assert-DesktopFailure { New-NeuroAPIDesktopConfig -Original '[model_providers."neuroapi_agents"]' @options }
 $literal = New-NeuroAPIDesktopConfig -Original "model = 'literal'" @options

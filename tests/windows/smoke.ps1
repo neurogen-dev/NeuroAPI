@@ -12,17 +12,21 @@ function Assert-True {
 }
 
 function New-DesktopTestCatalog {
-    param([string]$Model)
-    return @{ models = @(@{
-        slug = $Model; display_name = 'Test model'; description = 'Description'; base_instructions = 'Instructions'
-        supported_in_api = $true; supports_reasoning_summary_parameter = $true; support_verbosity = $false
-        supports_parallel_tool_calls = $true; supports_search_tool = $false; use_responses_lite = $false
-        priority = 0; context_window = 128000; max_context_window = 128000; auto_compact_token_limit = 100000
-        effective_context_window_percent = 95; input_token_limit = 128000; output_token_limit = 16000
-        supported_reasoning_levels = @(@{ effort = 'medium'; description = 'Medium' }); shell_type = 'shell_command'; visibility = 'list'
-        model_messages = @{ instructions_template = 'Instructions' }; truncation_policy = @{ mode = 'tokens'; limit = 10000 }
-        experimental_supported_tools = @(); input_modalities = @('text')
-    }); default_model = $Model } | ConvertTo-Json -Depth 8 -Compress
+    param([string]$Model, [string[]]$AdditionalModels = @())
+    $models = @()
+    foreach ($id in (@($Model) + @($AdditionalModels))) {
+        $models += @{
+            slug = $id; display_name = 'Test model'; description = 'Description'; base_instructions = 'Instructions'
+            supported_in_api = $true; supports_reasoning_summary_parameter = $true; support_verbosity = $false
+            supports_parallel_tool_calls = $true; supports_search_tool = $false; use_responses_lite = $false
+            priority = 0; context_window = 128000; max_context_window = 128000; auto_compact_token_limit = 100000
+            effective_context_window_percent = 95; input_token_limit = 128000; output_token_limit = 16000
+            supported_reasoning_levels = @(@{ effort = 'medium'; description = 'Medium' }); shell_type = 'shell_command'; visibility = 'list'
+            model_messages = @{ instructions_template = 'Instructions' }; truncation_policy = @{ mode = 'tokens'; limit = 10000 }
+            experimental_supported_tools = @(); input_modalities = @('text')
+        }
+    }
+    return @{ models = $models; default_model = $Model } | ConvertTo-Json -Depth 8 -Compress
 }
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -170,7 +174,7 @@ try {
     Assert-True ($rotatedKey -ceq 'rotated-test-token') 'Successful retry did not install the replacement key.'
     $env:NEUROAPI_AGENTS_TEST_TOKEN = $null
 
-    $desktopCatalog = New-DesktopTestCatalog 'gpt-6-sol'
+    $desktopCatalog = New-DesktopTestCatalog 'gpt-6-luna' -AdditionalModels @('gpt-6-sol')
     & "$repoRoot\scripts\windows\setup.ps1" `
         -TestMode -StateRoot $stateRoot -CodexHome $codexHome -NoPathUpdate `
         -EnableCodexDesktop -DesktopCatalogJson $desktopCatalog | Out-Null
@@ -181,7 +185,7 @@ try {
     Assert-True (Test-Path -LiteralPath $desktopStatePath) 'Desktop ownership metadata is missing.'
     Assert-True (Test-Path -LiteralPath $desktopCatalogPath) 'Desktop model catalog is missing.'
     $desktopBefore = [IO.File]::ReadAllText($desktopConfigPath)
-    Assert-True ($desktopBefore -match '(?m)^model = "gpt-6-sol"$') 'Entitled default model was not selected.'
+    Assert-True ($desktopBefore -match '(?m)^model = "gpt-6-luna"$') 'Listed Sol overrode the validated server default Luna.'
     Assert-True ($desktopBefore -match 'https://codex.neuroapi.host/v1') 'Desktop URL is incorrect.'
     Assert-True ($desktopBefore -notmatch 'test-neuroapi-token') 'Desktop config contains a plaintext key.'
     & "$repoRoot\scripts\windows\setup.ps1" `
